@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://refuse-protocol.org/schemas/customer-request.json",
+  "title": "REFUSE Protocol - Customer Request Entity",
+  "description": "Standardized customer request data structure for waste management service requests",
+  "type": "object",
+  "version": "1.0.0",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique request identifier"
+    },
+    "externalIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Legacy system request IDs"
+    },
+    "requestNumber": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50,
+      "description": "Human-readable request number"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["new_service", "change_service", "one_time", "inquiry", "complaint", "cancellation"],
+      "description": "Type of customer request"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "in_review", "approved", "rejected", "completed", "cancelled"],
+      "description": "Request processing status"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "normal", "high", "urgent"],
+      "description": "Request priority level"
+    },
+    "customerId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Customer making the request"
+    },
+    "siteId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Site for the request (if applicable)"
+    },
+    "requestedBy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Person making the request"
+    },
+    "contactInformation": {
+      "$ref": "#/$defs/Contact",
+      "description": "Contact for this request"
+    },
+    "serviceType": {
+      "type": "string",
+      "enum": ["waste", "recycling", "organics", "hazardous", "bulk"],
+      "description": "Type of service requested"
+    },
+    "materialTypes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["waste", "recycling", "organics", "hazardous", "bulk", "paper", "plastic", "metal", "glass", "electronics"]
+      },
+      "description": "Materials involved"
+    },
+    "containerType": {
+      "type": "string",
+      "enum": ["cart", "dumpster", "bin", "rolloff", "compactor"],
+      "description": "Container requirements"
+    },
+    "containerSize": {
+      "type": "string",
+      "enum": ["96_gallon", "2_yard", "3_yard", "4_yard", "6_yard", "8_yard", "10_yard", "20_yard", "30_yard", "40_yard"],
+      "description": "Container size needed"
+    },
+    "requestedDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When customer wants service"
+    },
+    "preferredTimeSlot": {
+      "type": "string",
+      "enum": ["morning", "afternoon", "evening", "weekend", "any"],
+      "description": "Preferred time window"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": ["weekly", "biweekly", "monthly", "oncall", "custom", "one_time"],
+      "description": "How often service is needed"
+    },
+    "serviceAddress": {
+      "$ref": "#/$defs/Address",
+      "description": "Where service should be provided"
+    },
+    "accessInstructions": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Special access requirements"
+    },
+    "specialHandling": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Special handling needs"
+    },
+    "estimatedPricing": {
+      "$ref": "#/$defs/RequestPricing",
+      "description": "Estimated costs"
+    },
+    "contractReference": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "If related to existing contract"
+    },
+    "budgetApprovalRequired": {
+      "type": "boolean",
+      "description": "Whether budget approval is needed"
+    },
+    "assignedTo": {
+      "type": "string",
+      "format": "uuid",
+      "description": "User assigned to review request"
+    },
+    "reviewNotes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Review comments and notes"
+    },
+    "approvalHistory": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ApprovalStep"
+      },
+      "description": "Approval workflow history"
+    },
+    "fulfillmentStatus": {
+      "type": "string",
+      "enum": ["pending", "scheduled", "in_progress", "completed", "on_hold"],
+      "description": "Request fulfillment status"
+    },
+    "scheduledDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When request is scheduled for completion"
+    },
+    "completedDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When request was actually completed"
+    },
+    "completionNotes": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Notes from completion"
+    },
+    "relatedServices": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "Services created from this request"
+    },
+    "relatedOrders": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "Orders created from this request"
+    },
+    "relatedQuotes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "Quotes provided for this request"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Extensible metadata"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record creation timestamp"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record last update timestamp"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Optimistic concurrency control version"
+    }
+  },
+  "required": ["id", "requestNumber", "type", "status", "customerId", "requestedBy", "serviceType", "serviceAddress", "createdAt", "updatedAt", "version"],
+  "additionalProperties": false,
+  "$defs": {
+    "Contact": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 100},
+        "title": {"type": "string", "maxLength": 100},
+        "email": {"type": "string", "format": "email", "maxLength": 255},
+        "phone": {"type": "string", "pattern": "^\\+?[1-9]\\d{1,14}$", "maxLength": 20},
+        "mobile": {"type": "string", "pattern": "^\\+?[1-9]\\d{1,14}$", "maxLength": 20}
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "Address": {
+      "type": "object",
+      "properties": {
+        "street1": {"type": "string", "minLength": 1, "maxLength": 100},
+        "street2": {"type": "string", "maxLength": 100},
+        "city": {"type": "string", "minLength": 1, "maxLength": 100},
+        "state": {"type": "string", "minLength": 2, "maxLength": 50},
+        "zipCode": {"type": "string", "pattern": "^\\d{5}(-\\d{4})?$", "minLength": 5, "maxLength": 10},
+        "country": {"type": "string", "default": "US", "minLength": 2, "maxLength": 50},
+        "coordinates": {"$ref": "#/$defs/GeoLocation"}
+      },
+      "required": ["street1", "city", "state", "zipCode", "country"],
+      "additionalProperties": false
+    },
+    "GeoLocation": {
+      "type": "object",
+      "properties": {
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180}
+      },
+      "required": ["latitude", "longitude"],
+      "additionalProperties": false
+    },
+    "RequestPricing": {
+      "type": "object",
+      "properties": {
+        "monthlyRate": {"type": "number", "minimum": 0, "description": "Estimated monthly cost"},
+        "setupFee": {"type": "number", "minimum": 0, "description": "One-time setup fee"},
+        "estimatedFirstMonth": {"type": "number", "minimum": 0, "description": "Estimated total first month"},
+        "validUntil": {"type": "string", "format": "date", "description": "Quote expiration date"},
+        "assumptions": {"type": "array", "items": {"type": "string"}, "description": "Pricing assumptions"},
+        "notes": {"type": "string", "description": "Pricing notes and conditions"}
+      },
+      "required": ["monthlyRate"],
+      "additionalProperties": false
+    },
+    "ApprovalStep": {
+      "type": "object",
+      "properties": {
+        "stepNumber": {"type": "integer", "minimum": 1},
+        "approverId": {"type": "string", "format": "uuid"},
+        "approverName": {"type": "string"},
+        "approverRole": {"type": "string"},
+        "decision": {"type": "string", "enum": ["approved", "rejected", "pending"]},
+        "decisionDate": {"type": "string", "format": "date-time"},
+        "comments": {"type": "string"},
+        "conditions": {"type": "array", "items": {"type": "string"}, "description": "Approval conditions"}
+      },
+      "required": ["stepNumber", "approverId", "approverName", "decision"],
+      "additionalProperties": false
+    }
+  }
+}

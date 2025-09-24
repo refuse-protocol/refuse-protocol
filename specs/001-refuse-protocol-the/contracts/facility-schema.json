@@ -1,0 +1,333 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://refuse-protocol.org/schemas/facility.json",
+  "title": "REFUSE Protocol - Facility Entity",
+  "description": "Standardized facility data structure for waste management processing locations",
+  "type": "object",
+  "version": "1.0.0",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique facility identifier"
+    },
+    "externalIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Legacy system facility IDs"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Facility name"
+    },
+    "code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20,
+      "description": "Facility code for operations"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["landfill", "mrf", "transfer", "composter", "export", "cad", "incinerator", "recycling_center"],
+      "description": "Facility type classification"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["operational", "maintenance", "closed", "planned", "limited"],
+      "description": "Facility operational status"
+    },
+    "address": {
+      "$ref": "#/$defs/Address",
+      "description": "Physical facility location"
+    },
+    "contactInformation": {
+      "$ref": "#/$defs/Contact",
+      "description": "Facility contact details"
+    },
+    "operatingHours": {
+      "$ref": "#/$defs/OperatingHours",
+      "description": "Hours of operation"
+    },
+    "capacity": {
+      "$ref": "#/$defs/FacilityCapacity",
+      "description": "Daily/monthly capacity limits"
+    },
+    "acceptedMaterials": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["waste", "recycling", "organics", "hazardous", "bulk", "paper", "plastic", "metal", "glass", "electronics"]
+      },
+      "description": "Materials accepted at this facility"
+    },
+    "pricing": {
+      "$ref": "#/$defs/FacilityPricing",
+      "description": "Tipping fees and pricing structure"
+    },
+    "serviceRestrictions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ServiceRestriction"
+      },
+      "description": "Operational limitations"
+    },
+    "permits": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FacilityPermit"
+      },
+      "description": "Operating permits and licenses"
+    },
+    "environmentalControls": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EnvironmentalControl"
+      },
+      "description": "Emission controls and monitoring"
+    },
+    "complianceRecords": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "Regulatory compliance record IDs"
+    },
+    "utilization": {
+      "$ref": "#/$defs/UtilizationMetrics",
+      "description": "Usage and efficiency metrics"
+    },
+    "processingRates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ProcessingRate"
+      },
+      "description": "Material processing capabilities"
+    },
+    "qualityStandards": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/QualityStandard"
+      },
+      "description": "Quality requirements for incoming materials"
+    },
+    "assignedRoutes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "Route IDs that deliver to this facility"
+    },
+    "materialTickets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "Material ticket IDs processed at this facility"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Extensible metadata"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record creation timestamp"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record last update timestamp"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Optimistic concurrency control version"
+    }
+  },
+  "required": ["id", "name", "code", "type", "status", "address", "createdAt", "updatedAt", "version"],
+  "additionalProperties": false,
+  "$defs": {
+    "Address": {
+      "type": "object",
+      "properties": {
+        "street1": {"type": "string", "minLength": 1, "maxLength": 100},
+        "street2": {"type": "string", "maxLength": 100},
+        "city": {"type": "string", "minLength": 1, "maxLength": 100},
+        "state": {"type": "string", "minLength": 2, "maxLength": 50},
+        "zipCode": {"type": "string", "pattern": "^\\d{5}(-\\d{4})?$", "minLength": 5, "maxLength": 10},
+        "country": {"type": "string", "default": "US", "minLength": 2, "maxLength": 50},
+        "coordinates": {"$ref": "#/$defs/GeoLocation"}
+      },
+      "required": ["street1", "city", "state", "zipCode", "country"],
+      "additionalProperties": false
+    },
+    "GeoLocation": {
+      "type": "object",
+      "properties": {
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180}
+      },
+      "required": ["latitude", "longitude"],
+      "additionalProperties": false
+    },
+    "Contact": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 100},
+        "title": {"type": "string", "maxLength": 100},
+        "email": {"type": "string", "format": "email", "maxLength": 255},
+        "phone": {"type": "string", "pattern": "^\\+?[1-9]\\d{1,14}$", "maxLength": 20},
+        "mobile": {"type": "string", "pattern": "^\\+?[1-9]\\d{1,14}$", "maxLength": 20}
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "OperatingHours": {
+      "type": "object",
+      "properties": {
+        "monday": {"$ref": "#/$defs/TimeRange"},
+        "tuesday": {"$ref": "#/$defs/TimeRange"},
+        "wednesday": {"$ref": "#/$defs/TimeRange"},
+        "thursday": {"$ref": "#/$defs/TimeRange"},
+        "friday": {"$ref": "#/$defs/TimeRange"},
+        "saturday": {"$ref": "#/$defs/TimeRange"},
+        "sunday": {"$ref": "#/$defs/TimeRange"},
+        "holidays": {"type": "string", "enum": ["closed", "normal", "modified"]}
+      },
+      "additionalProperties": false
+    },
+    "TimeRange": {
+      "type": "object",
+      "properties": {
+        "open": {"type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"},
+        "close": {"type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"},
+        "closed": {"type": "boolean", "default": false}
+      },
+      "required": ["open", "close"],
+      "additionalProperties": false
+    },
+    "FacilityCapacity": {
+      "type": "object",
+      "properties": {
+        "dailyLimit": {"type": "integer", "minimum": 0, "description": "Daily tonnage limit"},
+        "monthlyLimit": {"type": "integer", "minimum": 0, "description": "Monthly tonnage limit"},
+        "currentUtilization": {"type": "number", "minimum": 0, "maximum": 100, "description": "Current capacity utilization %"},
+        "measurementUnit": {"type": "string", "enum": ["tons", "cubic_yards", "loads"], "default": "tons"}
+      },
+      "additionalProperties": false
+    },
+    "FacilityPricing": {
+      "type": "object",
+      "properties": {
+        "baseTippingFee": {"type": "number", "minimum": 0, "description": "Base fee per ton"},
+        "materialSurcharges": {
+          "type": "object",
+          "additionalProperties": {"type": "number", "minimum": 0}
+        },
+        "minimumCharge": {"type": "number", "minimum": 0},
+        "volumeDiscounts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "minVolume": {"type": "number", "minimum": 0},
+              "discountRate": {"type": "number", "minimum": 0, "maximum": 1}
+            },
+            "required": ["minVolume", "discountRate"]
+          }
+        }
+      },
+      "required": ["baseTippingFee"],
+      "additionalProperties": false
+    },
+    "ServiceRestriction": {
+      "type": "object",
+      "properties": {
+        "restrictionType": {"type": "string", "enum": ["weight", "volume", "material", "time", "access"]},
+        "description": {"type": "string"},
+        "maxWeight": {"type": "number", "minimum": 0},
+        "maxVolume": {"type": "number", "minimum": 0},
+        "allowedMaterials": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "restrictedMaterials": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "required": ["restrictionType", "description"],
+      "additionalProperties": false
+    },
+    "FacilityPermit": {
+      "type": "object",
+      "properties": {
+        "permitNumber": {"type": "string"},
+        "issuingAgency": {"type": "string"},
+        "permitType": {"type": "string", "enum": ["operating", "environmental", "safety", "discharge"]},
+        "issueDate": {"type": "string", "format": "date"},
+        "expirationDate": {"type": "string", "format": "date"},
+        "status": {"type": "string", "enum": ["active", "expired", "pending", "revoked"]},
+        "conditions": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["permitNumber", "issuingAgency", "permitType", "issueDate"],
+      "additionalProperties": false
+    },
+    "EnvironmentalControl": {
+      "type": "object",
+      "properties": {
+        "controlType": {"type": "string", "enum": ["scrubber", "filter", "monitoring", "containment", "treatment"]},
+        "description": {"type": "string"},
+        "installationDate": {"type": "string", "format": "date"},
+        "lastMaintenance": {"type": "string", "format": "date"},
+        "nextMaintenance": {"type": "string", "format": "date"},
+        "complianceStatus": {"type": "string", "enum": ["compliant", "warning", "violation", "maintenance"]}
+      },
+      "required": ["controlType", "description"],
+      "additionalProperties": false
+    },
+    "UtilizationMetrics": {
+      "type": "object",
+      "properties": {
+        "dailyAverage": {"type": "number", "minimum": 0},
+        "monthlyAverage": {"type": "number", "minimum": 0},
+        "peakUtilization": {"type": "number", "minimum": 0, "maximum": 100},
+        "measurementPeriod": {"type": "string", "enum": ["daily", "weekly", "monthly"]},
+        "lastUpdated": {"type": "string", "format": "date-time"}
+      },
+      "required": ["measurementPeriod", "lastUpdated"],
+      "additionalProperties": false
+    },
+    "ProcessingRate": {
+      "type": "object",
+      "properties": {
+        "materialType": {"type": "string"},
+        "processingRate": {"type": "number", "minimum": 0, "description": "Tons per hour"},
+        "efficiency": {"type": "number", "minimum": 0, "maximum": 100, "description": "Processing efficiency %"},
+        "qualityOutput": {"type": "number", "minimum": 0, "maximum": 100, "description": "Quality of processed material %"}
+      },
+      "required": ["materialType", "processingRate"],
+      "additionalProperties": false
+    },
+    "QualityStandard": {
+      "type": "object",
+      "properties": {
+        "materialType": {"type": "string"},
+        "maxContamination": {"type": "number", "minimum": 0, "maximum": 100, "description": "Maximum contamination %"},
+        "minPurity": {"type": "number", "minimum": 0, "maximum": 100, "description": "Minimum purity %"},
+        "testingMethod": {"type": "string"},
+        "frequency": {"type": "string", "enum": ["per_load", "daily", "weekly", "monthly"]}
+      },
+      "required": ["materialType", "maxContamination", "minPurity"],
+      "additionalProperties": false
+    }
+  }
+}

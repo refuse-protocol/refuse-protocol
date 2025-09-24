@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running REFUSE Protocol validation checks..."
+
+# Run linting
+npm run lint
+if [ $? -ne 0 ]; then
+  echo "❌ Linting failed. Please fix the issues before committing."
+  exit 1
+fi
+
+# Run tests
+npm run test
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed. Please ensure all tests pass before committing."
+  exit 1
+fi
+
+# Validate JSON schemas
+echo "🔍 Validating JSON schemas..."
+npx ajv validate -s protocol/schemas/*.json -d "protocol/**/*.ts" --valid
+if [ $? -ne 0 ]; then
+  echo "❌ Schema validation failed. Please check schema compliance."
+  exit 1
+fi
+
+echo "✅ All validation checks passed!"

@@ -1,0 +1,55 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["protocol/*"],
+      "@/specs/*": ["specs/*"],
+      "@/tests/*": ["tests/*"],
+      "@/examples/*": ["examples/*"]
+    },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": false,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
+  },
+  "include": [
+    "protocol/**/*",
+    "tests/**/*",
+    "examples/**/*",
+    "tools/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "docs",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ],
+  "typedocOptions": {
+    "entryPoints": ["protocol/specifications/index.ts"],
+    "out": "docs",
+    "name": "REFUSE Protocol Documentation",
+    "includeVersion": true,
+    "hideGenerator": false,
+    "theme": "default",
+    "exclude": ["**/*.spec.ts", "**/*.test.ts"]
+  }
+}

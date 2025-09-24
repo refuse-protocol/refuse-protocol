@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://refuse-protocol.org/schemas/route.json",
+  "title": "REFUSE Protocol - Route Entity",
+  "description": "Standardized route data structure for waste management operations",
+  "type": "object",
+  "version": "1.0.0",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique route identifier"
+    },
+    "externalIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Legacy system route IDs"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Route name"
+    },
+    "code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20,
+      "description": "Route code for operations"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["residential", "commercial", "mixed", "special", "transfer"],
+      "description": "Route type classification"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "inactive", "planned", "completed"],
+      "description": "Route operational status"
+    },
+    "schedule": {
+      "$ref": "#/$defs/RouteSchedule",
+      "description": "Route schedule and timing"
+    },
+    "estimatedDuration": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Estimated route completion time in minutes"
+    },
+    "actualDuration": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Actual completion time when finished"
+    },
+    "assignedSites": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "Site IDs on this route"
+    },
+    "assignedServices": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "Service IDs on this route"
+    },
+    "serviceSequence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ServiceSequence"
+      },
+      "description": "Order of service stops"
+    },
+    "assignedVehicle": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Vehicle ID assigned to route"
+    },
+    "assignedDriver": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Driver ID assigned to route"
+    },
+    "plannedStops": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of planned stops"
+    },
+    "actualStops": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of actual stops completed"
+    },
+    "efficiency": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Route efficiency percentage"
+    },
+    "territoryId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Territory this route belongs to"
+    },
+    "yardId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Yard where route originates"
+    },
+    "routeNotes": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Special route instructions and notes"
+    },
+    "optimizationHistory": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RouteOptimization"
+      },
+      "description": "History of route optimizations"
+    },
+    "performanceMetrics": {
+      "$ref": "#/$defs/RoutePerformance",
+      "description": "Route performance tracking"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Extensible metadata"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record creation timestamp"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record last update timestamp"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Optimistic concurrency control version"
+    }
+  },
+  "required": ["id", "name", "code", "type", "status", "territoryId", "createdAt", "updatedAt", "version"],
+  "additionalProperties": false,
+  "$defs": {
+    "RouteSchedule": {
+      "type": "object",
+      "properties": {
+        "startTime": {
+          "type": "string",
+          "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "Route start time"
+        },
+        "endTime": {
+          "type": "string",
+          "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "Route end time"
+        },
+        "daysOfWeek": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 0, "maximum": 6},
+          "minItems": 1,
+          "maxItems": 7
+        },
+        "estimatedTravelTime": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Estimated travel time in minutes"
+        },
+        "bufferTime": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Buffer time for unexpected delays"
+        }
+      },
+      "required": ["startTime", "endTime", "daysOfWeek"],
+      "additionalProperties": false
+    },
+    "ServiceSequence": {
+      "type": "object",
+      "properties": {
+        "sequenceNumber": {"type": "integer", "minimum": 1},
+        "siteId": {"type": "string", "format": "uuid"},
+        "serviceId": {"type": "string", "format": "uuid"},
+        "estimatedDuration": {"type": "integer", "minimum": 1, "description": "Estimated service time in minutes"},
+        "requiredEquipment": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "specialInstructions": {"type": "string"},
+        "coordinates": {
+          "type": "object",
+          "properties": {
+            "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+            "longitude": {"type": "number", "minimum": -180, "maximum": 180}
+          },
+          "required": ["latitude", "longitude"]
+        }
+      },
+      "required": ["sequenceNumber", "siteId", "serviceId"],
+      "additionalProperties": false
+    },
+    "RouteOptimization": {
+      "type": "object",
+      "properties": {
+        "optimizedAt": {"type": "string", "format": "date-time"},
+        "originalStopCount": {"type": "integer", "minimum": 1},
+        "optimizedStopCount": {"type": "integer", "minimum": 1},
+        "timeSaved": {"type": "integer", "minimum": 0, "description": "Time saved in minutes"},
+        "distanceSaved": {"type": "number", "minimum": 0, "description": "Distance saved in miles"},
+        "optimizationType": {"type": "string", "enum": ["manual", "automated", "emergency"]},
+        "optimizationNotes": {"type": "string"}
+      },
+      "required": ["optimizedAt", "originalStopCount", "optimizedStopCount"],
+      "additionalProperties": false
+    },
+    "RoutePerformance": {
+      "type": "object",
+      "properties": {
+        "onTimePercentage": {"type": "number", "minimum": 0, "maximum": 100},
+        "averageServiceTime": {"type": "number", "minimum": 0, "description": "Average minutes per stop"},
+        "fuelConsumption": {"type": "number", "minimum": 0, "description": "Fuel used per route"},
+        "customerComplaints": {"type": "integer", "minimum": 0},
+        "missedServices": {"type": "integer", "minimum": 0},
+        "extraServices": {"type": "integer", "minimum": 0},
+        "measurementPeriod": {"type": "string", "enum": ["daily", "weekly", "monthly"]},
+        "lastUpdated": {"type": "string", "format": "date-time"}
+      },
+      "required": ["onTimePercentage", "measurementPeriod", "lastUpdated"],
+      "additionalProperties": false
+    }
+  }
+}

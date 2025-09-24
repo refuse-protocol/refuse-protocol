@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+docs/
+*.json
+*.md
+LICENSE
+CHANGELOG.md
+.git/

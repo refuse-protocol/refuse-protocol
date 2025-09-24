@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://refuse-protocol.org/schemas/service.json",
+  "title": "REFUSE Protocol - Service Entity",
+  "description": "Standardized service data structure for waste management operations",
+  "type": "object",
+  "version": "1.0.0",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique service identifier"
+    },
+    "customerId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Reference to customer"
+    },
+    "externalIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Legacy system service IDs"
+    },
+    "serviceType": {
+      "type": "string",
+      "enum": ["waste", "recycling", "organics", "hazardous", "bulk"],
+      "description": "Type of waste service"
+    },
+    "containerType": {
+      "type": "string",
+      "enum": ["cart", "dumpster", "bin", "rolloff", "compactor"],
+      "description": "Container type for service"
+    },
+    "containerSize": {
+      "type": "string",
+      "enum": ["96_gallon", "2_yard", "3_yard", "4_yard", "6_yard", "8_yard", "10_yard", "20_yard", "30_yard", "40_yard"],
+      "description": "Size of service container"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": ["weekly", "biweekly", "monthly", "oncall", "custom"],
+      "description": "Service frequency"
+    },
+    "schedule": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ScheduleRule"
+      },
+      "description": "Service schedule rules"
+    },
+    "nextServiceDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Next scheduled service date"
+    },
+    "lastServiceDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last completed service date"
+    },
+    "serviceAddress": {
+      "$ref": "#/$defs/Address",
+      "description": "Service delivery location"
+    },
+    "specialLocationNotes": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Access instructions, gate codes, etc"
+    },
+    "pricing": {
+      "$ref": "#/$defs/ServicePricing",
+      "description": "Service pricing structure"
+    },
+    "billingCycle": {
+      "type": "string",
+      "enum": ["monthly", "quarterly", "annual"],
+      "description": "Billing cycle frequency"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "suspended", "cancelled", "pending"],
+      "description": "Service operational status"
+    },
+    "specialInstructions": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Driver instructions and safety notes"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Extensible metadata for system-specific fields"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record creation timestamp"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record last update timestamp"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Optimistic concurrency control version"
+    }
+  },
+  "required": ["id", "customerId", "serviceType", "containerType", "containerSize", "frequency", "serviceAddress", "status", "createdAt", "updatedAt", "version"],
+  "additionalProperties": false,
+  "$defs": {
+    "Address": {
+      "type": "object",
+      "properties": {
+        "street1": {"type": "string", "minLength": 1, "maxLength": 100},
+        "street2": {"type": "string", "maxLength": 100},
+        "city": {"type": "string", "minLength": 1, "maxLength": 100},
+        "state": {"type": "string", "minLength": 2, "maxLength": 50},
+        "zipCode": {"type": "string", "pattern": "^\\d{5}(-\\d{4})?$", "minLength": 5, "maxLength": 10},
+        "country": {"type": "string", "default": "US", "minLength": 2, "maxLength": 50},
+        "coordinates": {"$ref": "#/$defs/GeoLocation"}
+      },
+      "required": ["street1", "city", "state", "zipCode", "country"],
+      "additionalProperties": false
+    },
+    "GeoLocation": {
+      "type": "object",
+      "properties": {
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+        "accuracy": {"type": "number", "minimum": 0, "description": "Accuracy in meters"}
+      },
+      "required": ["latitude", "longitude"],
+      "additionalProperties": false
+    },
+    "ScheduleRule": {
+      "type": "object",
+      "properties": {
+        "daysOfWeek": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 0, "maximum": 6},
+          "minItems": 1,
+          "maxItems": 7
+        },
+        "startTime": {
+          "type": "string",
+          "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "HH:MM format"
+        },
+        "endTime": {
+          "type": "string",
+          "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "HH:MM format"
+        },
+        "holidays": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/HolidayRule"}
+        }
+      },
+      "required": ["daysOfWeek"],
+      "additionalProperties": false
+    },
+    "HolidayRule": {
+      "type": "object",
+      "properties": {
+        "holidayName": {"type": "string"},
+        "skipService": {"type": "boolean", "default": true},
+        "rescheduleTo": {"type": "string", "format": "date"},
+        "advanceNoticeDays": {"type": "integer", "minimum": 0, "default": 7}
+      },
+      "required": ["holidayName"],
+      "additionalProperties": false
+    },
+    "ServicePricing": {
+      "type": "object",
+      "properties": {
+        "baseRate": {"type": "number", "minimum": 0, "description": "Monthly base rate"},
+        "perPickupRate": {"type": "number", "minimum": 0, "description": "Additional per-service charges"},
+        "fuelSurcharge": {"type": "number", "minimum": 0, "description": "Variable fuel costs"},
+        "environmentalFee": {"type": "number", "minimum": 0, "description": "Regulatory compliance fees"},
+        "taxes": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/TaxItem"}
+        },
+        "discounts": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/Discount"}
+        }
+      },
+      "required": ["baseRate"],
+      "additionalProperties": false
+    },
+    "TaxItem": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "description": "Tax name (e.g., 'Sales Tax')"},
+        "rate": {"type": "number", "minimum": 0, "maximum": 1, "description": "Tax rate as decimal"},
+        "amount": {"type": "number", "minimum": 0, "description": "Calculated tax amount"},
+        "jurisdiction": {"type": "string", "description": "Taxing authority"}
+      },
+      "required": ["name", "rate", "amount", "jurisdiction"],
+      "additionalProperties": false
+    },
+    "Discount": {
+      "type": "object",
+      "properties": {
+        "type": {"type": "string", "enum": ["percentage", "fixed", "volume"]},
+        "value": {"type": "number", "minimum": 0},
+        "description": {"type": "string"},
+        "validFrom": {"type": "string", "format": "date"},
+        "validTo": {"type": "string", "format": "date"}
+      },
+      "required": ["type", "value", "description"],
+      "additionalProperties": false
+    }
+  }
+}

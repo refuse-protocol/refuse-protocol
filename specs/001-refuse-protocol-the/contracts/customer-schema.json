@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://refuse-protocol.org/schemas/customer.json",
+  "title": "REFUSE Protocol - Customer Entity",
+  "description": "Standardized customer data structure for waste management operations",
+  "type": "object",
+  "version": "1.0.0",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique customer identifier"
+    },
+    "externalIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Legacy system IDs for data archaeology"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Legal business/customer name"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["residential", "commercial", "industrial", "municipal"],
+      "description": "Customer type classification"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "inactive", "suspended", "pending"],
+      "description": "Current customer status"
+    },
+    "primaryContact": {
+      "$ref": "#/$defs/Contact",
+      "description": "Primary business contact"
+    },
+    "billingContact": {
+      "$ref": "#/$defs/Contact",
+      "description": "Billing-specific contact (if different)"
+    },
+    "serviceContacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Contact"
+      },
+      "description": "Operational contacts"
+    },
+    "serviceAddress": {
+      "$ref": "#/$defs/Address",
+      "description": "Physical service location"
+    },
+    "billingAddress": {
+      "$ref": "#/$defs/Address",
+      "description": "Billing address (if different)"
+    },
+    "serviceTypes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["waste", "recycling", "organics", "hazardous", "bulk"]
+      },
+      "description": "Types of service provided"
+    },
+    "specialInstructions": {
+      "type": "string",
+      "maxLength": 2000,
+      "description": "Customer-specific service requirements"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Extensible metadata for system-specific fields"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record creation timestamp"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record last update timestamp"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Optimistic concurrency control version"
+    }
+  },
+  "required": ["id", "name", "type", "status", "serviceAddress", "createdAt", "updatedAt", "version"],
+  "additionalProperties": false,
+  "$defs": {
+    "Contact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 255
+        },
+        "phone": {
+          "type": "string",
+          "pattern": "^\\+?[1-9]\\d{1,14}$",
+          "maxLength": 20
+        },
+        "mobile": {
+          "type": "string",
+          "pattern": "^\\+?[1-9]\\d{1,14}$",
+          "maxLength": 20
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "Address": {
+      "type": "object",
+      "properties": {
+        "street1": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "street2": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "city": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "state": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 50
+        },
+        "zipCode": {
+          "type": "string",
+          "pattern": "^\\d{5}(-\\d{4})?$",
+          "minLength": 5,
+          "maxLength": 10
+        },
+        "country": {
+          "type": "string",
+          "default": "US",
+          "minLength": 2,
+          "maxLength": 50
+        },
+        "coordinates": {
+          "$ref": "#/$defs/GeoLocation"
+        }
+      },
+      "required": ["street1", "city", "state", "zipCode", "country"],
+      "additionalProperties": false
+    },
+    "GeoLocation": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "accuracy": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Accuracy in meters"
+        }
+      },
+      "required": ["latitude", "longitude"],
+      "additionalProperties": false
+    }
+  }
+}

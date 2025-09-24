@@ -1,0 +1,32 @@
+# REFUSE Protocol Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2025-09-23
+
+## REFUSE Protocol Context
+This project implements the REFUSE (REcyclable & Solid waste Unified Standard Exchange) protocol:
+- **RESTful API-first**: All data exchange via standardized REST endpoints
+- **JSON-native**: Primary data format with semantic field naming
+- **Extensible**: Support for system-specific extensions via metadata
+- **Backward compatible**: Version updates maintain existing integrations
+- **Data archaeology**: Handle legacy waste management data patterns
+
+## Active Technologies
+- (001-refuse-protocol-the)
+
+## Project Structure
+```
+src/
+tests/
+```
+
+## Commands
+# Add commands for 
+
+## Code Style
+: Follow standard conventions
+
+## Recent Changes
+- 001-refuse-protocol-the: Added
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->

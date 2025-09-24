@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://refuse-protocol.org/schemas/territory.json",
+  "title": "REFUSE Protocol - Territory Entity",
+  "description": "Standardized territory data structure for waste management service areas",
+  "type": "object",
+  "version": "1.0.0",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique territory identifier"
+    },
+    "externalIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Legacy system territory IDs"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Territory name"
+    },
+    "code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20,
+      "description": "Territory code for reporting"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["geographic", "municipal", "commercial", "custom"],
+      "description": "Territory type classification"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "inactive", "planned"],
+      "description": "Territory operational status"
+    },
+    "boundary": {
+      "$ref": "#/$defs/GeoBoundary",
+      "description": "Geographic service area boundary"
+    },
+    "zipCodes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^\\d{5}(-\\d{4})?$"
+      },
+      "description": "ZIP codes covered by territory"
+    },
+    "municipalities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Municipalities/jurisdictions covered"
+    },
+    "pricingRules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PricingRule"
+      },
+      "description": "Territory-specific pricing rules"
+    },
+    "serviceRestrictions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ServiceRestriction"
+      },
+      "description": "Service limitations and restrictions"
+    },
+    "regulatoryZones": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RegulatoryZone"
+      },
+      "description": "Environmental/safety regulatory zones"
+    },
+    "assignedRoutes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "description": "Route IDs assigned to this territory"
+    },
+    "serviceDays": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ServiceDay"
+      },
+      "description": "Days when service is provided"
+    },
+    "holidaySchedule": {
+      "$ref": "#/$defs/HolidaySchedule",
+      "description": "Holiday service adjustments"
+    },
+    "serviceLevel": {
+      "$ref": "#/$defs/ServiceLevel",
+      "description": "Target service quality metrics"
+    },
+    "utilization": {
+      "$ref": "#/$defs/UtilizationMetrics",
+      "description": "Territory utilization statistics"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Extensible metadata"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record creation timestamp"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record last update timestamp"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Optimistic concurrency control version"
+    }
+  },
+  "required": ["id", "name", "code", "type", "status", "boundary", "createdAt", "updatedAt", "version"],
+  "additionalProperties": false,
+  "$defs": {
+    "GeoBoundary": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["polygon", "circle", "rectangle"]
+        },
+        "coordinates": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 3
+            }
+          },
+          "description": "GeoJSON coordinate format"
+        },
+        "centerPoint": {
+          "type": "object",
+          "properties": {
+            "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+            "longitude": {"type": "number", "minimum": -180, "maximum": 180}
+          },
+          "required": ["latitude", "longitude"]
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Radius in meters for circular boundaries"
+        }
+      },
+      "required": ["type", "coordinates"],
+      "additionalProperties": false
+    },
+    "PricingRule": {
+      "type": "object",
+      "properties": {
+        "serviceType": {
+          "type": "string",
+          "enum": ["waste", "recycling", "organics", "hazardous", "bulk"]
+        },
+        "containerType": {
+          "type": "string",
+          "enum": ["cart", "dumpster", "bin", "rolloff", "compactor"]
+        },
+        "baseRate": {"type": "number", "minimum": 0},
+        "effectiveDate": {"type": "string", "format": "date"},
+        "expirationDate": {"type": "string", "format": "date"}
+      },
+      "required": ["serviceType", "baseRate"],
+      "additionalProperties": false
+    },
+    "ServiceRestriction": {
+      "type": "object",
+      "properties": {
+        "restrictionType": {"type": "string", "enum": ["noise", "access", "environmental", "safety"]},
+        "description": {"type": "string"},
+        "startTime": {"type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"},
+        "endTime": {"type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"},
+        "daysOfWeek": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 0, "maximum": 6}
+        }
+      },
+      "required": ["restrictionType", "description"],
+      "additionalProperties": false
+    },
+    "RegulatoryZone": {
+      "type": "object",
+      "properties": {
+        "zoneType": {"type": "string", "enum": ["environmental", "noise", "traffic", "safety"]},
+        "regulation": {"type": "string"},
+        "boundary": {"$ref": "#/$defs/GeoBoundary"},
+        "restrictions": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["zoneType", "regulation"],
+      "additionalProperties": false
+    },
+    "ServiceDay": {
+      "type": "object",
+      "properties": {
+        "dayOfWeek": {"type": "integer", "minimum": 0, "maximum": 6},
+        "startTime": {"type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"},
+        "endTime": {"type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$"},
+        "serviceTypes": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["waste", "recycling", "organics", "hazardous", "bulk"]}
+        }
+      },
+      "required": ["dayOfWeek"],
+      "additionalProperties": false
+    },
+    "HolidaySchedule": {
+      "type": "object",
+      "properties": {
+        "holidayName": {"type": "string"},
+        "skipService": {"type": "boolean", "default": true},
+        "rescheduleTo": {"type": "string", "format": "date"},
+        "advanceNoticeDays": {"type": "integer", "minimum": 0, "default": 7}
+      },
+      "required": ["holidayName"],
+      "additionalProperties": false
+    },
+    "ServiceLevel": {
+      "type": "object",
+      "properties": {
+        "onTimePercentage": {"type": "number", "minimum": 0, "maximum": 100, "description": "Target on-time service percentage"},
+        "missedStopsTarget": {"type": "number", "minimum": 0, "description": "Maximum allowed missed stops per period"},
+        "customerComplaintsTarget": {"type": "number", "minimum": 0, "description": "Maximum allowed complaints per period"},
+        "measurementPeriod": {"type": "string", "enum": ["daily", "weekly", "monthly", "quarterly"]}
+      },
+      "required": ["onTimePercentage", "measurementPeriod"],
+      "additionalProperties": false
+    },
+    "UtilizationMetrics": {
+      "type": "object",
+      "properties": {
+        "customerCount": {"type": "integer", "minimum": 0},
+        "serviceCount": {"type": "integer", "minimum": 0},
+        "revenue": {"type": "number", "minimum": 0},
+        "routeEfficiency": {"type": "number", "minimum": 0, "maximum": 100},
+        "lastUpdated": {"type": "string", "format": "date-time"}
+      },
+      "required": ["customerCount", "serviceCount"],
+      "additionalProperties": false
+    }
+  }
+}
