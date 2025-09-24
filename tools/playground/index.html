@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REFUSE Protocol Interactive Playground</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: flex;
+            min-height: 70vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .entity-list {
+            list-style: none;
+        }
+
+        .entity-item {
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .entity-item:hover {
+            background: #e9ecef;
+        }
+
+        .entity-item.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 15px 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+
+        .editor-container {
+            flex: 1;
+            display: flex;
+        }
+
+        .editor {
+            flex: 1;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            border: none;
+            outline: none;
+            resize: none;
+        }
+
+        .output {
+            width: 400px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+        }
+
+        .output-header {
+            background: #333;
+            color: #fff;
+            padding: 8px 15px;
+            font-weight: 500;
+            border-bottom: 1px solid #555;
+        }
+
+        .output-content {
+            padding: 15px;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .log-info {
+            color: #64b5f6;
+        }
+
+        .log-success {
+            color: #81c784;
+        }
+
+        .log-error {
+            color: #e57373;
+        }
+
+        .log-warn {
+            color: #ffb74d;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 15px 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .code-editor {
+            min-height: 200px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+
+        .entity-form {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .examples {
+            margin-top: 20px;
+        }
+
+        .examples h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .example-item {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            transition: all 0.2s;
+        }
+
+        .example-item:hover {
+            background: #e9ecef;
+        }
+
+        .example-item pre {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            margin-top: 5px;
+            color: #495057;
+        }
+
+        .status-bar {
+            background: #e9ecef;
+            border-top: 1px solid #dee2e6;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.connected {
+            background: #28a745;
+        }
+
+        .status-dot.disconnected {
+            background: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+            }
+
+            .editor-container {
+                flex-direction: column;
+            }
+
+            .output {
+                width: 100%;
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>♻️ REFUSE Protocol Playground</h1>
+            <p>Interactive testing environment for waste management data exchange</p>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3>Entities</h3>
+                <ul class="entity-list">
+                    <li class="entity-item active" data-entity="customer">Customer</li>
+                    <li class="entity-item" data-entity="service">Service</li>
+                    <li class="entity-item" data-entity="route">Route</li>
+                    <li class="entity-item" data-entity="facility">Facility</li>
+                    <li class="entity-item" data-entity="material-ticket">Material Ticket</li>
+                    <li class="entity-item" data-entity="contract">Contract</li>
+                    <li class="entity-item" data-entity="payment">Payment</li>
+                    <li class="entity-item" data-entity="environmental-compliance">Environmental Compliance</li>
+                </ul>
+
+                <div class="examples">
+                    <h4>Examples</h4>
+                    <div class="example-item" data-example="customer-basic">
+                        <strong>Basic Customer</strong>
+                        <pre>{
+  "name": "Acme Manufacturing",
+  "type": "commercial",
+  "status": "active",
+  "serviceAddress": {
+    "street": "123 Industrial Way",
+    "city": "Manufacturing City",
+    "state": "CA",
+    "zipCode": "94105"
+  }
+}</pre>
+                    </div>
+
+                    <div class="example-item" data-example="service-weekly">
+                        <strong>Weekly Service</strong>
+                        <pre>{
+  "serviceType": "waste",
+  "frequency": "weekly",
+  "containerType": "dumpster",
+  "containerSize": "4_yard",
+  "pricing": {
+    "baseRate": 150.00,
+    "rateUnit": "month"
+  }
+}</pre>
+                    </div>
+
+                    <div class="example-item" data-example="route-optimization">
+                        <strong>Route with Stops</strong>
+                        <pre>{
+  "name": "Monday Route 1",
+  "type": "commercial",
+  "assignedSites": ["SITE-001", "SITE-002", "SITE-003"],
+  "plannedStops": 3,
+  "totalDistance": 45.2
+}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="workspace">
+                <div class="toolbar">
+                    <button class="btn btn-primary" id="runBtn">Run Code</button>
+                    <button class="btn btn-secondary" id="clearBtn">Clear</button>
+                    <button class="btn btn-success" id="formatBtn">Format JSON</button>
+                    <div style="margin-left: auto;">
+                        <select id="operationSelect">
+                            <option value="create">Create Entity</option>
+                            <option value="validate">Validate Data</option>
+                            <option value="transform">Transform Legacy</option>
+                            <option value="event">Generate Event</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="editor-container">
+                    <textarea class="editor" id="codeEditor" placeholder="Enter your REFUSE Protocol code here..."></textarea>
+                    <div class="output">
+                        <div class="output-header">Output</div>
+                        <div class="output-content" id="outputContent">
+                            <div class="log-entry log-info">
+                                Welcome to the REFUSE Protocol Playground!
+                            </div>
+                            <div class="log-entry log-info">
+                                Select an entity from the sidebar and start experimenting.
+                            </div>
+                            <div class="log-entry log-info">
+                                Click on examples to load sample data.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot connected" id="connectionStatus"></div>
+                <span>Connected to REFUSE Protocol</span>
+            </div>
+            <div class="status-item">
+                <span>Version 1.0.0</span>
+            </div>
+            <div class="status-item">
+                <span id="entityCount">0 entities loaded</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2024 REFUSE Protocol. Built with ❤️ for sustainable waste management.</p>
+        </div>
+    </div>
+
+    <script>
+        // REFUSE Protocol Playground JavaScript
+        class RefusePlayground {
+            constructor() {
+                this.currentEntity = 'customer';
+                this.entities = new Map();
+                this.editor = document.getElementById('codeEditor');
+                this.output = document.getElementById('outputContent');
+
+                this.initializeEventListeners();
+                this.loadSampleData();
+            }
+
+            initializeEventListeners() {
+                // Entity selection
+                document.querySelectorAll('.entity-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.selectEntity(item.dataset.entity);
+                    });
+                });
+
+                // Example selection
+                document.querySelectorAll('.example-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.loadExample(item.dataset.example);
+                    });
+                });
+
+                // Toolbar buttons
+                document.getElementById('runBtn').addEventListener('click', () => {
+                    this.runCode();
+                });
+
+                document.getElementById('clearBtn').addEventListener('click', () => {
+                    this.clearOutput();
+                });
+
+                document.getElementById('formatBtn').addEventListener('click', () => {
+                    this.formatJSON();
+                });
+
+                // Operation selection
+                document.getElementById('operationSelect').addEventListener('change', (e) => {
+                    this.updateOperation(e.target.value);
+                });
+
+                // Keyboard shortcuts
+                this.editor.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        this.runCode();
+                    }
+                });
+            }
+
+            selectEntity(entityType) {
+                // Update UI
+                document.querySelectorAll('.entity-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`[data-entity="${entityType}"]`).classList.add('active');
+
+                this.currentEntity = entityType;
+                this.updateEntityCount();
+                this.log(`Switched to ${entityType} entity`, 'info');
+            }
+
+            loadExample(exampleType) {
+                const examples = {
+                    'customer-basic': `{
+  "name": "Acme Manufacturing",
+  "type": "commercial",
+  "status": "active",
+  "serviceAddress": {
+    "street": "123 Industrial Way",
+    "city": "Manufacturing City",
+    "state": "CA",
+    "zipCode": "94105"
+  },
+  "primaryContact": {
+    "name": "John Smith",
+    "email": "john@acme.com",
+    "phone": "(555) 123-4567"
+  },
+  "serviceTypes": ["waste", "recycling"],
+  "specialInstructions": "Handle with care"
+}`,
+                    'service-weekly': `{
+  "customerId": "CUST-001",
+  "serviceType": "waste",
+  "materialTypes": ["mixed_waste"],
+  "frequency": "weekly",
+  "containerType": "dumpster",
+  "containerSize": "4_yard",
+  "nextServiceDate": "2024-01-22",
+  "pricing": {
+    "baseRate": 150.00,
+    "rateUnit": "month",
+    "additionalCharges": 25.00
+  },
+  "status": "active",
+  "priority": "normal"
+}`,
+                    'route-optimization': `{
+  "name": "Monday Route 1",
+  "code": "MON-01",
+  "type": "commercial",
+  "status": "planned",
+  "schedule": {
+    "startTime": "08:00",
+    "endTime": "17:00",
+    "workingDays": ["monday", "wednesday", "friday"]
+  },
+  "estimatedDuration": 480,
+  "assignedVehicle": "VEH-001",
+  "assignedDriver": "DRIVER-001",
+  "assignedSites": ["SITE-001", "SITE-002", "SITE-003"],
+  "assignedServices": ["SERV-001", "SERV-002", "SERV-003"],
+  "serviceSequence": [],
+  "plannedStops": 3,
+  "efficiency": 85,
+  "totalDistance": 45.2
+}`
+                };
+
+                if (examples[exampleType]) {
+                    this.editor.value = examples[exampleType];
+                    this.log(`Loaded ${exampleType} example`, 'success');
+                }
+            }
+
+            async runCode() {
+                const code = this.editor.value.trim();
+
+                if (!code) {
+                    this.log('No code to execute', 'warn');
+                    return;
+                }
+
+                try {
+                    const operation = document.getElementById('operationSelect').value;
+                    await this.executeOperation(operation, code);
+                } catch (error) {
+                    this.log(`Error: ${error.message}`, 'error');
+                }
+            }
+
+            async executeOperation(operation, code) {
+                switch (operation) {
+                    case 'create':
+                        await this.createEntity(code);
+                        break;
+                    case 'validate':
+                        await this.validateData(code);
+                        break;
+                    case 'transform':
+                        await this.transformLegacy(code);
+                        break;
+                    case 'event':
+                        await this.generateEvent(code);
+                        break;
+                    default:
+                        this.log(`Unknown operation: ${operation}`, 'error');
+                }
+            }
+
+            async createEntity(code) {
+                try {
+                    const data = JSON.parse(code);
+
+                    // Simulate entity creation
+                    const entityId = `ENT-${Date.now()}`;
+                    const entity = {
+                        id: entityId,
+                        ...data,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                        version: 1,
+                        metadata: {
+                            createdBy: 'playground',
+                            source: 'playground'
+                        }
+                    };
+
+                    this.entities.set(entityId, entity);
+                    this.updateEntityCount();
+
+                    this.log(`Created ${this.currentEntity} entity: ${entityId}`, 'success');
+                    this.log(`Entity: ${JSON.stringify(entity, null, 2)}`, 'info');
+
+                } catch (error) {
+                    this.log(`Failed to create entity: ${error.message}`, 'error');
+                }
+            }
+
+            async validateData(code) {
+                try {
+                    const data = JSON.parse(code);
+
+                    // Basic validation rules
+                    const errors = [];
+
+                    if (!data.name && this.currentEntity === 'customer') {
+                        errors.push('Name is required for customer');
+                    }
+
+                    if (!data.serviceType && this.currentEntity === 'service') {
+                        errors.push('Service type is required');
+                    }
+
+                    if (!data.serviceAddress && this.currentEntity === 'customer') {
+                        errors.push('Service address is required');
+                    }
+
+                    // Email validation
+                    if (data.primaryContact?.email && !this.isValidEmail(data.primaryContact.email)) {
+                        errors.push('Invalid email format');
+                    }
+
+                    // Phone validation
+                    if (data.primaryContact?.phone && !this.isValidPhone(data.primaryContact.phone)) {
+                        errors.push('Invalid phone format');
+                    }
+
+                    if (errors.length === 0) {
+                        this.log('✅ Data validation passed', 'success');
+                        this.log('Validation result: Valid', 'info');
+                    } else {
+                        this.log('❌ Data validation failed', 'error');
+                        errors.forEach(error => this.log(`- ${error}`, 'error'));
+                    }
+
+                } catch (error) {
+                    this.log(`Validation error: ${error.message}`, 'error');
+                }
+            }
+
+            async transformLegacy(code) {
+                try {
+                    const legacyData = JSON.parse(code);
+
+                    // Simulate legacy data transformation
+                    const transformed = this.transformLegacyData(legacyData);
+
+                    this.log('🔄 Legacy data transformation completed', 'success');
+                    this.log('Original data:', 'info');
+                    this.log(JSON.stringify(legacyData, null, 2), 'info');
+                    this.log('Transformed data:', 'info');
+                    this.log(JSON.stringify(transformed, null, 2), 'info');
+
+                } catch (error) {
+                    this.log(`Transformation error: ${error.message}`, 'error');
+                }
+            }
+
+            async generateEvent(code) {
+                try {
+                    const data = JSON.parse(code);
+
+                    const event = {
+                        id: `EVT-${Date.now()}`,
+                        entityType: this.currentEntity,
+                        entityId: data.id || 'unknown',
+                        eventType: 'created',
+                        timestamp: new Date().toISOString(),
+                        data: data,
+                        metadata: {
+                            source: 'playground',
+                            version: '1.0.0'
+                        }
+                    };
+
+                    this.log('📡 Event generated', 'success');
+                    this.log(`Event type: ${this.currentEntity}.${event.eventType}`, 'info');
+                    this.log(`Entity ID: ${event.entityId}`, 'info');
+                    this.log('Event data:', 'info');
+                    this.log(JSON.stringify(event, null, 2), 'info');
+
+                } catch (error) {
+                    this.log(`Event generation error: ${error.message}`, 'error');
+                }
+            }
+
+            transformLegacyData(legacyData) {
+                // Simulate transformation from legacy systems
+                const transformed = { ...legacyData };
+
+                // Map common legacy field names to REFUSE Protocol format
+                if (legacyData.customer_name) {
+                    transformed.name = legacyData.customer_name;
+                    delete transformed.customer_name;
+                }
+
+                if (legacyData.CUSTOMER_TYPE) {
+                    transformed.type = legacyData.CUSTOMER_TYPE.toLowerCase();
+                    delete transformed.CUSTOMER_TYPE;
+                }
+
+                if (legacyData.address1) {
+                    transformed.serviceAddress = {
+                        street: legacyData.address1,
+                        street2: legacyData.address2,
+                        city: legacyData.city,
+                        state: legacyData.state,
+                        zipCode: legacyData.zip
+                    };
+                    delete transformed.address1;
+                    delete transformed.address2;
+                    delete transformed.city;
+                    delete transformed.state;
+                    delete transformed.zip;
+                }
+
+                // Add metadata for tracking
+                transformed.metadata = {
+                    ...transformed.metadata,
+                    importedFrom: 'legacy_system',
+                    importTimestamp: new Date().toISOString(),
+                    transformationApplied: true
+                };
+
+                return transformed;
+            }
+
+            isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            isValidPhone(phone) {
+                const phoneRegex = /^\+?[\d\s\-\(\)]{10,}$/;
+                return phoneRegex.test(phone);
+            }
+
+            updateOperation(operation) {
+                this.log(`Operation changed to: ${operation}`, 'info');
+
+                // Update editor placeholder based on operation
+                const placeholders = {
+                    'create': 'Enter entity data to create...',
+                    'validate': 'Enter data to validate...',
+                    'transform': 'Enter legacy data to transform...',
+                    'event': 'Enter entity data to generate event...'
+                };
+
+                this.editor.placeholder = placeholders[operation] || 'Enter your code...';
+            }
+
+            formatJSON() {
+                try {
+                    const code = this.editor.value.trim();
+                    if (!code) return;
+
+                    const parsed = JSON.parse(code);
+                    this.editor.value = JSON.stringify(parsed, null, 2);
+                    this.log('JSON formatted successfully', 'success');
+                } catch (error) {
+                    this.log(`JSON formatting error: ${error.message}`, 'error');
+                }
+            }
+
+            log(message, type = 'info') {
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+
+                this.output.appendChild(logEntry);
+                this.output.scrollTop = this.output.scrollHeight;
+            }
+
+            clearOutput() {
+                this.output.innerHTML = `
+                    <div class="log-entry log-info">
+                        Output cleared - ${new Date().toLocaleTimeString()}
+                    </div>
+                `;
+            }
+
+            updateEntityCount() {
+                const count = this.entities.size;
+                document.getElementById('entityCount').textContent =
+                    `${count} ${count === 1 ? 'entity' : 'entities'} loaded`;
+            }
+
+            loadSampleData() {
+                // Load some sample entities for demonstration
+                const sampleCustomer = {
+                    id: 'SAMPLE-CUST-001',
+                    name: 'Sample Manufacturing Inc.',
+                    type: 'commercial',
+                    status: 'active',
+                    serviceAddress: {
+                        street: '123 Sample Street',
+                        city: 'Sample City',
+                        state: 'CA',
+                        zipCode: '94105'
+                    },
+                    primaryContact: {
+                        name: 'Jane Sample',
+                        email: 'jane@sample.com',
+                        phone: '(555) 987-6543'
+                    },
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    version: 1
+                };
+
+                this.entities.set(sampleCustomer.id, sampleCustomer);
+                this.updateEntityCount();
+
+                this.log('Sample data loaded', 'info');
+            }
+        }
+
+        // Initialize playground when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new RefusePlayground();
+        });
+    </script>
+</body>
+</html>

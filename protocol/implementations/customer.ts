@@ -4,9 +4,18 @@
  * @version 1.0.0
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { Customer, Address, Contact, BaseEntity } from '../specifications/entities';
+import { Customer, Address, Contact } from '../specifications/entities';
 import { Event } from '../specifications/entities';
+import {
+  ValidationUtils,
+  FormatUtils,
+  DataUtils,
+  Constants,
+  AuditUtils,
+  MetadataUtils,
+  ConcurrencyError,
+  ValidationError
+} from './common';
 
 /**
  * Customer implementation with full validation and business logic
@@ -31,9 +40,10 @@ export class CustomerModel implements Customer {
   serviceTypes?: string[];
   specialInstructions?: string;
 
-  private static readonly MAX_NAME_LENGTH = 200;
-  private static readonly VALID_TYPES: Customer['type'][] = ['residential', 'commercial', 'industrial', 'municipal'];
-  private static readonly VALID_STATUSES: Customer['status'][] = ['active', 'inactive', 'suspended', 'pending'];
+  // Use constants from common utilities
+  private static readonly MAX_NAME_LENGTH = Constants.BUSINESS_RULES.MAX_NAME_LENGTH;
+  private static readonly VALID_TYPES = Constants.CUSTOMER_TYPES;
+  private static readonly VALID_STATUSES = Constants.CUSTOMER_STATUSES;
 
   constructor(data: Partial<Customer>) {
     this.validateAndAssign(data);
@@ -65,21 +75,13 @@ export class CustomerModel implements Customer {
    */
   update(updates: Partial<Omit<Customer, keyof BaseEntity>>, expectedVersion: number): CustomerModel {
     if (this.version !== expectedVersion) {
-      throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
+      throw new ConcurrencyError('customer', this.id, expectedVersion, this.version);
     }
 
-    const updatedData: Partial<Customer> = {
-      ...updates,
-      id: this.id,
-      version: this.version + 1,
-      updatedAt: new Date(),
-      metadata: {
-        ...this.metadata,
-        ...updates.metadata,
-        lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
-    };
+    const updatedData: Partial<Customer> = DataUtils.deepMerge(this as any, updates);
+    updatedData.version = this.version + 1;
+    updatedData.updatedAt = new Date();
+    updatedData.metadata = MetadataUtils.updateMetadata(this.metadata!, updates.metadata || {});
 
     return new CustomerModel(updatedData);
   }
@@ -88,75 +90,55 @@ export class CustomerModel implements Customer {
    * Validate and assign customer data
    */
   private validateAndAssign(data: Partial<Customer>): void {
-    // Required fields validation
-    if (!data.name || typeof data.name !== 'string') {
-      throw new Error('Customer name is required and must be a string');
+    // Validate required fields
+    const requiredErrors = ValidationUtils.validateRequired(data, ['name', 'type', 'status', 'serviceAddress']);
+    if (requiredErrors.length > 0) {
+      throw new ValidationError(requiredErrors[0], 'customer', 'multiple');
     }
 
-    if (!data.type || !CustomerModel.VALID_TYPES.includes(data.type)) {
-      throw new Error(`Customer type must be one of: ${CustomerModel.VALID_TYPES.join(', ')}`);
+    // Validate enum values
+    const typeErrors = ValidationUtils.validateEnum(data.type, Constants.CUSTOMER_TYPES, 'Customer type');
+    if (typeErrors.length > 0) {
+      throw new ValidationError(typeErrors[0], 'customer', 'type');
     }
 
-    if (!data.status || !CustomerModel.VALID_STATUSES.includes(data.status)) {
-      throw new Error(`Customer status must be one of: ${CustomerModel.VALID_STATUSES.join(', ')}`);
+    const statusErrors = ValidationUtils.validateEnum(data.status, Constants.CUSTOMER_STATUSES, 'Customer status');
+    if (statusErrors.length > 0) {
+      throw new ValidationError(statusErrors[0], 'customer', 'status');
     }
 
-    if (!data.serviceAddress) {
-      throw new Error('Service address is required');
+    // Validate string length
+    const nameErrors = ValidationUtils.validateLength(data.name!, Constants.BUSINESS_RULES.MAX_NAME_LENGTH, 'Customer name');
+    if (nameErrors.length > 0) {
+      throw new ValidationError(nameErrors[0], 'customer', 'name');
     }
 
-    // Length validation
-    if (data.name.length > CustomerModel.MAX_NAME_LENGTH) {
-      throw new Error(`Customer name cannot exceed ${CustomerModel.MAX_NAME_LENGTH} characters`);
+    // Validate contacts
+    if (data.primaryContact?.email && !ValidationUtils.isValidEmail(data.primaryContact.email)) {
+      throw new ValidationError('Primary contact email is invalid', 'customer', 'primaryContact.email');
     }
 
-    // Email validation for contacts
-    if (data.primaryContact?.email && !this.isValidEmail(data.primaryContact.email)) {
-      throw new Error('Primary contact email is invalid');
-    }
-
-    if (data.billingContact?.email && !this.isValidEmail(data.billingContact.email)) {
-      throw new Error('Billing contact email is invalid');
+    if (data.billingContact?.email && !ValidationUtils.isValidEmail(data.billingContact.email)) {
+      throw new ValidationError('Billing contact email is invalid', 'customer', 'billingContact.email');
     }
 
     if (data.serviceContacts) {
       data.serviceContacts.forEach((contact, index) => {
-        if (contact.email && !this.isValidEmail(contact.email)) {
-          throw new Error(`Service contact ${index} email is invalid`);
+        if (contact.email && !ValidationUtils.isValidEmail(contact.email)) {
+          throw new ValidationError(`Service contact ${index} email is invalid`, 'customer', `serviceContacts.${index}.email`);
         }
       });
     }
 
-    // Tax ID validation for commercial customers
-    if (data.type === 'commercial' && data.taxId) {
-      if (!this.isValidTaxId(data.taxId)) {
-        throw new Error('Invalid tax ID format');
-      }
+    // Validate tax ID for commercial customers
+    if (data.type === 'commercial' && data.taxId && !ValidationUtils.isValidTaxId(data.taxId)) {
+      throw new ValidationError('Invalid tax ID format', 'customer', 'taxId');
     }
 
     // Assign validated data
     Object.assign(this, data);
   }
 
-  /**
-   * Validate email format
-   */
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
-  /**
-   * Validate tax ID format (US EIN format)
-   */
-  private isValidTaxId(taxId: string): boolean {
-    // Remove hyphens and spaces for validation
-    const cleanTaxId = taxId.replace(/[-\s]/g, '');
-
-    // US EIN format: XX-XXXXXXX or just XXXXXXXXX
-    const einRegex = /^\d{9}$|^\d{2}-\d{7}$/;
-    return einRegex.test(cleanTaxId);
-  }
 
   /**
    * Check if customer is active
@@ -232,14 +214,12 @@ export class CustomerModel implements Customer {
    * Create domain event for customer changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
-    return {
-      id: uuidv4(),
-      entityType: 'customer',
+    return AuditUtils.generateEvent(
+      'customer',
+      this.id,
       eventType,
-      timestamp: new Date(),
-      eventData: this.toEventData(),
-      version: 1
-    };
+      this.toEventData()
+    ) as Event;
   }
 
   /**
