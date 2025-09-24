@@ -14,9 +14,9 @@ function Footer() {
           </a>
         </div>
         <div className="mt-8 md:mt-0 md:order-1">
-          <p className="text-center text-base text-gray-400">
-            &copy; 2025 REFUSE Protocol. All rights reserved.
-          </p>
+              <p className="text-center text-base text-gray-400">
+                &copy; 2025 REFUSE Protocol. Sponsored by <a href="mailto:jed@edisoncode.com" className="text-refuse-blue hover:text-blue-700">Edison Code LLC</a>. All rights reserved.
+              </p>
         </div>
       </div>
 
@@ -28,6 +28,7 @@ function Footer() {
               <p>
                 REFUSE (REcyclable & Solid waste Unified Standard Exchange) protocol enables
                 standardized data exchange for waste management and recycling operations.
+                <strong className="text-gray-600"> We're building this open source standard together with the waste industry.</strong>
               </p>
             </div>
             <div className="mt-4 md:mt-0">
@@ -38,9 +39,9 @@ function Footer() {
                 <Link to="/docs" className="text-sm text-gray-500 hover:text-gray-600">
                   Documentation
                 </Link>
-                <Link to="/contact" className="text-sm text-gray-500 hover:text-gray-600">
+                <a href="mailto:jed@edisoncode.com" className="text-sm text-gray-500 hover:text-gray-600">
                   Contact
-                </Link>
+                </a>
               </nav>
             </div>
           </div>

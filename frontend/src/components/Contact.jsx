@@ -46,9 +46,11 @@ function Contact() {
           <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-2">
             {/* Contact Information */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Get in Touch</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Join the Community</h2>
               <p className="mt-4 text-lg text-gray-600">
-                We're here to help you integrate REFUSE protocol into your waste management systems.
+                Help us build the future of waste management standards. Whether you're a software vendor,
+                waste management company, or developer, we want to collaborate with you to make REFUSE
+                protocol the industry standard.
               </p>
 
               <div className="mt-8 space-y-6">
@@ -61,9 +63,9 @@ function Contact() {
                     </div>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-lg font-medium text-gray-900">Email Support</h3>
-                    <p className="mt-1 text-gray-600">support@refuse-protocol.org</p>
-                    <p className="mt-1 text-sm text-gray-500">Response within 24 hours</p>
+                    <h3 className="text-lg font-medium text-gray-900">Email</h3>
+                    <p className="mt-1 text-gray-600">jed@edisoncode.com</p>
+                    <p className="mt-1 text-sm text-gray-500">Best effort support - we're building this together</p>
                   </div>
                 </div>
 
@@ -76,8 +78,8 @@ function Contact() {
                     </div>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-lg font-medium text-gray-900">Community</h3>
-                    <p className="mt-1 text-gray-600">Join our developer community</p>
+                    <h3 className="text-lg font-medium text-gray-900">Open Source Community</h3>
+                    <p className="mt-1 text-gray-600">Join developers and vendors building the standard</p>
                     <a href="https://github.com/refuse-protocol" className="mt-1 text-sm text-refuse-blue hover:text-blue-700">
                       GitHub Repository →
                     </a>

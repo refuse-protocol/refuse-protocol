@@ -21,13 +21,14 @@ function About() {
               <div>
                 <h2 className="text-3xl font-extrabold text-gray-900">What is REFUSE?</h2>
                 <p className="mt-4 text-lg text-gray-600">
-                  REFUSE Protocol is an open standard for waste management data exchange.
+                  REFUSE Protocol is an open source standard for waste management data exchange.
                   It provides a unified interface for connecting diverse systems used in
                   recycling, waste collection, environmental compliance, and facility management.
                 </p>
                 <p className="mt-4 text-lg text-gray-600">
                   Our protocol addresses the fundamental challenge of data silos in waste
                   management by providing RESTful APIs with semantic clarity and backward compatibility.
+                  <strong className="text-gray-700"> We're building this standard collaboratively with the waste industry.</strong>
                 </p>
               </div>
 
@@ -81,7 +82,7 @@ function About() {
           </div>
 
           <div className="mt-16">
-            <h2 className="text-3xl font-extrabold text-gray-900 text-center">Use Cases</h2>
+            <h2 className="text-3xl font-extrabold text-gray-900 text-center">Industry Applications</h2>
             <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
               <div className="card">
                 <div className="card-header text-center">
@@ -90,9 +91,9 @@ function About() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
-                  <h3 className="mt-4 text-lg font-medium text-gray-900">Facility Management</h3>
+                  <h3 className="mt-4 text-lg font-medium text-gray-900">Waste Management Systems</h3>
                   <p className="mt-2 text-gray-600">
-                    Connect recycling centers, transfer stations, and processing facilities
+                    Connect recycling centers, transfer stations, and processing facilities with standardized data exchange
                   </p>
                 </div>
               </div>
@@ -106,7 +107,7 @@ function About() {
                   </div>
                   <h3 className="mt-4 text-lg font-medium text-gray-900">Environmental Compliance</h3>
                   <p className="mt-2 text-gray-600">
-                    Automated reporting for regulatory requirements and environmental standards
+                    Automated reporting for regulatory requirements and environmental standards across the industry
                   </p>
                 </div>
               </div>
@@ -115,12 +116,12 @@ function About() {
                 <div className="card-header text-center">
                   <div className="mx-auto h-12 w-12 text-refuse-orange">
                     <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
-                  <h3 className="mt-4 text-lg font-medium text-gray-900">Route Optimization</h3>
+                  <h3 className="mt-4 text-lg font-medium text-gray-900">Software Vendor Integration</h3>
                   <p className="mt-2 text-gray-600">
-                    Real-time data exchange for collection routes and logistics planning
+                    Join other vendors in building compatible software solutions using the REFUSE standard
                   </p>
                 </div>
               </div>
@@ -128,14 +129,18 @@ function About() {
           </div>
 
           <div className="mt-16 text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900">Ready to Get Started?</h2>
+            <h2 className="text-3xl font-extrabold text-gray-900">Ready to Join the Standard?</h2>
             <p className="mt-4 text-lg text-gray-600">
-              Explore our comprehensive documentation to begin integrating REFUSE protocol.
+              Whether you're a waste management company, software vendor, or developer,
+              we invite you to collaborate with us in building the future of waste industry standards.
             </p>
-            <div className="mt-8">
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/docs" className="btn">
                 View Documentation
               </Link>
+              <a href="mailto:jed@edisoncode.com" className="btn-secondary">
+                Contact Edison Code
+              </a>
             </div>
           </div>
         </div>

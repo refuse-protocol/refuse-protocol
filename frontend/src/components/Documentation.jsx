@@ -11,8 +11,8 @@ function Documentation() {
               Documentation
             </h1>
             <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive guides and API reference for implementing REFUSE protocol
-              in your waste management systems.
+              Implementation guides and API reference for software vendors and developers
+              building with REFUSE protocol. Join us in creating industry standards.
             </p>
           </div>
 
@@ -23,7 +23,7 @@ function Documentation() {
                 <div className="card-header">
                   <h2 className="text-2xl font-bold text-gray-900">API Reference</h2>
                   <p className="mt-2 text-gray-600">
-                    Complete RESTful API documentation with request/response examples
+                    Complete RESTful API documentation for vendors implementing REFUSE protocol
                   </p>
                   <div className="mt-6">
                     <h3 className="text-lg font-semibold text-gray-900">Core Endpoints</h3>
@@ -50,7 +50,7 @@ function Documentation() {
                 <div className="card-header">
                   <h2 className="text-2xl font-bold text-gray-900">Implementation Guide</h2>
                   <p className="mt-2 text-gray-600">
-                    Step-by-step instructions for integrating REFUSE protocol
+                    Step-by-step instructions for vendors adopting REFUSE protocol in their software
                   </p>
                   <div className="mt-6">
                     <h3 className="text-lg font-semibold text-gray-900">Quick Start</h3>
@@ -143,14 +143,18 @@ print(reports)`}
           </div>
 
           <div className="mt-16 text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900">Need Help?</h2>
+            <h2 className="text-3xl font-extrabold text-gray-900">Ready to Contribute?</h2>
             <p className="mt-4 text-lg text-gray-600">
-              Our community and support team are here to help with your integration.
+              Join our community of vendors and developers building the waste industry standard.
+              We welcome contributions, feedback, and collaboration.
             </p>
-            <div className="mt-8">
-              <Link to="/contact" className="btn">
-                Contact Support
-              </Link>
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="https://github.com/refuse-protocol" className="btn" target="_blank" rel="noopener noreferrer">
+                View on GitHub
+              </a>
+              <a href="mailto:jed@edisoncode.com" className="btn-secondary">
+                Contact Edison Code
+              </a>
             </div>
           </div>
         </div>
