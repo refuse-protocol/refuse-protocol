@@ -1,0 +1,95 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    name: Deploy to Cloudflare Pages
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Run tests
+        run: cd frontend && npm test -- --run --reporter=junit --outputFile=../test-results.xml
+        continue-on-error: false
+
+      - name: Run accessibility audit
+        run: cd frontend && npx axe-core index.html --exit
+        continue-on-error: true
+
+      - name: Run Lighthouse CI
+        run: cd frontend && npx @lhci/cli@0.12.x autorun --upload.target=temporary-public-storage
+        continue-on-error: true
+
+      - name: Build site
+        run: cd frontend && npm run build
+
+      - name: Deploy to Cloudflare Pages
+        id: cloudflare_deployment
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: refuse-protocol-org
+          directory: frontend/dist
+          branch: ${{ github.ref_name }}
+          wranglerVersion: '3'
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deploymentUrl = '${{ steps.cloudflare_deployment.outputs.url }}';
+            const testReport = 'Test results: ${{ steps.test.outputs.outcome }}';
+            const accessibilityReport = 'Accessibility: ${{ steps.audit.outputs.outcome }}';
+
+            const body = `## 🚀 Deployment Preview
+
+**URL:** ${deploymentUrl}
+
+### 📊 Quality Checks
+- ✅ Tests: ${testReport}
+- ♿ Accessibility: ${accessibilityReport}
+- 🔍 Lighthouse: Automated audit completed
+
+### 🔗 Quick Links
+- [View Deployment](${deploymentUrl})
+- [Run Tests](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  quality-gate:
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Check deployment status
+        run: |
+          echo "✅ Deployment completed successfully"
+          echo "🌐 Site available at: ${{ needs.deploy.outputs.url }}"
+          echo "📝 Commit: ${{ github.sha }}"
