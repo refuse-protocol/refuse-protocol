@@ -1,0 +1,21 @@
+{
+  "name": "refuse-protocol-compliance-reporter",
+  "version": "1.0.0",
+  "description": "REFUSE Protocol Compliance Reporting Tool",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "pdfkit": "^0.13.0",
+    "exceljs": "^4.3.0",
+    "@refuse-protocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.3",
+    "ts-node": "^10.9.1"
+  }
+}
