@@ -84,6 +84,16 @@ When creating this spec from a user prompt:
 
 ---
 
+## REFUSE Protocol Alignment
+This specification aligns with REFUSE (REcyclable & Solid waste Unified Standard Exchange) protocol principles:
+- **RESTful API-first**: All data operations designed as REST endpoints
+- **JSON-native**: Data structures use human-readable field names
+- **Semantic clarity**: Requirements use domain-specific terminology
+- **Extensible**: Accommodates system-specific fields via metadata
+- **Data archaeology**: Handles legacy data patterns and inconsistencies
+
+---
+
 ## Review & Acceptance Checklist
 *GATE: Automated checks run during main() execution*
 

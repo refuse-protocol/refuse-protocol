@@ -91,6 +91,14 @@ Task: "Integration test registration in tests/integration/test_registration.py"
 Task: "Integration test auth in tests/integration/test_auth.py"
 ```
 
+## REFUSE Protocol Requirements
+All tasks MUST align with REFUSE protocol constitution:
+- **RESTful API-first**: Implement endpoints as RESTful services
+- **JSON-native**: Use JSON for data exchange with semantic field names
+- **Extensible**: Support metadata extensions for system-specific needs
+- **Backward compatible**: Handle legacy data patterns during migration
+- **Data archaeology**: Account for inconsistent legacy data structures
+
 ## Notes
 - [P] tasks = different files, no dependencies
 - Verify tests fail before implementing

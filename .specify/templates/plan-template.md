@@ -101,6 +101,14 @@ ios/ or android/
 
 **Structure Decision**: [DEFAULT to Option 1 unless Technical Context indicates web/mobile app]
 
+## REFUSE Protocol Context
+This implementation follows the REFUSE (REcyclable & Solid waste Unified Standard Exchange) protocol constitution, ensuring:
+- RESTful API-first design with JSON-native data exchange
+- Semantic clarity in field naming and data structures
+- Extensible design supporting legacy waste management system integration
+- Backward compatibility for existing data patterns
+- Comprehensive data archaeology capabilities for legacy system migration
+
 ## Phase 0: Outline & Research
 1. **Extract unknowns from Technical Context** above:
    - For each NEEDS CLARIFICATION → research task
@@ -209,4 +217,4 @@ ios/ or android/
 - [ ] Complexity deviations documented
 
 ---
-*Based on Constitution v2.1.1 - See `/memory/constitution.md`*
+*Based on REFUSE Protocol Constitution v1.0.0 - See `.specify/memory/constitution.md`*
