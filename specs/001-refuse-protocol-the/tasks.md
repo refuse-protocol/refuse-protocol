@@ -86,19 +86,19 @@
 - [x] T027 [P] Create MaterialTicket entity model with scale calculations in protocol/implementations/material-ticket.ts
 
 ### Entity Relationships Implementation
-- [ ] T028 Implement entity relationship mappings and foreign key validation in protocol/specifications/relationships.ts
-- [ ] T029 [P] Create Territory entity with geographic boundary validation in protocol/implementations/territory.ts
-- [ ] T030 [P] Create Site entity with multi-site customer support in protocol/implementations/site.ts
-- [ ] T031 [P] Create Contract entity with guaranteed pricing logic in protocol/implementations/contract.ts
-- [ ] T032 [P] Create Fleet entity with vehicle tracking capabilities in protocol/implementations/fleet.ts
-- [ ] T033 [P] Create Container entity with RFID/GPS tracking support in protocol/implementations/container.ts
+- [x] T028 Implement entity relationship mappings and foreign key validation in protocol/specifications/relationships.ts
+- [x] T029 [P] Create Territory entity with geographic boundary validation in protocol/implementations/territory.ts
+- [x] T030 [P] Create Site entity with multi-site customer support in protocol/implementations/site.ts
+- [x] T031 [P] Create Contract entity with guaranteed pricing logic in protocol/implementations/contract.ts
+- [x] T032 [P] Create Fleet entity with vehicle tracking capabilities in protocol/implementations/fleet.ts
+- [x] T033 [P] Create Container entity with RFID/GPS tracking support in protocol/implementations/container.ts
 
 ### Advanced Entities
-- [ ] T034 [P] Create Yard entity with facility management in protocol/implementations/yard.ts
-- [ ] T035 [P] Create Order/Job entity with work scheduling in protocol/implementations/order.ts
-- [ ] T036 [P] Create Material entity with recycling classification in protocol/implementations/material.ts
-- [ ] T037 [P] Create Payment entity with reconciliation logic in protocol/implementations/payment.ts
-- [ ] T038 [P] Create Allocation entity with LEED compliance tracking in protocol/implementations/allocation.ts
+- [x] T034 [P] Create Yard entity with facility management in protocol/implementations/yard.ts
+- [x] T035 [P] Create Order/Job entity with work scheduling in protocol/implementations/order.ts
+- [x] T036 [P] Create Material entity with recycling classification in protocol/implementations/material.ts
+- [x] T037 [P] Create Payment entity with reconciliation logic in protocol/implementations/payment.ts
+- [x] T038 [P] Create Allocation entity with LEED compliance tracking in protocol/implementations/allocation.ts
 
 ## Phase 3.4: Protocol Specification & Tools
 
