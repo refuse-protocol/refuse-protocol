@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 
 function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
+  const location = useLocation()
 
   const navigation = [
-    { name: 'Home', href: '#', current: true },
-    { name: 'About', href: '#about', current: false },
-    { name: 'Documentation', href: '#docs', current: false },
-    { name: 'Contact', href: '#contact', current: false },
+    { name: 'Home', href: '/', current: location.pathname === '/' },
+    { name: 'About', href: '/about', current: location.pathname === '/about' },
+    { name: 'Documentation', href: '/docs', current: location.pathname === '/docs' },
+    { name: 'Contact', href: '/contact', current: location.pathname === '/contact' },
   ]
 
   return (
@@ -16,15 +18,15 @@ function Navigation() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <a href="#" className="text-xl font-bold text-gradient">
+              <Link to="/" className="text-xl font-bold text-gradient">
                 REFUSE Protocol
-              </a>
+              </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navigation.map((item) => (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
+                  to={item.href}
                   className={`${
                     item.current
                       ? 'border-refuse-blue text-gray-900'
@@ -33,7 +35,7 @@ function Navigation() {
                   aria-current={item.current ? 'page' : undefined}
                 >
                   {item.name}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -67,9 +69,9 @@ function Navigation() {
         <div className="sm:hidden" id="mobile-menu">
           <div className="pt-2 pb-3 space-y-1">
             {navigation.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
+                to={item.href}
                 className={`${
                   item.current
                     ? 'bg-refuse-blue text-white'
@@ -79,7 +81,7 @@ function Navigation() {
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
           </div>
         </div>

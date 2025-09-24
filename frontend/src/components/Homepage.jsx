@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 function Homepage() {
   return (
@@ -17,14 +18,14 @@ function Homepage() {
             </p>
             <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
               <div className="rounded-md shadow">
-                <a href="#docs" className="btn w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-refuse-blue hover:bg-blue-700 md:py-4 md:text-lg md:px-10">
+                <Link to="/docs" className="btn w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-refuse-blue hover:bg-blue-700 md:py-4 md:text-lg md:px-10">
                   Get Started
-                </a>
+                </Link>
               </div>
               <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
-                <a href="#about" className="btn-secondary w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-refuse-blue bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+                <Link to="/about" className="btn-secondary w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-refuse-blue bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
                   Learn More
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -109,9 +110,9 @@ function Homepage() {
               Join the growing ecosystem of waste management systems using REFUSE protocol.
             </p>
             <div className="mt-8">
-              <a href="#contact" className="btn">
+              <Link to="/contact" className="btn">
                 Contact Us
-              </a>
+              </Link>
             </div>
           </div>
         </div>

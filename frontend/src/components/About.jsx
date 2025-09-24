@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 function About() {
   return (
@@ -132,9 +133,9 @@ function About() {
               Explore our comprehensive documentation to begin integrating REFUSE protocol.
             </p>
             <div className="mt-8">
-              <a href="#docs" className="btn">
+              <Link to="/docs" className="btn">
                 View Documentation
-              </a>
+              </Link>
             </div>
           </div>
         </div>

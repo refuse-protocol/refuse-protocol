@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 function Documentation() {
   return (
@@ -147,9 +148,9 @@ print(reports)`}
               Our community and support team are here to help with your integration.
             </p>
             <div className="mt-8">
-              <a href="#contact" className="btn">
+              <Link to="/contact" className="btn">
                 Contact Support
-              </a>
+              </Link>
             </div>
           </div>
         </div>
