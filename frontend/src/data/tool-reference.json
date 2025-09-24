@@ -1,0 +1,40 @@
+{
+  "validationTools": [
+    "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/compliance-validator.ts",
+    "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/conformance-checker.ts",
+    "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/schema-validator.ts"
+  ],
+  "generationTools": [
+    "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/sdk-generator.ts",
+    "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/spec-generator.ts"
+  ],
+  "utilityTools": [
+    "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/jsdoc-parser.ts",
+    "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/test-utils.ts"
+  ],
+  "analysisTools": [
+    "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/data-archaeologist.ts",
+    "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/data-transformer.ts"
+  ],
+  "categories": {
+    "API Documentation": [
+      "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/api-docs.ts"
+    ],
+    "SDK Generation": [
+      "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/sdk-generator.ts"
+    ],
+    "Compliance & Validation": [
+      "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/compliance-validator.ts",
+      "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/conformance-checker.ts",
+      "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/schema-validator.ts"
+    ],
+    "Data Processing": [
+      "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/data-archaeologist.ts",
+      "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/data-transformer.ts"
+    ],
+    "Development Tools": [
+      "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/jsdoc-parser.ts",
+      "/Users/jeddawson/Documents/GitHub/refuse-protocol/protocol/tools/test-utils.ts"
+    ]
+  }
+}

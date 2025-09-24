@@ -1,0 +1,39 @@
+{
+  "name": "REFUSE Protocol",
+  "version": "1.0.0",
+  "description": "REcyclable & Solid waste Unified Standard Exchange",
+  "tagline": "Open source standardized data exchange for waste management and recycling operations",
+  "entities": 22,
+  "implementations": 27,
+  "tools": 13,
+  "lastUpdated": "2025-09-24T17:27:29.642Z",
+  "features": [
+    "RESTful API-first design with JSON-native data exchange",
+    "16+ core entities covering all aspects of waste management",
+    "Comprehensive tool ecosystem for validation and compliance",
+    "Backward compatibility for legacy system migration",
+    "Data archaeology capabilities for inconsistent legacy data"
+  ],
+  "principles": [
+    {
+      "name": "RESTful API-first",
+      "description": "All data exchange operations accessible via REST endpoints"
+    },
+    {
+      "name": "JSON-native",
+      "description": "JSON as primary data interchange format with optional XML support"
+    },
+    {
+      "name": "Semantic clarity",
+      "description": "Human-readable field names with consistent domain terminology"
+    },
+    {
+      "name": "Extensible design",
+      "description": "Support for system-specific extensions while maintaining compatibility"
+    },
+    {
+      "name": "Backward compatibility & Data archaeology",
+      "description": "Handles legacy data patterns and migration challenges"
+    }
+  ]
+}
