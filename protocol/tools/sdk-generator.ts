@@ -220,7 +220,7 @@ export class ProtocolClient {
           id: `evt-${Date.now()}`,
           entityType: this.entityType,
           eventType: 'created',
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           eventData: response.data,
           source: 'sdk'
         };
@@ -310,7 +310,7 @@ export class ProtocolClient {
           id: `evt-${Date.now()}`,
           entityType: this.entityType,
           eventType: 'updated',
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           eventData: { ...data, id },
           source: 'sdk'
         };
@@ -352,7 +352,7 @@ export class ProtocolClient {
           id: `evt-${Date.now()}`,
           entityType: this.entityType,
           eventType: 'deleted',
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           eventData: { id },
           source: 'sdk'
         };

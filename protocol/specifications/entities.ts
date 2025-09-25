@@ -11,6 +11,7 @@ export interface BaseEntity {
   createdAt: Date;
   updatedAt: Date;
   version: number;
+  metadata?: Record<string, any>;
 }
 
 // Supporting types
@@ -59,6 +60,13 @@ export interface Customer extends BaseEntity {
   billingAddress?: Address;
   serviceTypes?: string[];
   specialInstructions?: string;
+  contactInfo?: {
+    email: string;
+    primaryPhone: string;
+    secondaryPhone?: string;
+    emergencyContact?: Contact;
+  };
+  serviceArea?: string;
   metadata?: Record<string, any>;
 }
 
@@ -284,10 +292,32 @@ export interface Fleet extends BaseEntity {
 export interface Container extends BaseEntity {
   type: 'cart' | 'dumpster' | 'bin' | 'rolloff' | 'compactor';
   size: string;
+  material?: string;
   assignedTo?: string;
   currentLocation?: Address;
   rfidTag?: string;
   specifications?: Record<string, any>;
+  capacityGallons?: number;
+  capacityCubicYards?: number;
+  purchaseDate?: Date;
+  warrantyExpiry?: Date;
+  maintenanceRecords?: MaintenanceRecord[];
+  isActive?: boolean;
+  lastGpsUpdate?: Date;
+}
+
+// MaintenanceRecord type
+export interface MaintenanceRecord {
+  id: string;
+  containerId: string;
+  maintenanceType: string;
+  scheduledDate: Date;
+  completedDate?: Date;
+  technician: string;
+  cost: number;
+  description: string;
+  nextScheduledDate?: Date;
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
 }
 
 // Yard entity
@@ -447,7 +477,6 @@ export interface Payment extends BaseEntity {
   };
 
   // Legacy and additional metadata
-  metadata?: Record<string, any>;
   referenceNumber?: string;
   notes?: string;
 }
@@ -462,16 +491,89 @@ export interface Allocation extends BaseEntity {
   reportingPeriod: string;
   verifiedBy?: string;
   verificationDate?: string;
+
+  // Extended properties for implementation
+  destination?: {
+    type: 'landfill' | 'mrf' | 'transfer' | 'composter' | 'export';
+    facilityId: string;
+    location: Address;
+    capacity?: number;
+    restrictions?: string[];
+  };
+  processingMethod?: {
+    method: string;
+    efficiency: number;
+    quality: string;
+    certifications?: string[];
+  };
+  environmentalImpact?: {
+    carbonFootprint: number;
+    waterUsage: number;
+    energyConsumption: number;
+    emissions: Record<string, number>;
+  };
+  leedCompliance?: {
+    certificationLevel: 'certified' | 'silver' | 'gold' | 'platinum';
+    creditsEarned: number;
+    totalCredits: number;
+    categories: Record<string, number>;
+  };
+  qualityMetrics?: Array<{
+    metricType: string;
+    value: number;
+    unit: string;
+    complianceStatus: 'pass' | 'fail' | 'warning';
+    threshold?: number;
+  }>;
+  transportation?: {
+    distance: number;
+    fuelType: string;
+    fuelEfficiency: number;
+    routeId?: string;
+    vehicleType?: string;
+  };
+  costBreakdown?: {
+    baseCost: number;
+    transportationCost: number;
+    processingCost: number;
+    disposalCost: number;
+    totalCost: number;
+    currency: string;
+  };
+  regulatoryCompliance?: Array<{
+    regulation: string;
+    status: 'compliant' | 'non_compliant' | 'exempt' | 'pending';
+    lastChecked: Date;
+    nextDue: Date;
+    violations?: string[];
+  }>;
+  documentation?: Array<{
+    documentType: string;
+    documentId: string;
+    status: 'submitted' | 'approved' | 'rejected' | 'pending';
+    submittedDate: Date;
+    approvedDate?: Date;
+    url?: string;
+  }>;
+  auditTrail?: Array<{
+    action: string;
+    timestamp: Date;
+    userId: string;
+    changes: Record<string, any>;
+    notes?: string;
+  }>;
+  metadata?: Record<string, any>;
 }
 
 // Event entity
 export interface Event extends BaseEntity {
-  entityType: 'customer' | 'service' | 'route' | 'facility' | 'customer_request' | 'material_ticket' | 'contract' | 'payment';
-  eventType: 'created' | 'updated' | 'completed' | 'cancelled';
+  entityType: 'customer' | 'service' | 'route' | 'facility' | 'customer_request' | 'material_ticket' | 'contract' | 'payment' | 'container';
+  eventType: 'created' | 'updated' | 'completed' | 'cancelled' | 'webhook_received';
   timestamp: Date;
   eventData: Record<string, any>;
   correlationId?: string;
   userId?: string;
+  source?: string;
   metadata?: Record<string, any>;
 }
 
@@ -526,3 +628,119 @@ export type RefuseEntities =
   | Payment
   | Allocation
   | Event;
+
+// Data archaeology types
+export interface AnalysisOptions {
+  maxDepth?: number;
+  includeInactive?: boolean;
+  sampleSize?: number;
+  analysisTypes?: string[];
+}
+
+export interface EntityInfo {
+  name: string;
+  type: string;
+  count: number;
+  properties: PropertyInfo[];
+  relationships: RelationshipInfo[];
+  constraints: ConstraintInfo[];
+}
+
+export interface PropertyInfo {
+  name: string;
+  type: string;
+  required: boolean;
+  nullable: boolean;
+  defaultValue?: any;
+  length?: number;
+  precision?: number;
+  scale?: number;
+}
+
+export interface RelationshipInfo {
+  name: string;
+  type: 'one_to_one' | 'one_to_many' | 'many_to_one' | 'many_to_many';
+  relatedEntity: string;
+  foreignKey?: string;
+  cardinality?: string;
+}
+
+export interface ConstraintInfo {
+  type: 'primary_key' | 'foreign_key' | 'unique' | 'check' | 'not_null';
+  name?: string;
+  columns: string[];
+  referencedTable?: string;
+  referencedColumns?: string[];
+  checkCondition?: string;
+}
+
+export interface DataPattern {
+  patternType: string;
+  entities: string[];
+  description: string;
+  confidence: number;
+  examples: string[];
+  recommendation?: string;
+}
+
+export interface MigrationStrategy {
+  phases: MigrationPhase[];
+  totalComplexity: number;
+  estimatedDuration: number;
+  riskLevel: 'low' | 'medium' | 'high';
+  dependencies: string[];
+}
+
+export interface MigrationPhase {
+  phaseNumber: number;
+  name: string;
+  description: string;
+  entities: string[];
+  complexity: number;
+  estimatedDuration: number;
+  prerequisites: string[];
+  riskFactors: string[];
+  rollbackStrategy?: string;
+}
+
+export interface DataTransformation {
+  entity: string;
+  transformationType: string;
+  fieldMappings: Record<string, string>;
+  validationRules: string[];
+  defaultValues: Record<string, any>;
+}
+
+export interface DataLineageReport {
+  entity: string;
+  sourceSystems: string[];
+  transformations: DataTransformation[];
+  qualityMetrics: Record<string, number>;
+  dependencies: string[];
+}
+
+export interface ArchaeologyReport {
+  analysisSummary: AnalysisSummary;
+  dataPatterns: DataPattern[];
+  migrationStrategy: MigrationStrategy;
+  recommendations: string[];
+  riskAssessment: string[];
+  dataQuality: string;
+  feasibility: string;
+}
+
+export interface AnalysisSummary {
+  totalEntities: number;
+  totalProperties: number;
+  totalRelationships: number;
+  dataQualityScore: number;
+  migrationComplexity: number;
+  estimatedCost: number;
+}
+
+export interface LegacySystemAnalysis {
+  entities: EntityInfo[];
+  patterns: DataPattern[];
+  strategy: MigrationStrategy;
+  report: ArchaeologyReport;
+}

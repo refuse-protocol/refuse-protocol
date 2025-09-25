@@ -140,11 +140,10 @@ export class PaymentModel implements Payment {
   /**
    * Create a new payment with validation
    */
-  static create(data: Omit<Payment, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): PaymentModel {
+  static create(data: Omit<Payment, 'id' | 'createdAt' | 'updatedAt' | 'version'>): PaymentModel {
     const now = new Date();
     const paymentData: Partial<Payment> = {
       id: uuidv4(),
-      ...data,
       createdAt: now,
       updatedAt: now,
       version: 1,
@@ -152,7 +151,8 @@ export class PaymentModel implements Payment {
         ...data.metadata,
         createdBy: 'system',
         source: 'payment_system'
-      }
+      },
+      ...data
     };
 
     return new PaymentModel(paymentData);
@@ -161,7 +161,7 @@ export class PaymentModel implements Payment {
   /**
    * Update payment with optimistic locking
    */
-  update(updates: Partial<Omit<Payment, keyof BaseEntity>>, expectedVersion: number): PaymentModel {
+  update(updates: Partial<Payment>, expectedVersion: number): PaymentModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }

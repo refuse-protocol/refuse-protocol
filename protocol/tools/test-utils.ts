@@ -449,7 +449,7 @@ export class TestingUtilities {
         id: 'test-event-1',
         entityType: 'customer',
         eventType: 'created',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
         eventData: { id: 'TEST001' },
         source: 'test'
       }
@@ -700,7 +700,7 @@ export class TestingUtilities {
         id: `TEST-EVENT-${i.toString().padStart(6, '0')}`,
         entityType: 'customer',
         eventType: 'created',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
         eventData: { id: `TEST-CUST-${i.toString().padStart(3, '0')}` },
         source: 'test-suite'
       });

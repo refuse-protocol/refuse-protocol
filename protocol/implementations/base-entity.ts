@@ -19,8 +19,13 @@ export abstract class BaseEntityModel implements BaseEntity {
   updatedAt: Date
   version: number
 
-  protected constructor(data: Partial<BaseEntity>) {
-    this.initializeBaseEntity(data)
+  protected constructor(data: Partial<BaseEntity> = {}) {
+    this.id = data.id || ''
+    this.externalIds = data.externalIds
+    this.metadata = data.metadata
+    this.createdAt = data.createdAt || new Date()
+    this.updatedAt = data.updatedAt || new Date()
+    this.version = data.version || 1
   }
 
   /**
@@ -232,7 +237,7 @@ export abstract class BaseEntityModel implements BaseEntity {
         archivedAt: new Date(),
         archivedReason: reason || 'Manual archive'
       }
-    } as any)
+    } as any, this.version)
   }
 
   /**

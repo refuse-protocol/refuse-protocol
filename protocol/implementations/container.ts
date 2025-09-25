@@ -11,29 +11,39 @@ import { Event } from '../specifications/entities';
 /**
  * Container implementation with comprehensive RFID/GPS tracking and lifecycle management
  */
-export class ContainerModel implements Container {
-  id: string;
-  externalIds?: string[];
-  metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
-
+export class ContainerModel extends BaseEntityModel implements Container {
   type: 'cart' | 'dumpster' | 'bin' | 'rolloff' | 'compactor';
   size: string;
-  material: string;
-  color?: string;
-  rfidTag?: string;
+  material?: string;
   assignedTo?: string;
   currentLocation?: Address;
-  lastGpsUpdate?: Date;
-  specifications: Record<string, any>;
-  maintenanceRecords: MaintenanceRecord[];
+  rfidTag?: string;
+  specifications?: Record<string, any>;
   capacityGallons?: number;
   capacityCubicYards?: number;
-  isActive: boolean;
-  purchaseDate?: string;
-  warrantyExpiry?: string;
+  purchaseDate?: Date;
+  warrantyExpiry?: Date;
+  maintenanceRecords?: MaintenanceRecord[];
+  isActive?: boolean;
+  lastGpsUpdate?: Date;
+
+  constructor(data: Partial<Container> = {}) {
+    super(data);
+    this.type = data.type || 'cart';
+    this.size = data.size || '';
+    this.material = data.material;
+    this.assignedTo = data.assignedTo;
+    this.currentLocation = data.currentLocation;
+    this.rfidTag = data.rfidTag;
+    this.specifications = data.specifications;
+    this.capacityGallons = data.capacityGallons;
+    this.capacityCubicYards = data.capacityCubicYards;
+    this.purchaseDate = data.purchaseDate;
+    this.warrantyExpiry = data.warrantyExpiry;
+    this.maintenanceRecords = data.maintenanceRecords || [];
+    this.isActive = data.isActive !== undefined ? data.isActive : true;
+    this.lastGpsUpdate = data.lastGpsUpdate;
+  }
 
   private static readonly VALID_CONTAINER_TYPES: Container['type'][] = [
     'cart', 'dumpster', 'bin', 'rolloff', 'compactor'

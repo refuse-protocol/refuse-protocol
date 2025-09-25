@@ -5,7 +5,7 @@
  */
 
 import { Event, Customer, Service, Route, Facility, MaterialTicket } from '../specifications/entities';
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -492,9 +492,12 @@ export class WasteManagementAPIAdapter {
     // Process webhook data
     const event: Event = {
       id: uuidv4(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      version: 1,
       entityType: 'customer',
       eventType: 'webhook_received',
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
       eventData: req.body,
       source: 'external_webhook'
     };
@@ -510,9 +513,12 @@ export class WasteManagementAPIAdapter {
 
     const event: Event = {
       id: uuidv4(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      version: 1,
       entityType: 'route',
       eventType: 'webhook_received',
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
       eventData: req.body,
       source: 'external_webhook'
     };
@@ -527,9 +533,12 @@ export class WasteManagementAPIAdapter {
 
     const event: Event = {
       id: uuidv4(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      version: 1,
       entityType: 'facility',
       eventType: 'webhook_received',
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
       eventData: req.body,
       source: 'external_webhook'
     };
