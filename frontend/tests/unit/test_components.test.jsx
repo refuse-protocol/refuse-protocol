@@ -3,8 +3,6 @@
  * These tests verify that the frontend components work correctly
  */
 
-import { test } from 'node:test'
-
 test('basic build verification', () => {
   // This test verifies that the test framework is working
   console.log('✅ Test framework is working')

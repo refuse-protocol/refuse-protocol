@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Static website for REFUSE Protocol",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=9.0.0"
@@ -10,13 +11,13 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:protocol-docs && vite build",
-    "build:protocol-docs": "node scripts/generate-protocol-docs.js",
+    "build:protocol-docs": "node scripts/generate-protocol-docs.cjs",
     "preview": "vite preview",
     "build:pages": "cd /opt/buildhome/repo/frontend && npm run build:protocol-docs && vite build",
     "lint": "eslint src --ext .js,.jsx",
     "lint:fix": "eslint src --ext .js,.jsx --fix",
     "format": "prettier --write src/**/*.{js,jsx,css}",
-    "test": "vitest",
+    "test": "node --test tests/unit/test_components.test.js",
     "test:ui": "vitest --ui",
     "accessibility": "npx @axe-core/cli http://localhost:3000 --exit",
     "lighthouse": "lhci autorun",
@@ -43,6 +44,7 @@
     "eslint-plugin-react": "^7.33.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "happy-dom": "^18.0.1",
     "jsdom": "^22.0.0",
     "lighthouse": "^10.0.0",
     "postcss": "^8.4.24",
