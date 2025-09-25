@@ -12,6 +12,8 @@ This project implements the REFUSE (REcyclable & Solid waste Unified Standard Ex
 
 ## Active Technologies
 - (001-refuse-protocol-the)
+- HTML/CSS/JavaScript (static site) + Tailwind CSS Plus, Cloudflare Pages/Workers, GitHub Actions (002-refuse-protocol-org)
+- Static file hosting (no database required) (002-refuse-protocol-org)
 
 ## Project Structure
 ```
@@ -26,6 +28,7 @@ tests/
 : Follow standard conventions
 
 ## Recent Changes
+- 002-refuse-protocol-org: Added HTML/CSS/JavaScript (static site) + Tailwind CSS Plus, Cloudflare Pages/Workers, GitHub Actions
 - 001-refuse-protocol-the: Added
 
 <!-- MANUAL ADDITIONS START -->

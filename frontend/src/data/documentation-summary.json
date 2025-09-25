@@ -1,0 +1,17 @@
+{
+  "generationTimestamp": "2025-09-25T15:59:29.915Z",
+  "totalFilesGenerated": 5,
+  "generatedFiles": [
+    "src/data/protocol-overview.json",
+    "src/data/entities.json",
+    "src/data/implementation-guide.json",
+    "src/data/tool-reference.json",
+    "src/data/schema-reference.json"
+  ],
+  "protocolStats": {},
+  "lastCommit": {
+    "hash": "357e33e3124b82ff11edf5c0792b2127448ae1b0",
+    "message": "docs: generate initial protocol documentation data\n\n✅ GENERATED PROTOCOL DOCUMENTATION DATA\n\nThe documentation generation script has successfully extracted information from the REFUSE Protocol implementation:\n\n📊 Protocol Overview:\n- 22 entities covering waste management operations\n- 27 implementation modules with complexity levels\n- 13 specialized tools for validation and compliance\n- 5 core principles with detailed descriptions\n- Live timestamps and statistics\n\n📁 Generated Files:\n- protocol-overview.json - Core protocol information and statistics\n- entities.json - Entity definitions and relationships\n- implementation-guide.json - Implementation details and complexity levels\n- tool-reference.json - Tool categorization and usage information\n- schema-reference.json - Schema definitions and validation rules\n- documentation-summary.json - Generation metadata and tracking\n\n🎯 Dynamic Documentation Features:\n- Real-time protocol statistics display\n- Implementation complexity indicators (High/Medium/Low)\n- Tool ecosystem categorization\n- Live entity and relationship information\n- Getting started guide with actual implementation counts\n\nThe website now displays live protocol documentation that automatically reflects the current state of the REFUSE Protocol implementation! 🚀",
+    "date": "Wed Sep 24 10:29:19 2025 -0700"
+  }
+}
