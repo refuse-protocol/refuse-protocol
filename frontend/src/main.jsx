@@ -3,24 +3,30 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './styles/main.css'
 
-console.log('main.jsx loaded successfully')
+// Only log in development
+if (import.meta.env.DEV) {
+  console.log('main.jsx loaded successfully')
+}
 
 // Add error handling for React mounting
 try {
   const rootElement = document.getElementById('root')
   if (rootElement) {
-    console.log('Root element found, creating React root...')
+    if (import.meta.env.DEV) {
+      console.log('Root element found, creating React root...')
+    }
     const root = ReactDOM.createRoot(rootElement)
-    console.log('React root created, rendering App...')
+    if (import.meta.env.DEV) {
+      console.log('React root created, rendering App...')
+    }
     root.render(
       <React.StrictMode>
-        <div className="bg-red-100 p-4 border border-red-400 text-red-700 mb-4">
-          <strong>Debug Info:</strong> React is mounting...
-        </div>
         <App />
       </React.StrictMode>,
     )
-    console.log('React app rendered successfully')
+    if (import.meta.env.DEV) {
+      console.log('React app rendered successfully')
+    }
   } else {
     console.error('Root element not found!')
     // Fallback: create the root element if it doesn't exist
@@ -32,9 +38,6 @@ try {
     const root = ReactDOM.createRoot(rootDiv)
     root.render(
       <React.StrictMode>
-        <div className="bg-yellow-100 p-4 border border-yellow-400 text-yellow-700 mb-4">
-          <strong>Warning:</strong> Root element was missing, created fallback
-        </div>
         <App />
       </React.StrictMode>,
     )
