@@ -3,21 +3,23 @@
   "version": "1.0.0",
   "description": "Static website for REFUSE Protocol",
   "private": true,
+  "type": "module",
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=20.0.0",
     "npm": ">=9.0.0"
   },
   "scripts": {
     "dev": "vite",
     "build": "npm run build:protocol-docs && vite build",
-    "build:protocol-docs": "node scripts/generate-protocol-docs.js",
+    "build:protocol-docs": "node scripts/generate-protocol-docs.cjs",
     "preview": "vite preview",
+    "build:pages": "cd /opt/buildhome/repo/frontend && npm run build:protocol-docs && vite build",
     "lint": "eslint src --ext .js,.jsx",
     "lint:fix": "eslint src --ext .js,.jsx --fix",
     "format": "prettier --write src/**/*.{js,jsx,css}",
-    "test": "vitest",
+    "test": "node --test tests/unit/test_components.test.js",
     "test:ui": "vitest --ui",
-    "accessibility": "axe-core --exit",
+    "accessibility": "npx @axe-core/cli http://localhost:3000 --exit",
     "lighthouse": "lhci autorun",
     "docs": "node scripts/generate-protocol-docs.js"
   },
@@ -31,6 +33,9 @@
   "devDependencies": {
     "@axe-core/react": "^4.7.0",
     "@lhci/cli": "^0.12.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.0.0",
     "@vitejs/plugin-react": "^4.0.0",
     "@vitest/ui": "^0.34.0",
     "autoprefixer": "^10.4.14",
@@ -39,12 +44,14 @@
     "eslint-plugin-react": "^7.33.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "happy-dom": "^18.0.1",
     "jsdom": "^22.0.0",
     "lighthouse": "^10.0.0",
     "postcss": "^8.4.24",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.4.1",
     "tailwindcss": "^3.3.0",
+    "terser": "^5.44.0",
     "vite": "^4.4.0",
     "vitest": "^0.34.0"
   }

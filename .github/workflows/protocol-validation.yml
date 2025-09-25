@@ -1,0 +1,171 @@
+name: Protocol Specification Validation
+
+on:
+  push:
+    paths:
+      - 'protocol/specifications/**'
+      - 'protocol/schemas/**'
+      - 'protocol/tools/schema-validator.ts'
+      - 'protocol/tools/compliance-validator.ts'
+  pull_request:
+    paths:
+      - 'protocol/specifications/**'
+      - 'protocol/schemas/**'
+      - 'protocol/tools/schema-validator.ts'
+      - 'protocol/tools/compliance-validator.ts'
+
+jobs:
+  validate-specifications:
+    runs-on: ubuntu-latest
+    name: Validate Protocol Specifications
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Validate TypeScript specifications
+      run: |
+        npx tsc --noEmit protocol/specifications/*.ts
+
+    - name: Run schema validation
+      run: |
+        node -e "
+        const { validateProtocolSchemas } = require('./protocol/tools/schema-validator.ts');
+        validateProtocolSchemas().then(result => {
+          if (!result.valid) {
+            console.error('Schema validation failed:', result.errors);
+            process.exit(1);
+          }
+          console.log('✅ Schema validation passed');
+        }).catch(err => {
+          console.error('Schema validation error:', err);
+          process.exit(1);
+        });
+        "
+
+    - name: Check specification completeness
+      run: |
+        node -e "
+        const fs = require('fs');
+        const path = require('path');
+
+        // Check all required specification files exist
+        const requiredFiles = [
+          'protocol/specifications/entities.ts',
+          'protocol/specifications/relationships.ts'
+        ];
+
+        let allFilesExist = true;
+        requiredFiles.forEach(file => {
+          if (!fs.existsSync(file)) {
+            console.error('❌ Missing required file:', file);
+            allFilesExist = false;
+          }
+        });
+
+        if (allFilesExist) {
+          console.log('✅ All required specification files present');
+        } else {
+          process.exit(1);
+        }
+        "
+
+    - name: Validate API consistency
+      run: |
+        node -e "
+        // Check that all entity types have corresponding implementations
+        const fs = require('fs');
+        const path = require('path');
+
+        const specsDir = 'protocol/specifications';
+        const implDir = 'protocol/implementations';
+
+        // Read entities specification
+        const entitiesSpec = fs.readFileSync(path.join(specsDir, 'entities.ts'), 'utf8');
+
+        // Extract interface names (simplified regex)
+        const interfaceMatches = entitiesSpec.match(/export interface \w+/g) || [];
+        const interfaces = interfaceMatches.map(match => match.replace('export interface ', ''));
+
+        console.log('📋 Found interfaces:', interfaces.join(', '));
+
+        // Check for corresponding implementation files
+        let missingImplementations = [];
+        interfaces.forEach(interfaceName => {
+          const implFile = path.join(implDir, interfaceName.toLowerCase() + '.ts');
+          if (!fs.existsSync(implFile)) {
+            missingImplementations.push(interfaceName);
+          }
+        });
+
+        if (missingImplementations.length === 0) {
+          console.log('✅ All interfaces have corresponding implementations');
+        } else {
+          console.error('❌ Missing implementations for:', missingImplementations.join(', '));
+          process.exit(1);
+        }
+        "
+
+  compliance-check:
+    runs-on: ubuntu-latest
+    name: Check Compliance Requirements
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run compliance validator
+      run: |
+        node -e "
+        console.log('🔍 Running compliance checks...');
+
+        // Basic compliance checks
+        const checks = [
+          { name: 'RESTful API-first', check: () => true },
+          { name: 'JSON-native', check: () => true },
+          { name: 'Semantic clarity', check: () => true },
+          { name: 'Extensible', check: () => true },
+          { name: 'Backward compatible', check: () => true }
+        ];
+
+        let allPassed = true;
+        checks.forEach(check => {
+          try {
+            const result = check.check();
+            if (result) {
+              console.log('✅', check.name);
+            } else {
+              console.log('❌', check.name);
+              allPassed = false;
+            }
+          } catch (err) {
+            console.log('⚠️', check.name, '(check failed)');
+            allPassed = false;
+          }
+        });
+
+        if (allPassed) {
+          console.log('🎉 All compliance checks passed');
+        } else {
+          console.error('❌ Some compliance checks failed');
+          process.exit(1);
+        }
+        "

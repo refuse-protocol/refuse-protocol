@@ -104,6 +104,9 @@ temp/
 # Frontend specific
 frontend/.vite/
 frontend/coverage/
+frontend/dist/
+frontend/node_modules/
+frontend/src/data/*.json
 
 # Node.js version file (local development)
 .nvmrc

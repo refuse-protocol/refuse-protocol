@@ -28,7 +28,7 @@ function About() {
                 <p className="mt-4 text-lg text-gray-600">
                   Our protocol addresses the fundamental challenge of data silos in waste
                   management by providing RESTful APIs with semantic clarity and backward compatibility.
-                  <strong className="text-gray-700"> We're building this standard collaboratively with the waste industry.</strong>
+                  <strong className="text-gray-700"> We&apos;re building this standard collaboratively with the waste industry.</strong>
                 </p>
               </div>
 
@@ -131,7 +131,7 @@ function About() {
           <div className="mt-16 text-center">
             <h2 className="text-3xl font-extrabold text-gray-900">Ready to Join the Standard?</h2>
             <p className="mt-4 text-lg text-gray-600">
-              Whether you're a waste management company, software vendor, or developer,
+              Whether you&apos;re a waste management company, software vendor, or developer,
               we invite you to collaborate with us in building the future of waste industry standards.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">

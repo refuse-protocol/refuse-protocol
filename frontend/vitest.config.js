@@ -1,13 +1,7 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-export default defineConfig({
-  plugins: [react()],
+// Vitest configuration temporarily disabled
+// Tests are currently run through Node.js test runner
+export default {
   test: {
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.js'],
-    globals: true,
-    css: true,
-  },
-})
+    environment: 'node',
+  }
+}

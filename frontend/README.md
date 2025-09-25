@@ -29,7 +29,7 @@ This website showcases the REFUSE protocol, providing information about standard
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - npm or yarn
 
 ### Getting Started

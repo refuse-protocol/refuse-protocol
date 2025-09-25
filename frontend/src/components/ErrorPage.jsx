@@ -15,7 +15,7 @@ function ErrorPage() {
               Service Temporarily Unavailable
             </h1>
             <p className="mt-2 text-sm text-gray-600">
-              We're currently updating our site to serve you better. Please check back soon.
+              We&apos;re currently updating our site to serve you better. Please check back soon.
             </p>
             <div className="mt-6">
               <a href="/" className="btn">
