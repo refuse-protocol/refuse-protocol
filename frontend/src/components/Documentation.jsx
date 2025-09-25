@@ -1,26 +1,32 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 
 function Documentation() {
+  console.log('Documentation component initializing')
+
   const [protocolData, setProtocolData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    console.log('Documentation useEffect running')
     loadProtocolDocumentation()
   }, [])
 
   const loadProtocolDocumentation = async () => {
     try {
+      console.log('Starting to load protocol documentation')
       setLoading(true)
 
       // Load generated documentation data
+      console.log('Fetching documentation files...')
       const [overviewRes, entitiesRes, guideRes, toolsRes] = await Promise.all([
         fetch('/data/protocol-overview.json'),
         fetch('/data/entities.json'),
         fetch('/data/implementation-guide.json'),
         fetch('/data/tool-reference.json')
       ])
+
+      console.log('Fetch responses:', { overviewRes: overviewRes.ok, entitiesRes: entitiesRes.ok, guideRes: guideRes.ok, toolsRes: toolsRes.ok })
 
       if (!overviewRes.ok) {
         throw new Error('Protocol documentation not yet generated. Run: npm run build:protocol-docs')
@@ -33,10 +39,13 @@ function Documentation() {
         toolsRes.json()
       ])
 
+      console.log('Data loaded successfully, setting state')
       setProtocolData({ overview, entities, guide, tools })
     } catch (err) {
+      console.log('Error loading documentation:', err.message)
       setError(err.message)
     } finally {
+      console.log('Loading state set to false')
       setLoading(false)
     }
   }
@@ -214,51 +223,6 @@ function Documentation() {
                       ))}
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Code Examples */}
-          <div className="mt-16">
-            <h2 className="text-3xl font-extrabold text-gray-900 text-center">Code Examples</h2>
-            <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="text-lg font-semibold text-gray-900">JavaScript Example</h3>
-                  <pre className="mt-4 bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-{`// Fetch facility information
-const response = await fetch('/api/v1/facilities', {
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  }
-});
-
-const facilities = await response.json();
-console.log(facilities);`}
-                  </pre>
-                </div>
-              </div>
-
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="text-lg font-semibold text-gray-900">TypeScript with Entities</h3>
-                  <pre className="mt-4 bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-{`import { Customer, Facility, Service } from '@refuse-protocol/entities';
-
-// Create a new customer
-const customer = new Customer({
-  id: 'customer-123',
-  name: 'Green Waste Solutions',
-  contactInfo: {
-    email: 'contact@greenwaste.com',
-    phone: '+1-555-0123'
-  }
-});
-
-await customer.save();`}
-                  </pre>
                 </div>
               </div>
             </div>

@@ -6,6 +6,7 @@ import Homepage from './components/Homepage'
 import About from './components/About'
 import Documentation from './components/Documentation'
 import Contact from './components/Contact'
+import ErrorPage from './components/ErrorPage'
 import Footer from './components/Footer'
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/docs" element={<Documentation />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="*" element={<ErrorPage />} />
           </Routes>
         </main>
         <Footer />
