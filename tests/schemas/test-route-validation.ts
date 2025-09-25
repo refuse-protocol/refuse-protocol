@@ -3,34 +3,26 @@
  * @description Tests MUST FAIL initially - no implementation exists yet
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import { createValidator } from '../test-utils';
 
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-
-// Load the route schema
-const routeSchema = JSON.parse(
-  readFileSync(join(__dirname, '../../specs/001-refuse-protocol-the/contracts/route-schema.json'), 'utf8')
-);
-
-// Compile the schema validator
-const validateRoute = ajv.compile(routeSchema);
+// Create the schema validator using shared utilities
+const validateRoute = createValidator('route');
 
 describe('Route Entity Schema Validation', () => {
   test('should validate basic route data structure', () => {
     const validRoute = {
       id: '123e4567-e89b-12d3-a456-426614174000',
       name: 'Monday Residential Route 1',
+      code: 'MRR001',
+      type: 'residential',
+      status: 'active',
+      territoryId: '123e4567-e89b-12d3-a456-426614174001',
       schedule: {
-        frequency: 'weekly',
-        dayOfWeek: 'monday',
         startTime: '06:00',
-        endTime: '15:00'
+        endTime: '15:00',
+        daysOfWeek: [1] // Monday
       },
-      assignedSites: ['site-1', 'site-2', 'site-3'],
+      assignedSites: ['123e4567-e89b-12d3-a456-426614174002', '123e4567-e89b-12d3-a456-426614174003'],
       efficiency: 85.5,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -48,7 +40,11 @@ describe('Route Entity Schema Validation', () => {
   test('should reject invalid route data', () => {
     const invalidRoute = {
       name: '', // Invalid: empty name
-      schedule: { frequency: 'invalid' } // Invalid: not in enum
+      code: '', // Invalid: empty code
+      type: 'invalid', // Invalid: not in enum
+      status: 'invalid', // Invalid: not in enum
+      territoryId: 'not-a-uuid', // Invalid: not a UUID format
+      schedule: { startTime: 'invalid', endTime: 'invalid' } // Invalid: not valid time format
       // Missing required id, createdAt, updatedAt, version
     };
 

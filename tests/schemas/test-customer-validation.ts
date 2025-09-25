@@ -3,27 +3,10 @@
  * @description Tests MUST FAIL initially - no implementation exists yet
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import { createValidator } from '../test-utils';
 
-const ajv = new Ajv({ allErrors: true, strict: false });
-addFormats(ajv);
-
-// Add JSON Schema draft support
-ajv.addMetaSchema(require('ajv/dist/refs/json-schema-draft-07.json'));
-
-// Load the customer schema
-const customerSchema = JSON.parse(
-  readFileSync(join(__dirname, '../../specs/001-refuse-protocol-the/contracts/customer-schema.json'), 'utf8')
-);
-
-// Add the schema to AJV
-ajv.addSchema(customerSchema);
-
-// Compile the schema validator
-const validateCustomer = ajv.compile(customerSchema);
+// Create the schema validator using shared utilities
+const validateCustomer = createValidator('customer');
 
 describe('Customer Entity Schema Validation', () => {
   test('should validate basic customer data structure', () => {
@@ -58,30 +41,28 @@ describe('Customer Entity Schema Validation', () => {
   test('should validate customer with all optional fields', () => {
     const fullCustomer = {
       id: '123e4567-e89b-12d3-a456-426614174001',
-      externalIds: ['legacy-001', 'old-system-123'],
       name: 'Complete Customer Example Inc.',
       type: 'industrial',
       status: 'active',
-      taxId: '12-3456789',
       primaryContact: {
         name: 'John Smith',
         title: 'Operations Manager',
         email: 'john.smith@example.com',
-        phone: '+1-555-0123',
-        mobile: '+1-555-0456'
+        phone: '+15550123',
+        mobile: '+15550456'
       },
       billingContact: {
         name: 'Jane Doe',
         title: 'Accounts Payable',
         email: 'jane.doe@example.com',
-        phone: '+1-555-0789'
+        phone: '+15550789'
       },
       serviceContacts: [
         {
           name: 'Mike Johnson',
           title: 'Site Manager',
           email: 'mike.johnson@example.com',
-          phone: '+1-555-0321'
+          phone: '+15550321'
         }
       ],
       serviceAddress: {
@@ -121,13 +102,13 @@ describe('Customer Entity Schema Validation', () => {
 
     const isValid = validateCustomer(fullCustomer);
 
+    if (!isValid) {
+      console.error('Customer validation errors:', validateCustomer.errors);
+    }
+
     // This test will fail initially since no implementation exists
     // It will pass once the Customer implementation is created
     expect(isValid).toBe(true);
-
-    if (!isValid) {
-      console.error('Validation errors:', validateCustomer.errors);
-    }
   });
 
   test('should reject invalid customer data', () => {

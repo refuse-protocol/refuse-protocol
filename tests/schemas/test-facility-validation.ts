@@ -3,21 +3,10 @@
  * @description Tests MUST FAIL initially - no implementation exists yet
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import { createValidator } from '../test-utils';
 
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-
-// Load the facility schema
-const facilitySchema = JSON.parse(
-  readFileSync(join(__dirname, '../../specs/001-refuse-protocol-the/contracts/facility-schema.json'), 'utf8')
-);
-
-// Compile the schema validator
-const validateFacility = ajv.compile(facilitySchema);
+// Create the schema validator using shared utilities
+const validateFacility = createValidator('facility');
 
 describe('Facility Entity Schema Validation', () => {
   test('should validate basic facility data structure', () => {

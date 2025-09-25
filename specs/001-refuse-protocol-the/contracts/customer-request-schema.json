@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://json-schema.org/draft-07/schema#",
   "$id": "https://refuse-protocol.org/schemas/customer-request.json",
   "title": "REFUSE Protocol - Customer Request Entity",
   "description": "Standardized customer request data structure for waste management service requests",

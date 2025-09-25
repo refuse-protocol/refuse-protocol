@@ -3,51 +3,47 @@
  * @description Tests MUST FAIL initially - no implementation exists yet
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import { createValidator } from '../test-utils';
 
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-
-// Load the event schema
-const eventSchema = JSON.parse(
-  readFileSync(join(__dirname, '../../specs/001-refuse-protocol-the/contracts/event-schema.json'), 'utf8')
-);
-
-// Compile the schema validator
-const validateEvent = ajv.compile(eventSchema);
+// Create the schema validator using shared utilities
+const validateEvent = createValidator('event');
 
 describe('Event Entity Schema Validation', () => {
   test('should validate basic event data structure', () => {
     const validEvent = {
       id: '123e4567-e89b-12d3-a456-426614174000',
       entityType: 'customer',
+      entityId: '456e7890-e12b-34c5-b678-901234567890',
       eventType: 'created',
       timestamp: new Date().toISOString(),
+      sourceSystem: 'customer-portal',
       eventData: {
-        id: '456e7890-e12b-34c5-b678-901234567890',
-        name: 'Test Customer',
-        type: 'commercial'
+        customerOnboarded: {
+          salesRepId: '123e4567-e89b-12d3-a456-426614174001',
+          contractValue: 15000.00
+        }
       },
+      createdAt: new Date().toISOString(),
       version: 1
     };
 
     const isValid = validateEvent(validEvent);
-    expect(isValid).toBe(true);
 
     if (!isValid) {
-      console.error('Validation errors:', validateEvent.errors);
+      console.error('Event validation errors:', validateEvent.errors);
     }
+
+    expect(isValid).toBe(true);
   });
 
   test('should reject invalid event data', () => {
     const invalidEvent = {
       entityType: 'invalid_entity_type',
+      entityId: 'not-a-uuid',
       eventType: 'invalid_event_type',
-      timestamp: 'invalid-date'
-      // Missing required id, eventData, version
+      timestamp: 'invalid-date',
+      sourceSystem: '',
+      // Missing required id, createdAt, version
     };
 
     const isValid = validateEvent(invalidEvent);

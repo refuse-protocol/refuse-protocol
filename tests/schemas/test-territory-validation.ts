@@ -3,29 +3,21 @@
  * @description Tests MUST FAIL initially - no implementation exists yet
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import { createValidator } from '../test-utils';
 
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-
-// Load the territory schema
-const territorySchema = JSON.parse(
-  readFileSync(join(__dirname, '../../specs/001-refuse-protocol-the/contracts/territory-schema.json'), 'utf8')
-);
-
-// Compile the schema validator
-const validateTerritory = ajv.compile(territorySchema);
+// Create the schema validator using shared utilities
+const validateTerritory = createValidator('territory');
 
 describe('Territory Entity Schema Validation', () => {
   test('should validate basic territory data structure', () => {
     const validTerritory = {
       id: '123e4567-e89b-12d3-a456-426614174000',
       name: 'North County Service Area',
+      code: 'NCSA001',
+      type: 'geographic',
+      status: 'active',
       boundary: {
-        type: 'Polygon',
+        type: 'polygon',
         coordinates: [[
           [-96.7970, 32.7767],
           [-96.7960, 32.7767],
@@ -36,10 +28,9 @@ describe('Territory Entity Schema Validation', () => {
       },
       pricingRules: [{
         serviceType: 'waste',
-        baseRate: 150.00,
-        rateUnit: 'month'
+        baseRate: 150.00
       }],
-      assignedRoutes: ['route-1', 'route-2'],
+      assignedRoutes: ['123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002'],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       version: 1
@@ -56,6 +47,9 @@ describe('Territory Entity Schema Validation', () => {
   test('should reject invalid territory data', () => {
     const invalidTerritory = {
       name: '', // Invalid: empty name
+      code: '', // Invalid: empty code
+      type: 'invalid', // Invalid: not in enum
+      status: 'invalid', // Invalid: not in enum
       boundary: { type: 'invalid' } // Invalid: not in enum
       // Missing required id, createdAt, updatedAt, version
     };

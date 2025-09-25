@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://json-schema.org/draft-07/schema#",
   "$id": "https://refuse-protocol.org/schemas/service.json",
   "title": "REFUSE Protocol - Service Entity",
   "description": "Standardized service data structure for waste management operations",
@@ -46,7 +46,7 @@
     "schedule": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/ScheduleRule"
+        "$ref": "#/definitions/ScheduleRule"
       },
       "description": "Service schedule rules"
     },
@@ -61,7 +61,7 @@
       "description": "Last completed service date"
     },
     "serviceAddress": {
-      "$ref": "#/$defs/Address",
+      "$ref": "#/definitions/Address",
       "description": "Service delivery location"
     },
     "specialLocationNotes": {
@@ -70,7 +70,7 @@
       "description": "Access instructions, gate codes, etc"
     },
     "pricing": {
-      "$ref": "#/$defs/ServicePricing",
+      "$ref": "#/definitions/ServicePricing",
       "description": "Service pricing structure"
     },
     "billingCycle": {
@@ -111,7 +111,7 @@
   },
   "required": ["id", "customerId", "serviceType", "containerType", "containerSize", "frequency", "serviceAddress", "status", "createdAt", "updatedAt", "version"],
   "additionalProperties": false,
-  "$defs": {
+  "definitions": {
     "Address": {
       "type": "object",
       "properties": {
@@ -121,7 +121,7 @@
         "state": {"type": "string", "minLength": 2, "maxLength": 50},
         "zipCode": {"type": "string", "pattern": "^\\d{5}(-\\d{4})?$", "minLength": 5, "maxLength": 10},
         "country": {"type": "string", "default": "US", "minLength": 2, "maxLength": 50},
-        "coordinates": {"$ref": "#/$defs/GeoLocation"}
+        "coordinates": {"$ref": "#/definitions/GeoLocation"}
       },
       "required": ["street1", "city", "state", "zipCode", "country"],
       "additionalProperties": false
@@ -157,7 +157,7 @@
         },
         "holidays": {
           "type": "array",
-          "items": {"$ref": "#/$defs/HolidayRule"}
+          "items": {"$ref": "#/definitions/HolidayRule"}
         }
       },
       "required": ["daysOfWeek"],
@@ -183,11 +183,11 @@
         "environmentalFee": {"type": "number", "minimum": 0, "description": "Regulatory compliance fees"},
         "taxes": {
           "type": "array",
-          "items": {"$ref": "#/$defs/TaxItem"}
+          "items": {"$ref": "#/definitions/TaxItem"}
         },
         "discounts": {
           "type": "array",
-          "items": {"$ref": "#/$defs/Discount"}
+          "items": {"$ref": "#/definitions/Discount"}
         }
       },
       "required": ["baseRate"],
