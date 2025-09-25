@@ -1,0 +1,263 @@
+{
+  "implementations": [
+    {
+      "name": "Allocation",
+      "description": "@fileoverview Allocation entity implementation with LEED compliance tracking\n * @description Complete Allocation model for managing material allocations with environmental compliance and LEED certification tracking\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Api Adapter",
+      "description": "@fileoverview API adapter for existing waste management systems\n * @description RESTful API adapter for integrating with existing waste management systems\n * @version 1.0.0",
+      "category": "API",
+      "complexity": "High"
+    },
+    {
+      "name": "Base Entity",
+      "description": "@fileoverview Base entity implementation for all REFUSE Protocol entities\n * @description Common functionality and patterns shared across all entity models\n * @version 1.0.0",
+      "category": "Core Entity",
+      "complexity": "High"
+    },
+    {
+      "name": "Common",
+      "description": "@fileoverview Common utilities for REFUSE Protocol entities\n * @description Shared validation, formatting, and utility functions\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Container",
+      "description": "@fileoverview Container entity implementation with RFID/GPS tracking support\n * @description Complete Container model for managing waste containers with asset tracking and lifecycle management\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Contract",
+      "description": "@fileoverview Contract entity implementation with guaranteed pricing logic\n * @description Complete Contract model for managing customer agreements with pricing guarantees and terms\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Customer Request",
+      "description": "@fileoverview CustomerRequest entity implementation with approval workflow\n * @description Complete CustomerRequest model with workflow management and approval tracking\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Customer",
+      "description": "@fileoverview Customer entity implementation with validation\n * @description Complete Customer model with business logic and validation\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "Medium"
+    },
+    {
+      "name": "Data Archaeology",
+      "description": "@fileoverview Data archaeology engine for legacy data analysis\n * @description Comprehensive data archaeology tools for analyzing and understanding legacy systems\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Environmental Compliance",
+      "description": "@fileoverview Environmental Compliance entity implementation\n * @description Environmental compliance tracking with LEED allocations and regulatory reporting\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "Medium"
+    },
+    {
+      "name": "Event Correlation",
+      "description": "@fileoverview Event correlation and tracking system\n * @description Advanced event correlation, pattern detection, and tracking for waste management operations\n * @version 1.0.0",
+      "category": "Event System",
+      "complexity": "High"
+    },
+    {
+      "name": "Event Router",
+      "description": "@fileoverview Event filtering and routing engine\n * @description Advanced event filtering and routing system for waste management operations\n * @version 1.0.0",
+      "category": "Event System",
+      "complexity": "High"
+    },
+    {
+      "name": "Event Sourcing",
+      "description": "@fileoverview Event sourcing for audit trails\n * @description Comprehensive event sourcing system for audit trails and entity state reconstruction\n * @version 1.0.0",
+      "category": "Event System",
+      "complexity": "High"
+    },
+    {
+      "name": "Event System",
+      "description": "@fileoverview Real-time event streaming system with guaranteed delivery\n * @description High-performance event streaming system for waste management operations\n * @version 1.0.0",
+      "category": "Event System",
+      "complexity": "High"
+    },
+    {
+      "name": "Facility",
+      "description": "@fileoverview Facility entity implementation with capacity management\n * @description Complete Facility model with capacity tracking, permits, and environmental controls\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Fleet",
+      "description": "@fileoverview Fleet entity implementation with vehicle tracking capabilities\n * @description Complete Fleet model for managing vehicles, equipment, and containers with GPS tracking\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Legacy Bridge",
+      "description": "@fileoverview Legacy system data transformation bridge\n * @description Bridge for integrating with legacy waste management systems through data transformation\n * @version 1.0.0",
+      "category": "Migration",
+      "complexity": "High"
+    },
+    {
+      "name": "Material Ticket",
+      "description": "@fileoverview MaterialTicket entity implementation with scale calculations\n * @description Complete MaterialTicket model with weight calculations, material breakdowns, and LEED allocations\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Material",
+      "description": "@fileoverview Material entity implementation with recycling classification\n * @description Complete Material model for managing waste materials with recycling and environmental classification\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Migration Utils",
+      "description": "@fileoverview Migration utilities for system transitions\n * @description Comprehensive migration utilities for transitioning between systems\n * @version 1.0.0",
+      "category": "Migration",
+      "complexity": "High"
+    },
+    {
+      "name": "Order",
+      "description": "@fileoverview Order/Job entity implementation with work scheduling\n * @description Complete Order model for managing work orders, job scheduling, and operational workflows\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Payment",
+      "description": "@fileoverview Payment entity implementation with reconciliation logic\n * @description Complete Payment model for managing financial transactions with reconciliation and audit capabilities\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Route",
+      "description": "@fileoverview Route entity implementation with optimization algorithms\n * @description Complete Route model with route optimization, scheduling, and performance tracking\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Service",
+      "description": "@fileoverview Service entity implementation with scheduling logic\n * @description Complete Service model with scheduling, pricing, and compliance\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Site",
+      "description": "@fileoverview Site entity implementation with multi-site customer support\n * @description Complete Site model for managing customer service locations with containers and services\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Territory",
+      "description": "@fileoverview Territory entity implementation with geographic boundary validation\n * @description Complete Territory model with geographic boundaries, pricing rules, and spatial operations\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    },
+    {
+      "name": "Yard",
+      "description": "@fileoverview Yard entity implementation with facility management\n * @description Complete Yard model for managing waste management facilities and operations\n * @version 1.0.0",
+      "category": "Implementation",
+      "complexity": "High"
+    }
+  ],
+  "tools": [
+    {
+      "name": "Api Docs",
+      "description": "@fileoverview Interactive API documentation generator\n * @description Generates interactive API documentation with live testing capabilities\n * @version 1.0.0",
+      "category": "Utility",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Benchmarker",
+      "description": "@fileoverview Performance benchmarking utilities for REFUSE Protocol\n * @description Comprehensive performance testing and benchmarking tools for protocol implementations\n * @version 1.0.0",
+      "category": "Utility",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Cli Commands",
+      "description": "@fileoverview CLI tools for protocol validation and testing\n * @description Command-line interface for REFUSE Protocol tools\n * @version 1.0.0",
+      "category": "Utility",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Compliance Validator",
+      "description": "@fileoverview Regulatory compliance validation engine for REFUSE Protocol\n * @description Comprehensive validation of environmental, safety, and data privacy compliance requirements\n * @version 1.0.0",
+      "category": "Validation",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Conformance Checker",
+      "description": "@fileoverview Protocol conformance checker utility for REFUSE Protocol\n * @description Comprehensive validation of protocol implementations against specification standards\n * @version 1.0.0",
+      "category": "Validation",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Data Archaeologist",
+      "description": "@fileoverview Data archaeology tools for legacy system analysis\n * @description Comprehensive analysis tools for understanding legacy waste management data structures and patterns\n * @version 1.0.0",
+      "category": "Data Processing",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Data Transformer",
+      "description": "@fileoverview Data transformation utilities for REFUSE Protocol legacy system migration\n * @description Comprehensive tools for transforming legacy waste management data into REFUSE Protocol format\n * @version 1.0.0",
+      "category": "Data Processing",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Event Streamer",
+      "description": "@fileoverview Event streaming protocol with WebSocket support for REFUSE Protocol\n * @description Real-time event streaming with guaranteed delivery, filtering, and multi-transport support\n * @version 1.0.0",
+      "category": "Utility",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Jsdoc Parser",
+      "description": "@fileoverview Simple JSDoc parser for extracting documentation from TypeScript files\n * @description Parses JSDoc comments and extracts structured documentation data\n * @version 1.0.0",
+      "category": "Parsing",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Schema Validator",
+      "description": "@fileoverview JSON Schema validation engine for REFUSE Protocol\n * @description Comprehensive schema validation with detailed error reporting, performance metrics, and protocol conformance checking\n * @version 1.0.0",
+      "category": "Validation",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Sdk Generator",
+      "description": "@fileoverview SDK for protocol integration\n * @description Software Development Kit for integrating with the REFUSE Protocol\n * @version 1.0.0",
+      "category": "Generation",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Spec Generator",
+      "description": "@fileoverview Protocol specification documentation generator for REFUSE Protocol\n * @description Automatically generates comprehensive documentation from entity implementations, schemas, and protocol artifacts\n * @version 1.0.0",
+      "category": "Generation",
+      "usage": "Refer to implementation for usage details"
+    },
+    {
+      "name": "Test Utils",
+      "description": "@fileoverview Testing utilities for protocol conformance\n * @description Comprehensive testing utilities for validating REFUSE Protocol implementations\n * @version 1.0.0",
+      "category": "Utility",
+      "usage": "Refer to implementation for usage details"
+    }
+  ],
+  "gettingStarted": {
+    "prerequisites": [
+      "Node.js 16+",
+      "TypeScript knowledge",
+      "Understanding of RESTful APIs",
+      "Familiarity with waste management domain (optional)"
+    ],
+    "quickStart": [
+      "1. Review the protocol specifications",
+      "2. Choose implementation approach",
+      "3. Set up development environment",
+      "4. Implement core entities",
+      "5. Add validation and compliance checks",
+      "6. Test with sample data",
+      "7. Deploy and integrate"
+    ]
+  }
+}

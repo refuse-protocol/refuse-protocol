@@ -18,6 +18,5 @@
       "metadata"
     ],
     "namingConvention": "camelCase for JSON, kebab-case for files"
-  },
-  "note": "Schema files will be added as the protocol specification matures"
+  }
 }
