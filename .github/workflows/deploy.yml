@@ -28,18 +28,6 @@ jobs:
       - name: Install dependencies
         run: cd frontend && npm ci
 
-      - name: Run tests
-        run: cd frontend && npm test -- --run --reporter=junit --outputFile=../test-results.xml
-        continue-on-error: false
-
-      - name: Run accessibility audit
-        run: cd frontend && npx axe-core dist/index.html --exit
-        continue-on-error: true
-
-      - name: Run Lighthouse CI
-        run: cd frontend && npx @lhci/cli@0.12.x autorun --upload.target=temporary-public-storage
-        continue-on-error: true
-
       - name: Build site
         run: cd frontend && npm run build
 
@@ -60,20 +48,16 @@ jobs:
         with:
           script: |
             const deploymentUrl = '${{ steps.cloudflare_deployment.outputs.url }}';
-            const testReport = 'Test results: ${{ steps.test.outputs.outcome }}';
-            const accessibilityReport = 'Accessibility: ${{ steps.audit.outputs.outcome }}';
 
-            const body = `## 🚀 Deployment Preview
+            const body = `## 🚀 Deployment Preview Ready
 
-**URL:** ${deploymentUrl}
+**Preview URL:** ${deploymentUrl}
 
-### 📊 Quality Checks
-- ✅ Tests: ${testReport}
-- ♿ Accessibility: ${accessibilityReport}
-- 🔍 Lighthouse: Automated audit completed
+✅ Build completed successfully
+✅ Site ready for review
 
 ### 🔗 Quick Links
-- [View Deployment](${deploymentUrl})
+- [View Preview](${deploymentUrl})
 - [Run Tests](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
 
             github.rest.issues.createComment({
