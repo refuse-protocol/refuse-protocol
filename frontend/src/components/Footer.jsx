@@ -28,7 +28,7 @@ function Footer() {
               <p>
                 REFUSE (REcyclable & Solid waste Unified Standard Exchange) protocol enables
                 standardized data exchange for waste management and recycling operations.
-                <strong className="text-gray-600"> We're building this open source standard together with the waste industry.</strong>
+                <strong className="text-gray-600"> We&apos;re building this open source standard together with the waste industry.</strong>
               </p>
             </div>
             <div className="mt-4 md:mt-0">

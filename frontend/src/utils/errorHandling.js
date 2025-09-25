@@ -1,5 +1,7 @@
 // Error Handling and Graceful Degradation Utilities
 // Provides robust error handling for production environments
+import React from 'react'
+import PropTypes from 'prop-types'
 
 export class ErrorHandler {
   static handleError(error, errorInfo = {}) {
@@ -55,18 +57,18 @@ export class ErrorBoundary extends React.Component {
     this.state = { hasError: false, error: null, errorInfo: null }
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(_error) {
     return { hasError: true }
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error, _errorInfo) {
     this.setState({
       error: error,
-      errorInfo: errorInfo
+      errorInfo: _errorInfo
     })
 
     ErrorHandler.handleError(error, {
-      componentStack: errorInfo.componentStack,
+      componentStack: _errorInfo.componentStack,
       errorBoundary: true
     })
   }
@@ -116,6 +118,10 @@ export class ErrorBoundary extends React.Component {
 
     return this.props.children
   }
+}
+
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired
 }
 
 // Network status monitoring
@@ -195,4 +201,3 @@ export const GracefulDegradation = {
 }
 
 // Export React import for JSX in ErrorBoundary
-import React from 'react'

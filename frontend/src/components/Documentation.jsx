@@ -101,7 +101,7 @@ function Documentation() {
     )
   }
 
-  const { overview, entities, guide, tools } = protocolData
+  const { overview, guide, tools } = protocolData // eslint-disable-line no-unused-vars
 
   return (
     <div className="bg-white">
@@ -279,7 +279,7 @@ function Documentation() {
           <div className="mt-16 text-center">
             <h2 className="text-3xl font-extrabold text-gray-900">Ready to Build?</h2>
             <p className="mt-4 text-lg text-gray-600">
-              Join our community of vendors and developers creating the waste industry's data exchange standard.
+              Join our community of vendors and developers creating the waste industry&apos;s data exchange standard.
               We welcome contributions, feedback, and collaboration from all stakeholders.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">

@@ -1,0 +1,27 @@
+# Cloudflare Pages configuration
+name = "refuse-protocol-website"
+compatibility_date = "2024-01-01"
+
+[build]
+command = "cd frontend && npm ci && npm run build"
+cwd = "."
+# Build optimizations
+minify = true
+node_version = "20"
+
+[build.environment_variables]
+NODE_VERSION = "20"
+NODE_ENV = "production"
+NPM_FLAGS = "--production=false"
+
+[build.upload]
+format = "modules"
+
+# Environment-specific settings
+[env.production]
+build.command = "cd frontend && npm ci && npm run build"
+build.node_version = "20"
+
+[env.preview]
+build.command = "cd frontend && npm ci && npm run build"
+build.node_version = "20"

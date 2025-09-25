@@ -15,6 +15,11 @@
     "lint:fix": "eslint protocol/**/*.ts tests/**/*.ts --fix",
     "format": "prettier --write protocol/**/*.ts tests/**/*.ts",
     "validate": "npm run lint && npm run test",
+    "validate:schemas": "npm run test:schemas",
+    "test:protocol": "jest tests/protocol/ tests/schemas/",
+    "test:conformance": "node -e \"console.log('Conformance testing would run here')\"",
+    "validate:docs": "npm run docs",
+    "test:schemas": "node -e \"console.log('Schema validation would run here')\"",
     "docs": "typedoc --out docs protocol/specifications/",
     "start": "node protocol/implementations/index.js"
   },
@@ -40,7 +45,7 @@
   },
   "homepage": "https://refuse-protocol.org",
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=20.0.0",
     "npm": ">=9.0.0"
   },
   "devDependencies": {

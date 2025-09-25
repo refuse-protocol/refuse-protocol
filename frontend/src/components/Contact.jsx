@@ -48,7 +48,7 @@ function Contact() {
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Join the Community</h2>
               <p className="mt-4 text-lg text-gray-600">
-                Help us build the future of waste management standards. Whether you're a software vendor,
+                Help us build the future of waste management standards. Whether you&apos;re a software vendor,
                 waste management company, or developer, we want to collaborate with you to make REFUSE
                 protocol the industry standard.
               </p>
@@ -65,7 +65,7 @@ function Contact() {
                   <div className="ml-3">
                     <h3 className="text-lg font-medium text-gray-900">Email</h3>
                     <p className="mt-1 text-gray-600">jed@edisoncode.com</p>
-                    <p className="mt-1 text-sm text-gray-500">Best effort support - we're building this together</p>
+                    <p className="mt-1 text-sm text-gray-500">Best effort support - we&apos;re building this together</p>
                   </div>
                 </div>
 
@@ -106,7 +106,7 @@ function Contact() {
                           Message sent successfully!
                         </p>
                         <p className="mt-1 text-sm text-green-700">
-                          We'll get back to you within 24 hours.
+                          We&apos;ll get back to you within 24 hours.
                         </p>
                       </div>
                     </div>

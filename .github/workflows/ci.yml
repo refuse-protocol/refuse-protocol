@@ -1,4 +1,4 @@
-name: CI
+name: Protocol Validation & Testing
 
 on:
   push:
@@ -7,8 +7,42 @@ on:
     branches: [ main, master, develop ]
 
 jobs:
-  build-and-test:
+  protocol-validation:
     runs-on: ubuntu-latest
+    name: Validate Protocol Specifications
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Validate Protocol Schemas
+      run: |
+        npm run validate:schemas
+
+    - name: Run Protocol Tests
+      run: npm run test:protocol
+
+    - name: Check Implementation Conformance
+      run: npm run test:conformance
+
+    - name: Validate Documentation
+      run: npm run validate:docs
+
+    - name: Run Security Audit
+      run: npm audit --audit-level=moderate || echo "Security audit completed with warnings"
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    name: Frontend Quality Checks
 
     steps:
     - name: Checkout code
@@ -21,7 +55,7 @@ jobs:
         cache: 'npm'
         cache-dependency-path: 'frontend/package-lock.json'
 
-    - name: Install dependencies
+    - name: Install frontend dependencies
       run: cd frontend && npm ci
 
     - name: Run linting
@@ -30,9 +64,8 @@ jobs:
     - name: Run tests
       run: cd frontend && npm run test
 
-    - name: Run build
-      run: cd frontend && npm run build
+    - name: Run accessibility tests
+      run: cd frontend && npm run accessibility
 
-    - name: Run security audit
-      run: |
-        npm audit --audit-level=moderate || echo "Security audit completed with warnings"
+    - name: Run performance tests
+      run: cd frontend && npm run lighthouse

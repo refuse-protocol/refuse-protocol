@@ -110,7 +110,7 @@ function Homepage() {
             </h2>
             <p className="mt-4 text-lg text-gray-600">
               Join waste management companies and software vendors in creating industry standards.
-              Whether you're adopting REFUSE or contributing to its development, we want to collaborate.
+              Whether you&apos;re adopting REFUSE or contributing to its development, we want to collaborate.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/docs" className="btn">

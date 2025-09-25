@@ -1,0 +1,266 @@
+name: Protocol Documentation & API Reference
+
+on:
+  push:
+    paths:
+      - 'protocol/**'
+      - 'docs/**'
+      - 'frontend/scripts/generate-protocol-docs.js'
+      - 'protocol/tools/api-docs.ts'
+  pull_request:
+    paths:
+      - 'protocol/**'
+      - 'docs/**'
+      - 'frontend/scripts/generate-protocol-docs.js'
+      - 'protocol/tools/api-docs.ts'
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    name: Generate Protocol Documentation
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate TypeScript API docs
+      run: |
+        npm run docs
+
+    - name: Generate protocol documentation
+      run: |
+        cd frontend && npm run build:protocol-docs
+
+    - name: Check documentation completeness
+      run: |
+        node -e "
+        const fs = require('fs');
+        const path = require('path');
+
+        console.log('📚 Checking documentation completeness...');
+
+        const docsDir = 'docs';
+        const requiredDocs = [
+          'index.html', // Typedoc generated index
+          'modules.html',
+          'classes.html'
+        ];
+
+        let missingDocs = [];
+        requiredDocs.forEach(doc => {
+          const docPath = path.join(docsDir, doc);
+          if (!fs.existsSync(docPath)) {
+            missingDocs.push(doc);
+          }
+        });
+
+        if (missingDocs.length === 0) {
+          console.log('✅ All API documentation files generated');
+        } else {
+          console.error('❌ Missing documentation files:', missingDocs.join(', '));
+          process.exit(1);
+        }
+
+        // Check for protocol-specific documentation
+        const protocolDocs = [
+          'protocol/specifications/entities.ts',
+          'protocol/specifications/relationships.ts'
+        ];
+
+        protocolDocs.forEach(doc => {
+          if (fs.existsSync(doc)) {
+            console.log('✅ Protocol specification found:', path.basename(doc));
+          } else {
+            console.warn('⚠️ Protocol specification missing:', path.basename(doc));
+          }
+        });
+        "
+
+    - name: Validate API documentation
+      run: |
+        node -e "
+        console.log('🔍 Validating API documentation...');
+
+        try {
+          // Test that generated docs contain expected content
+          const fs = require('fs');
+          const docsDir = 'docs';
+
+          if (fs.existsSync(docsDir)) {
+            const files = fs.readdirSync(docsDir);
+            console.log(\`📁 Generated \${files.length} documentation files\`);
+
+            // Check for main entities in docs
+            const mainEntities = ['BaseEntity', 'Customer', 'Facility', 'Route', 'Service'];
+            let foundEntities = 0;
+
+            files.forEach(file => {
+              if (file.endsWith('.html')) {
+                const content = fs.readFileSync(path.join(docsDir, file), 'utf8');
+                mainEntities.forEach(entity => {
+                  if (content.includes(entity)) {
+                    foundEntities++;
+                  }
+                });
+              }
+            });
+
+            console.log(\`📊 Found \${foundEntities} main entity references in documentation\`);
+            console.log('✅ API documentation validation completed');
+          } else {
+            console.error('❌ Documentation directory not found');
+            process.exit(1);
+          }
+        } catch (err) {
+          console.error('❌ Documentation validation failed:', err.message);
+          process.exit(1);
+        }
+        "
+
+    - name: Upload documentation artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: protocol-documentation
+        path: docs/
+
+  validate-readme:
+    runs-on: ubuntu-latest
+    name: Validate README & Quickstart
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check README exists and is comprehensive
+      run: |
+        node -e "
+        const fs = require('fs');
+        const path = require('path');
+
+        console.log('📖 Validating README files...');
+
+        const readmes = [
+          'README.md',
+          'protocol/README.md',
+          'frontend/README.md'
+        ];
+
+        readmes.forEach(readme => {
+          if (fs.existsSync(readme)) {
+            const content = fs.readFileSync(readme, 'utf8');
+            const lines = content.split('\\n');
+
+            // Check for essential sections
+            const essentialSections = ['#', '## Installation', '## Usage', '## Documentation'];
+            let foundSections = 0;
+
+            lines.forEach(line => {
+              essentialSections.forEach(section => {
+                if (line.includes(section)) {
+                  foundSections++;
+                }
+              });
+            });
+
+            if (foundSections >= 2) {
+              console.log(\`✅ \${readme} has essential sections\`);
+            } else {
+              console.warn(\`⚠️ \${readme} may be missing essential sections\`);
+            }
+
+            // Check for links to protocol documentation
+            if (content.includes('refuse-protocol.org') || content.includes('./docs')) {
+              console.log(\`✅ \${readme} has documentation links\`);
+            } else {
+              console.warn(\`⚠️ \${readme} missing documentation links\`);
+            }
+          } else {
+            console.warn(\`⚠️ README not found: \${readme}\`);
+          }
+        });
+        "
+
+  spec-validation:
+    runs-on: ubuntu-latest
+    name: Validate Protocol Specifications
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check specification files
+      run: |
+        node -e "
+        const fs = require('fs');
+        const path = require('path');
+
+        console.log('📋 Validating protocol specifications...');
+
+        const specsDir = 'specs';
+        const protocolDir = 'protocol';
+
+        // Check specs directory structure
+        if (fs.existsSync(specsDir)) {
+          const specs = fs.readdirSync(specsDir);
+          console.log(\`📁 Found \${specs.length} specification directories\`);
+
+          specs.forEach(spec => {
+            const specPath = path.join(specsDir, spec);
+            if (fs.statSync(specPath).isDirectory()) {
+              console.log(\`✅ Specification directory: \${spec}\`);
+
+              // Check for essential spec files
+              const essentialFiles = ['spec.md', 'plan.md', 'data-model.md'];
+              essentialFiles.forEach(file => {
+                const filePath = path.join(specPath, file);
+                if (fs.existsSync(filePath)) {
+                  console.log(\`  ✅ \${file}\`);
+                } else {
+                  console.warn(\`  ⚠️ Missing: \${file}\`);
+                }
+              });
+            }
+          });
+        }
+
+        // Check protocol directory structure
+        if (fs.existsSync(protocolDir)) {
+          const protocolFiles = fs.readdirSync(protocolDir);
+          console.log(\`📁 Found \${protocolFiles.length} protocol directories\`);
+
+          ['specifications', 'implementations', 'tools'].forEach(dir => {
+            if (protocolFiles.includes(dir)) {
+              console.log(\`✅ Protocol directory: \${dir}\`);
+            } else {
+              console.warn(\`⚠️ Missing protocol directory: \${dir}\`);
+            }
+          });
+        }
+        "
