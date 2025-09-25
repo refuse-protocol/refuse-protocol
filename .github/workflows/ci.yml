@@ -23,18 +23,19 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
 
     - name: Install dependencies
-      run: npm ci
+      run: cd frontend && npm ci
 
     - name: Run linting
-      run: npm run lint
+      run: cd frontend && npm run lint
 
     - name: Run tests
-      run: npm run test
+      run: cd frontend && npm run test
 
     - name: Run build
-      run: npm run build
+      run: cd frontend && npm run build
 
     - name: Validate schemas
       run: |
@@ -60,9 +61,10 @@ jobs:
       with:
         node-version: 20.x
         cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
 
     - name: Install dependencies
-      run: npm ci
+      run: cd frontend && npm ci
 
     - name: Validate protocol conformance
       run: |
@@ -78,7 +80,7 @@ jobs:
 
         # Validate JSON schemas
         echo "Validating JSON schemas..."
-        npm run test -- --testPathPattern=schemas
+        cd frontend && npm run test -- --testPathPattern=schemas
 
         echo "✅ Protocol validation completed"
 
@@ -95,6 +97,7 @@ jobs:
       with:
         node-version: 20.x
         cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
 
     - name: Run security audit
       run: |

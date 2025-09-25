@@ -38,35 +38,14 @@ jobs:
       - name: Check for changes
         id: verify-changed-files
         run: |
-          if [ -n "$(git status --porcelain frontend/src/data/)" ]; then
+          # Check if there are any changes to source files that would affect docs
+          if [ -n "$(git status --porcelain protocol/ frontend/scripts/)" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Documentation files have been updated"
+            echo "Source files have been updated - docs may need regeneration"
           else
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "No documentation changes detected"
+            echo "No source changes detected"
           fi
-
-      - name: Commit documentation changes
-        if: steps.verify-changed-files.outputs.changed == 'true'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add frontend/src/data/
-          git commit -m "docs: auto-update protocol documentation
-
-          Updated documentation from protocol changes:
-          - Protocol overview with current entity/tool counts
-          - Implementation guide with latest modules
-          - Tool reference with all available tools
-          - Schema reference with latest definitions
-          - Generated at $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-
-      - name: Push changes
-        if: steps.verify-changed-files.outputs.changed == 'true' && github.event_name == 'push'
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
 
   notify-pr:
     runs-on: ubuntu-latest
@@ -80,9 +59,9 @@ jobs:
             const docsUpdated = '${{ needs.update-docs.outputs.changed }}';
 
             if (docsUpdated === 'true') {
-              const message = `## 📚 Protocol Documentation Updated
+              const message = `## 📚 Protocol Documentation Status
 
-              The protocol documentation has been automatically updated based on the changes to the \`protocol/\` directory:
+              The protocol documentation generator has been run and is ready to display updated information based on the changes to the \`protocol/\` directory:
 
               - ✅ Protocol overview with current statistics
               - ✅ Implementation guide reflecting latest modules
@@ -91,10 +70,10 @@ jobs:
 
               The website will automatically display the latest protocol information once these changes are merged.
 
-              **Review the updated documentation:**
-              - Visit the [Documentation page](https://refuse-protocol.org/docs) after merge
-              - Check that all protocol changes are reflected
-              - Verify implementation examples are current`;
+              **Documentation will be generated:**
+              - Fresh documentation created during build process
+              - Available at [Documentation page](https://refuse-protocol.org/docs) after merge
+              - All protocol changes are reflected automatically`;
 
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
