@@ -21,7 +21,15 @@ export class FacilityModel implements Facility {
 
   name!: string;
   code!: string;
-  type!: 'landfill' | 'mrf' | 'transfer' | 'composter' | 'export' | 'cad' | 'incinerator' | 'recycling_center';
+  type!:
+    | 'landfill'
+    | 'mrf'
+    | 'transfer'
+    | 'composter'
+    | 'export'
+    | 'cad'
+    | 'incinerator'
+    | 'recycling_center';
   status!: 'operational' | 'maintenance' | 'closed' | 'planned' | 'limited';
   address!: Address;
   contactInformation?: Contact;
@@ -63,13 +71,33 @@ export class FacilityModel implements Facility {
   materialTickets?: string[];
 
   private static readonly VALID_TYPES: Facility['type'][] = [
-    'landfill', 'mrf', 'transfer', 'composter', 'export', 'cad', 'incinerator', 'recycling_center'
+    'landfill',
+    'mrf',
+    'transfer',
+    'composter',
+    'export',
+    'cad',
+    'incinerator',
+    'recycling_center',
   ];
   private static readonly VALID_STATUSES: Facility['status'][] = [
-    'operational', 'maintenance', 'closed', 'planned', 'limited'
+    'operational',
+    'maintenance',
+    'closed',
+    'planned',
+    'limited',
   ];
   private static readonly MATERIAL_TYPES = [
-    'waste', 'recycling', 'organics', 'hazardous', 'bulk', 'paper', 'plastic', 'metal', 'glass', 'electronics'
+    'waste',
+    'recycling',
+    'organics',
+    'hazardous',
+    'bulk',
+    'paper',
+    'plastic',
+    'metal',
+    'glass',
+    'electronics',
   ];
 
   constructor(data: Partial<Facility>) {
@@ -80,7 +108,11 @@ export class FacilityModel implements Facility {
   /**
    * Create a new facility with validation
    */
-  static create(data: Omit<Facility, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'> & { metadata?: Record<string, any> }): FacilityModel {
+  static create(
+    data: Omit<Facility, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'> & {
+      metadata?: Record<string, any>;
+    }
+  ): FacilityModel {
     const now = new Date();
     const facilityData: Partial<Facility> = {
       id: uuidv4(),
@@ -91,8 +123,8 @@ export class FacilityModel implements Facility {
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'api'
-      }
+        source: 'api',
+      },
     };
 
     return new FacilityModel(facilityData);
@@ -101,7 +133,10 @@ export class FacilityModel implements Facility {
   /**
    * Update facility with optimistic locking
    */
-  update(updates: Partial<Omit<Facility, keyof BaseEntity>> & { metadata?: Record<string, any> }, expectedVersion: number): FacilityModel {
+  update(
+    updates: Partial<Omit<Facility, keyof BaseEntity>> & { metadata?: Record<string, any> },
+    expectedVersion: number
+  ): FacilityModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -115,8 +150,8 @@ export class FacilityModel implements Facility {
         ...this.metadata,
         ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new FacilityModel(updatedData);
@@ -153,7 +188,7 @@ export class FacilityModel implements Facility {
 
     // Validate accepted materials
     const invalidMaterials = data.acceptedMaterials.filter(
-      material => !FacilityModel.MATERIAL_TYPES.includes(material)
+      (material) => !FacilityModel.MATERIAL_TYPES.includes(material)
     );
     if (invalidMaterials.length > 0) {
       throw new Error(`Invalid material types: ${invalidMaterials.join(', ')}`);
@@ -161,11 +196,17 @@ export class FacilityModel implements Facility {
 
     // Validate capacity if provided
     if (data.capacity) {
-      if (data.capacity.dailyLimit && (data.capacity.dailyLimit < 0 || data.capacity.dailyLimit > 10000)) {
+      if (
+        data.capacity.dailyLimit &&
+        (data.capacity.dailyLimit < 0 || data.capacity.dailyLimit > 10000)
+      ) {
         throw new Error('Daily limit must be between 0 and 10,000 tons');
       }
 
-      if (data.capacity.monthlyLimit && (data.capacity.monthlyLimit < 0 || data.capacity.monthlyLimit > 300000)) {
+      if (
+        data.capacity.monthlyLimit &&
+        (data.capacity.monthlyLimit < 0 || data.capacity.monthlyLimit > 300000)
+      ) {
         throw new Error('Monthly limit must be between 0 and 300,000 tons');
       }
     }
@@ -219,7 +260,7 @@ export class FacilityModel implements Facility {
         currentLevel: 0,
         dailyAverage: 0,
         monthlyAverage: 0,
-        peakUtilization: 0
+        peakUtilization: 0,
       };
     }
 
@@ -249,7 +290,9 @@ export class FacilityModel implements Facility {
    * Check if facility can accept material
    */
   canAcceptMaterial(materialType: string): boolean {
-    return this.acceptedMaterials.includes(materialType) && this.isOperational() && !this.isAtCapacity();
+    return (
+      this.acceptedMaterials.includes(materialType) && this.isOperational() && !this.isAtCapacity()
+    );
   }
 
   /**
@@ -352,7 +395,7 @@ export class FacilityModel implements Facility {
     const dailyLimit = this.capacity?.dailyLimit || 0;
 
     // Maintenance needed if consistently running at high capacity
-    return utilizationPercent > 90 || (peakUtilization / dailyLimit) > 0.95;
+    return utilizationPercent > 90 || peakUtilization / dailyLimit > 0.95;
   }
 
   /**
@@ -393,10 +436,10 @@ export class FacilityModel implements Facility {
       availableCapacity: Math.round(this.getAvailableCapacity() * 100) / 100,
       efficiencyScore: Math.round(this.getEfficiencyScore() * 100) / 100,
       acceptedMaterialsCount: this.acceptedMaterials.length,
-      activePermits: this.permits?.filter(p => new Date(p.validTo) > new Date()).length || 0,
+      activePermits: this.permits?.filter((p) => new Date(p.validTo) > new Date()).length || 0,
       isOperational: this.isOperational(),
       needsMaintenance: this.needsMaintenance(),
-      monthlyAverageUtilization: Math.round((this.utilization?.monthlyAverage || 0) * 100) / 100
+      monthlyAverageUtilization: Math.round((this.utilization?.monthlyAverage || 0) * 100) / 100,
     };
   }
 
@@ -429,7 +472,7 @@ export class FacilityModel implements Facility {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -454,7 +497,7 @@ export class FacilityModel implements Facility {
       eventData: this.toEventData(),
       createdAt: now,
       updatedAt: now,
-      version: 1
+      version: 1,
     };
   }
 
@@ -476,19 +519,25 @@ export class FacilityModel implements Facility {
     }
 
     // Business rule: Landfills should have environmental controls
-    if (this.type === 'landfill' && (!this.environmentalControls || this.environmentalControls.length === 0)) {
+    if (
+      this.type === 'landfill' &&
+      (!this.environmentalControls || this.environmentalControls.length === 0)
+    ) {
       errors.push('Landfills must have environmental controls');
     }
 
     // Business rule: Facilities accepting hazardous materials need permits
     if (this.acceptedMaterials.includes('hazardous')) {
-      const hasValidPermit = this.permits?.some(permit =>
-        new Date(permit.validTo) > new Date() &&
-        permit.permitType.toLowerCase().includes('hazardous')
+      const hasValidPermit = this.permits?.some(
+        (permit) =>
+          new Date(permit.validTo) > new Date() &&
+          permit.permitType.toLowerCase().includes('hazardous')
       );
 
       if (!hasValidPermit) {
-        errors.push('Facilities accepting hazardous materials must have valid hazardous waste permits');
+        errors.push(
+          'Facilities accepting hazardous materials must have valid hazardous waste permits'
+        );
       }
     }
 
@@ -509,7 +558,9 @@ export class FacilityFactory {
       externalIds: [legacyData.facility_id || legacyData.FACILITY_ID || legacyData.id],
       name: legacyData.facility_name || legacyData.FACILITY_NAME || legacyData.name,
       code: legacyData.facility_code || legacyData.FACILITY_CODE || legacyData.code,
-      type: this.mapLegacyFacilityType(legacyData.facility_type || legacyData.FACILITY_TYPE || legacyData.type),
+      type: this.mapLegacyFacilityType(
+        legacyData.facility_type || legacyData.FACILITY_TYPE || legacyData.type
+      ),
       status: this.mapLegacyStatus(legacyData.status || legacyData.STATUS || 'operational'),
       address: this.mapLegacyAddress(legacyData),
       contactInformation: this.mapLegacyContact(legacyData),
@@ -524,8 +575,8 @@ export class FacilityFactory {
         originalFieldNames: Object.keys(legacyData),
         transformationNotes: 'Migrated from legacy waste management system',
         syncStatus: 'migrated',
-        lastSyncDate: new Date().toISOString()
-      }
+        lastSyncDate: new Date().toISOString(),
+      },
     };
 
     return FacilityModel.create(mappedData as any);
@@ -536,19 +587,19 @@ export class FacilityFactory {
    */
   private static mapLegacyFacilityType(legacyType: string): Facility['type'] {
     const typeMap: Record<string, Facility['type']> = {
-      'landfill': 'landfill',
-      'lf': 'landfill',
-      'mrf': 'mrf',
-      'materials_recovery': 'mrf',
-      'transfer': 'transfer',
-      'transfer_station': 'transfer',
-      'composter': 'composter',
-      'compost': 'composter',
-      'export': 'export',
-      'cad': 'cad',
-      'incinerator': 'incinerator',
-      'recycling_center': 'recycling_center',
-      'recycling': 'recycling_center'
+      landfill: 'landfill',
+      lf: 'landfill',
+      mrf: 'mrf',
+      materials_recovery: 'mrf',
+      transfer: 'transfer',
+      transfer_station: 'transfer',
+      composter: 'composter',
+      compost: 'composter',
+      export: 'export',
+      cad: 'cad',
+      incinerator: 'incinerator',
+      recycling_center: 'recycling_center',
+      recycling: 'recycling_center',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'transfer';
@@ -559,14 +610,14 @@ export class FacilityFactory {
    */
   private static mapLegacyStatus(legacyStatus: string): Facility['status'] {
     const statusMap: Record<string, Facility['status']> = {
-      'operational': 'operational',
-      'op': 'operational',
-      'active': 'operational',
-      'maintenance': 'maintenance',
-      'maint': 'maintenance',
-      'closed': 'closed',
-      'planned': 'planned',
-      'limited': 'limited'
+      operational: 'operational',
+      op: 'operational',
+      active: 'operational',
+      maintenance: 'maintenance',
+      maint: 'maintenance',
+      closed: 'closed',
+      planned: 'planned',
+      limited: 'limited',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'operational';
@@ -582,7 +633,7 @@ export class FacilityFactory {
       city: legacyData.city || legacyData.CITY,
       state: legacyData.state || legacyData.STATE,
       zipCode: legacyData.zip || legacyData.ZIP || legacyData.zipcode,
-      country: legacyData.country || 'US'
+      country: legacyData.country || 'US',
     };
   }
 
@@ -599,14 +650,16 @@ export class FacilityFactory {
       title: legacyData.contact_title || legacyData.CONTACT_TITLE,
       email: legacyData.email || legacyData.EMAIL,
       phone: legacyData.phone || legacyData.PHONE,
-      mobile: legacyData.mobile || legacyData.MOBILE
+      mobile: legacyData.mobile || legacyData.MOBILE,
     };
   }
 
   /**
    * Map legacy operating hours
    */
-  private static mapLegacyOperatingHours(legacyData: Record<string, any>): OperatingHours | undefined {
+  private static mapLegacyOperatingHours(
+    legacyData: Record<string, any>
+  ): OperatingHours | undefined {
     // Simplified mapping - in production this would be more comprehensive
     return {
       monday: { open: '06:00', close: '18:00' },
@@ -615,7 +668,7 @@ export class FacilityFactory {
       thursday: { open: '06:00', close: '18:00' },
       friday: { open: '06:00', close: '18:00' },
       saturday: { open: '08:00', close: '16:00' },
-      holidays: legacyData.holidays || legacyData.HOLIDAYS
+      holidays: legacyData.holidays || legacyData.HOLIDAYS,
     };
   }
 
@@ -625,7 +678,8 @@ export class FacilityFactory {
   private static mapLegacyCapacity(legacyData: Record<string, any>): Facility['capacity'] {
     return {
       dailyLimit: legacyData.daily_capacity || legacyData.DAILY_CAPACITY || legacyData.daily_limit,
-      monthlyLimit: legacyData.monthly_capacity || legacyData.MONTHLY_CAPACITY || legacyData.monthly_limit
+      monthlyLimit:
+        legacyData.monthly_capacity || legacyData.MONTHLY_CAPACITY || legacyData.monthly_limit,
     };
   }
 
@@ -649,13 +703,15 @@ export class FacilityFactory {
   /**
    * Map legacy pricing
    */
-  private static mapLegacyPricing(legacyData: Record<string, any>): Facility['pricing'] | undefined {
+  private static mapLegacyPricing(
+    legacyData: Record<string, any>
+  ): Facility['pricing'] | undefined {
     if (!legacyData.tipping_fee && !legacyData.fees) {
       return undefined;
     }
 
     const pricing: Facility['pricing'] = {
-      tippingFee: legacyData.tipping_fee || legacyData.TIPPING_FEE || legacyData.fees
+      tippingFee: legacyData.tipping_fee || legacyData.TIPPING_FEE || legacyData.fees,
     };
 
     // Handle material-specific rates if available
@@ -702,7 +758,7 @@ export class FacilityValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -722,12 +778,15 @@ export class FacilityCapacityManager {
   /**
    * Optimize capacity across multiple facilities
    */
-  static optimizeCapacityDistribution(facilities: FacilityModel[], materialDemand: Map<string, number>): FacilityModel[] {
+  static optimizeCapacityDistribution(
+    facilities: FacilityModel[],
+    materialDemand: Map<string, number>
+  ): FacilityModel[] {
     const optimizedFacilities = [...facilities];
 
     // Distribute material processing based on available capacity and efficiency
     for (const [materialType, demand] of materialDemand) {
-      const suitableFacilities = optimizedFacilities.filter(facility =>
+      const suitableFacilities = optimizedFacilities.filter((facility) =>
         facility.canAcceptMaterial(materialType)
       );
 
@@ -740,7 +799,7 @@ export class FacilityCapacityManager {
         const aEfficiency = a.getEfficiencyScore();
         const bEfficiency = b.getEfficiencyScore();
 
-        return (bAvailable * bEfficiency) - (aAvailable * aEfficiency);
+        return bAvailable * bEfficiency - aAvailable * aEfficiency;
       });
 
       this.distributeMaterialToFacilities(suitableFacilities, materialType, demand);
@@ -752,7 +811,11 @@ export class FacilityCapacityManager {
   /**
    * Distribute material processing across facilities
    */
-  private static distributeMaterialToFacilities(facilities: FacilityModel[], materialType: string, totalDemand: number): void {
+  private static distributeMaterialToFacilities(
+    facilities: FacilityModel[],
+    materialType: string,
+    totalDemand: number
+  ): void {
     let remainingDemand = totalDemand;
 
     for (const facility of facilities) {

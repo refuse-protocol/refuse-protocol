@@ -46,7 +46,7 @@ export class AdvancedEventSourcingSystem extends BaseEventSourcingSystem {
       auditEntry,
       complianceChecks,
       retentionInfo,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -61,7 +61,7 @@ export class AdvancedEventSourcingSystem extends BaseEventSourcingSystem {
       entityState,
       auditTrail,
       rebuildTimestamp: new Date(),
-      eventCount: auditTrail.events.length
+      eventCount: auditTrail.events.length,
     };
   }
 
@@ -95,7 +95,7 @@ export class AdvancedEventSourcingSystem extends BaseEventSourcingSystem {
       entityId,
       timestamp: new Date(),
       state: super.rebuildEntityState(entityType, entityId),
-      auditTrail: this.auditTrailManager.getCompleteAuditTrail(entityType, entityId)
+      auditTrail: this.auditTrailManager.getCompleteAuditTrail(entityType, entityId),
     };
 
     // Store snapshot
@@ -104,7 +104,7 @@ export class AdvancedEventSourcingSystem extends BaseEventSourcingSystem {
     return {
       snapshot,
       snapshotId: `entity-${entityType}-${entityId}-${Date.now()}`,
-      created: true
+      created: true,
     };
   }
 
@@ -116,21 +116,25 @@ export class AdvancedEventSourcingSystem extends BaseEventSourcingSystem {
     const validationErrors: string[] = [];
 
     // Check for gaps in event sequence
-    const sortedEvents = auditTrail.events.sort((a, b) =>
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    const sortedEvents = auditTrail.events.sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
 
     for (let i = 1; i < sortedEvents.length; i++) {
-      const timeDiff = new Date(sortedEvents[i].timestamp).getTime() -
-                      new Date(sortedEvents[i-1].timestamp).getTime();
+      const timeDiff =
+        new Date(sortedEvents[i].timestamp).getTime() -
+        new Date(sortedEvents[i - 1].timestamp).getTime();
 
-      if (timeDiff > 3600000) { // Gap > 1 hour
-        validationErrors.push(`Event gap detected: ${timeDiff}ms between events ${sortedEvents[i-1].id} and ${sortedEvents[i].id}`);
+      if (timeDiff > 3600000) {
+        // Gap > 1 hour
+        validationErrors.push(
+          `Event gap detected: ${timeDiff}ms between events ${sortedEvents[i - 1].id} and ${sortedEvents[i].id}`
+        );
       }
     }
 
     // Check for missing events
-    const entityEvents = this.eventStore.filter(event => {
+    const entityEvents = this.eventStore.filter((event) => {
       if (typeof event.eventData === 'object' && event.eventData !== null) {
         return event.entityType === entityType && (event.eventData as any).id === entityId;
       }
@@ -138,14 +142,16 @@ export class AdvancedEventSourcingSystem extends BaseEventSourcingSystem {
     });
 
     if (entityEvents.length !== auditTrail.events.length) {
-      validationErrors.push(`Event count mismatch: store has ${entityEvents.length}, audit trail has ${auditTrail.events.length}`);
+      validationErrors.push(
+        `Event count mismatch: store has ${entityEvents.length}, audit trail has ${auditTrail.events.length}`
+      );
     }
 
     return {
       isValid: validationErrors.length === 0,
       validationErrors,
       auditTrail,
-      validatedAt: new Date()
+      validatedAt: new Date(),
     };
   }
 
@@ -182,7 +188,7 @@ export class AdvancedEventSourcingSystem extends BaseEventSourcingSystem {
       data: exportData,
       contentType,
       filename: `audit-trail-${entityType}-${entityId}-${Date.now()}.${format}`,
-      exportedAt: new Date()
+      exportedAt: new Date(),
     };
   }
 
@@ -211,9 +217,10 @@ export class AdvancedEventSourcingSystem extends BaseEventSourcingSystem {
     let csv = 'id,eventType,entityType,timestamp,eventData\n';
 
     for (const event of auditTrail.events) {
-      const eventData = typeof event.eventData === 'object'
-        ? JSON.stringify(event.eventData)
-        : String(event.eventData);
+      const eventData =
+        typeof event.eventData === 'object'
+          ? JSON.stringify(event.eventData)
+          : String(event.eventData);
 
       csv += `"${event.id}","${event.eventType}","${event.entityType}","${event.timestamp}","${eventData}"\n`;
     }
@@ -243,8 +250,8 @@ export class AuditTrailManager {
         eventType: event.eventType,
         sessionId: this.generateSessionId(),
         ipAddress: 'system', // Would be extracted from context
-        userAgent: 'REFUSE-Protocol/1.0'
-      }
+        userAgent: 'REFUSE-Protocol/1.0',
+      },
     };
 
     // Store audit entry
@@ -271,7 +278,7 @@ export class AuditTrailManager {
       entries,
       totalEntries: entries.length,
       firstEntry: entries.length > 0 ? entries[0] : null,
-      lastEntry: entries.length > 0 ? entries[entries.length - 1] : null
+      lastEntry: entries.length > 0 ? entries[entries.length - 1] : null,
     };
   }
 
@@ -310,7 +317,7 @@ export class AuditTrailManager {
               field,
               oldValue: data.previousValues[field],
               newValue,
-              changeType: 'modified'
+              changeType: 'modified',
             });
           }
         }
@@ -323,7 +330,7 @@ export class AuditTrailManager {
             field,
             oldValue: null,
             newValue: value,
-            changeType: 'added'
+            changeType: 'added',
           });
         }
       }
@@ -335,7 +342,7 @@ export class AuditTrailManager {
             field,
             oldValue: value,
             newValue: null,
-            changeType: 'removed'
+            changeType: 'removed',
           });
         }
       }
@@ -400,7 +407,7 @@ export class ComplianceManager {
       complianceScore: 0, // Would calculate from actual data
       generatedAt: new Date(),
       entityType,
-      entityId
+      entityId,
     };
   }
 
@@ -429,7 +436,7 @@ export class ComplianceManager {
       ruleName: rule.name,
       passed: true, // Would implement actual logic
       timestamp: new Date(),
-      details: `Compliance check for ${rule.name}`
+      details: `Compliance check for ${rule.name}`,
     };
   }
 
@@ -445,7 +452,7 @@ export class ComplianceManager {
         entityType: '*',
         eventType: '*',
         retentionPeriod: 7 * 365 * 24 * 60 * 60 * 1000, // 7 years
-        regulations: ['GDPR', 'CCPA']
+        regulations: ['GDPR', 'CCPA'],
       },
       {
         id: 'audit-trail-integrity',
@@ -453,7 +460,7 @@ export class ComplianceManager {
         description: 'Ensure audit trails maintain integrity',
         entityType: '*',
         eventType: 'deleted',
-        regulations: ['SOX', 'HIPAA']
+        regulations: ['SOX', 'HIPAA'],
       },
       {
         id: 'change-tracking',
@@ -461,8 +468,8 @@ export class ComplianceManager {
         description: 'Track all changes to sensitive data',
         entityType: 'customer',
         eventType: 'updated',
-        regulations: ['GDPR', 'CCPA']
-      }
+        regulations: ['GDPR', 'CCPA'],
+      },
     ];
   }
 }
@@ -488,7 +495,7 @@ export class RetentionManager {
           retentionPeriod: policy.retentionPeriod,
           archiveDate: new Date(Date.now() + policy.retentionPeriod),
           disposalAction: policy.disposalAction,
-          appliedAt: new Date()
+          appliedAt: new Date(),
         };
       }
     }
@@ -499,7 +506,7 @@ export class RetentionManager {
       retentionPeriod: 365 * 24 * 60 * 60 * 1000, // 1 year
       archiveDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       disposalAction: 'delete',
-      appliedAt: new Date()
+      appliedAt: new Date(),
     };
   }
 
@@ -511,7 +518,7 @@ export class RetentionManager {
       totalPolicies: this.retentionPolicies.length,
       eventsByRetentionPeriod: new Map(), // Would calculate from actual data
       upcomingDisposals: 0, // Would calculate from actual data
-      storageUtilization: 0 // Would calculate from actual data
+      storageUtilization: 0, // Would calculate from actual data
     };
   }
 
@@ -543,7 +550,7 @@ export class RetentionManager {
         eventType: '*',
         retentionPeriod: 7 * 365 * 24 * 60 * 60 * 1000, // 7 years
         disposalAction: 'archive',
-        regulations: ['GDPR', 'CCPA']
+        regulations: ['GDPR', 'CCPA'],
       },
       {
         id: 'financial-records',
@@ -553,7 +560,7 @@ export class RetentionManager {
         eventType: '*',
         retentionPeriod: 10 * 365 * 24 * 60 * 60 * 1000, // 10 years
         disposalAction: 'archive',
-        regulations: ['SOX']
+        regulations: ['SOX'],
       },
       {
         id: 'operational-logs',
@@ -563,8 +570,8 @@ export class RetentionManager {
         eventType: 'created',
         retentionPeriod: 365 * 24 * 60 * 60 * 1000, // 1 year
         disposalAction: 'delete',
-        regulations: ['ISO27001']
-      }
+        regulations: ['ISO27001'],
+      },
     ];
   }
 }
@@ -609,7 +616,7 @@ export class EventQueryEngine {
       totalCount,
       hasMore: offset + limit < totalCount,
       query: query,
-      executedAt: new Date()
+      executedAt: new Date(),
     };
   }
 
@@ -617,24 +624,33 @@ export class EventQueryEngine {
    * Apply filter to events
    */
   private applyFilter(events: Event[], filter: EventFilterCriteria): Event[] {
-    return events.filter(event => {
+    return events.filter((event) => {
       switch (filter.field) {
         case 'entityType':
-          return filter.operator === 'eq' ? event.entityType === filter.value : event.entityType !== filter.value;
+          return filter.operator === 'eq'
+            ? event.entityType === filter.value
+            : event.entityType !== filter.value;
 
         case 'eventType':
-          return filter.operator === 'eq' ? event.eventType === filter.value : event.eventType !== filter.value;
+          return filter.operator === 'eq'
+            ? event.eventType === filter.value
+            : event.eventType !== filter.value;
 
         case 'timestamp':
           const eventTime = new Date(event.timestamp).getTime();
           const filterTime = new Date(filter.value).getTime();
 
           switch (filter.operator) {
-            case 'gt': return eventTime > filterTime;
-            case 'gte': return eventTime >= filterTime;
-            case 'lt': return eventTime < filterTime;
-            case 'lte': return eventTime <= filterTime;
-            default: return eventTime === filterTime;
+            case 'gt':
+              return eventTime > filterTime;
+            case 'gte':
+              return eventTime >= filterTime;
+            case 'lt':
+              return eventTime < filterTime;
+            case 'lte':
+              return eventTime <= filterTime;
+            default:
+              return eventTime === filterTime;
           }
 
         case 'id':
@@ -879,7 +895,9 @@ export interface ExportResult {
 /**
  * Export factory functions
  */
-export function createAdvancedEventSourcingSystem(options?: EventSourcingOptions): AdvancedEventSourcingSystem {
+export function createAdvancedEventSourcingSystem(
+  options?: EventSourcingOptions
+): AdvancedEventSourcingSystem {
   return new AdvancedEventSourcingSystem(options);
 }
 
@@ -919,5 +937,5 @@ export type {
   SnapshotResult,
   AuditValidationResult,
   ExportFormat,
-  ExportResult
+  ExportResult,
 };

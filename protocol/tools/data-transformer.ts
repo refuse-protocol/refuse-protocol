@@ -42,16 +42,20 @@ export class DataTransformer {
     }
 
     try {
-      const configContent = readFileSync(configPath, 'utf8');
-      const config = JSON.parse(configContent) as FieldMappingConfig;
+      // REMOVED UNUSED:       const configContent = readFileSync(configPath, 'utf8');
+      // REMOVED UNUSED:       const config = JSON.parse(configContent) as FieldMappingConfig;
 
       for (const [entityType, mappings] of Object.entries(config)) {
         this.fieldMappings.set(entityType, mappings);
       }
 
-      console.log(chalk.green(`✅ Loaded field mappings for ${this.fieldMappings.size} entity types`));
+      console.log(
+        chalk.green(`✅ Loaded field mappings for ${this.fieldMappings.size} entity types`)
+      );
     } catch (error) {
-      throw new Error(`Failed to load field mappings: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to load field mappings: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -59,15 +63,15 @@ export class DataTransformer {
    * Transform a single legacy data record to REFUSE Protocol format
    */
   transformRecord(legacyData: Record<string, any>, entityType: string): TransformationResult {
-    const startTime = Date.now();
+    // REMOVED UNUSED:     const startTime = Date.now();
 
     try {
-      const transformer = this.transformers.get(entityType);
+      // REMOVED UNUSED:       const transformer = this.transformers.get(entityType);
       if (!transformer) {
         throw new Error(`No transformer available for entity type: ${entityType}`);
       }
 
-      const mappings = this.fieldMappings.get(entityType);
+      // REMOVED UNUSED:       const mappings = this.fieldMappings.get(entityType);
       if (!mappings) {
         throw new Error(`No field mappings configured for entity type: ${entityType}`);
       }
@@ -76,7 +80,7 @@ export class DataTransformer {
       const transformedData: Record<string, any> = this.applyFieldMappings(legacyData, mappings);
 
       // Apply entity-specific transformations
-      const finalData = transformer.transform(legacyData, transformedData);
+      // REMOVED UNUSED:       const finalData = transformer.transform(legacyData, transformedData);
 
       // Add metadata
       const result = {
@@ -88,14 +92,16 @@ export class DataTransformer {
           transformationSource: 'legacy-system',
           originalEntityType: entityType,
           transformationDate: new Date().toISOString(),
-          legacySystemFields: Object.keys(legacyData).filter(key => !mappings.some(m => m.source === key))
+          legacySystemFields: Object.keys(legacyData).filter(
+            (key) => !mappings.some((m) => m.source === key)
+          ),
         },
         createdAt: finalData.createdAt || new Date().toISOString(),
         updatedAt: finalData.updatedAt || new Date().toISOString(),
-        version: finalData.version || 1
+        version: finalData.version || 1,
       };
 
-      const transformationTime = Date.now() - startTime;
+      // REMOVED UNUSED:       const transformationTime = Date.now() - startTime;
 
       // Update metrics
       this.updateTransformationMetrics(entityType, true, transformationTime);
@@ -110,11 +116,11 @@ export class DataTransformer {
           targetEntityType: entityType,
           transformationRulesApplied: mappings.length,
           fieldsMapped: mappings.length,
-          fieldsPreserved: Object.keys(legacyData).length - mappings.length
-        }
+          fieldsPreserved: Object.keys(legacyData).length - mappings.length,
+        },
       };
     } catch (error) {
-      const transformationTime = Date.now() - startTime;
+      // REMOVED UNUSED:       const transformationTime = Date.now() - startTime;
       this.updateTransformationMetrics(entityType, false, transformationTime);
 
       return {
@@ -127,8 +133,8 @@ export class DataTransformer {
           targetEntityType: entityType,
           transformationRulesApplied: 0,
           fieldsMapped: 0,
-          fieldsPreserved: 0
-        }
+          fieldsPreserved: 0,
+        },
       };
     }
   }
@@ -138,16 +144,16 @@ export class DataTransformer {
    */
   transformBatch(data: any[], entityType: string): BatchTransformationResult {
     const results: TransformationResult[] = [];
-    let totalTransformationTime = 0;
-    let successfulTransformations = 0;
-    let failedTransformations = 0;
+    // REMOVED UNUSED:     let totalTransformationTime = 0;
+    // REMOVED UNUSED:     let successfulTransformations = 0;
+    // REMOVED UNUSED:     let failedTransformations = 0;
     const warnings: string[] = [];
 
     console.log(chalk.blue(`🔄 Transforming ${data.length} ${entityType} records...`));
 
     for (let i = 0; i < data.length; i++) {
-      const item = data[i];
-      const result = this.transformRecord(item, entityType);
+      // REMOVED UNUSED:       const item = data[i];
+      // REMOVED UNUSED:       const result = this.transformRecord(item, entityType);
 
       results.push(result);
       totalTransformationTime += result.transformationTime;
@@ -163,15 +169,23 @@ export class DataTransformer {
 
       // Progress indicator for large batches
       if ((i + 1) % 100 === 0 || i + 1 === data.length) {
-        const progress = ((i + 1) / data.length * 100).toFixed(1);
-        console.log(chalk.gray(`  Progress: ${i + 1}/${data.length} (${progress}%) - ✅ ${successfulTransformations} ❌ ${failedTransformations}`));
+        // REMOVED UNUSED:         const progress = (((i + 1) / data.length) * 100).toFixed(1);
+        console.log(
+          chalk.gray(
+            `  Progress: ${i + 1}/${data.length} (${progress}%) - ✅ ${successfulTransformations} ❌ ${failedTransformations}`
+          )
+        );
       }
     }
 
-    const successRate = data.length > 0 ? (successfulTransformations / data.length) * 100 : 0;
-    const averageTime = data.length > 0 ? totalTransformationTime / data.length : 0;
+    // REMOVED UNUSED:     const successRate = data.length > 0 ? (successfulTransformations / data.length) * 100 : 0;
+    // REMOVED UNUSED:     const averageTime = data.length > 0 ? totalTransformationTime / data.length : 0;
 
-    console.log(chalk.green(`✅ Batch transformation complete: ${successfulTransformations}/${data.length} successful (${successRate.toFixed(1)}%)`));
+    console.log(
+      chalk.green(
+        `✅ Batch transformation complete: ${successfulTransformations}/${data.length} successful (${successRate.toFixed(1)}%)`
+      )
+    );
 
     return {
       totalRecords: data.length,
@@ -185,20 +199,23 @@ export class DataTransformer {
       summary: {
         transformationsPerSecond: averageTime > 0 ? 1000 / averageTime : 0,
         totalWarnings: warnings.length,
-        entityType
-      }
+        entityType,
+      },
     };
   }
 
   /**
    * Transform data from file (CSV, JSON, etc.)
    */
-  async transformFromFile(filePath: string, entityType: string): Promise<BatchTransformationResult> {
+  async transformFromFile(
+    filePath: string,
+    entityType: string
+  ): Promise<BatchTransformationResult> {
     if (!existsSync(filePath)) {
       throw new Error(`Input file not found: ${filePath}`);
     }
 
-    const fileExtension = extname(filePath).toLowerCase();
+    // REMOVED UNUSED:     const fileExtension = extname(filePath).toLowerCase();
 
     console.log(chalk.blue(`📁 Reading data from ${filePath} (${fileExtension})`));
 
@@ -217,7 +234,9 @@ export class DataTransformer {
 
       return await this.transformBatch(data, entityType);
     } catch (error) {
-      throw new Error(`Failed to read file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to read file ${filePath}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -225,24 +244,29 @@ export class DataTransformer {
    * Save transformed data to file
    */
   saveTransformedData(results: BatchTransformationResult, outputFileName?: string): string {
-    const successfulResults = results.results.filter(r => r.success && r.data);
+    // REMOVED UNUSED:     const successfulResults = results.results.filter((r) => r.success && r.data);
 
     if (successfulResults.length === 0) {
       throw new Error('No successful transformations to save');
     }
 
-    const outputFile = outputFileName || `${results.summary.entityType}-transformed-${Date.now()}.json`;
-    const outputPath = join(this.outputDir, outputFile);
+    const outputFile =
+      outputFileName || `${results.summary.entityType}-transformed-${Date.now()}.json`;
+    // REMOVED UNUSED:     const outputPath = join(this.outputDir, outputFile);
 
-    const transformedData = successfulResults.map(r => r.data);
+    // REMOVED UNUSED:     const transformedData = successfulResults.map((r) => r.data);
 
     try {
       writeFileSync(outputPath, JSON.stringify(transformedData, null, 2), 'utf8');
-      console.log(chalk.green(`💾 Saved ${transformedData.length} transformed records to ${outputPath}`));
+      console.log(
+        chalk.green(`💾 Saved ${transformedData.length} transformed records to ${outputPath}`)
+      );
 
       return outputPath;
     } catch (error) {
-      throw new Error(`Failed to save transformed data: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to save transformed data: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -250,7 +274,7 @@ export class DataTransformer {
    * Generate transformation report
    */
   generateTransformationReport(results: BatchTransformationResult): string {
-    const reportPath = join(this.outputDir, `transformation-report-${Date.now()}.md`);
+    // REMOVED UNUSED:     const reportPath = join(this.outputDir, `transformation-report-${Date.now()}.md`);
 
     const report = `# REFUSE Protocol Data Transformation Report
 
@@ -274,18 +298,21 @@ export class DataTransformer {
 ### Failed Records
 
 ${results.results
-  .filter(r => !r.success)
-  .map((result, index) => `#### Record ${index + 1}
+  .filter((r) => !r.success)
+  .map(
+    (result, index) => `#### Record ${index + 1}
 - **Error**: ${result.error}
 - **Processing Time**: ${result.transformationTime}ms
-`)
+`
+  )
   .join('\n')}
 
 ### Warnings
 
-${results.warnings.length > 0
-  ? results.warnings.map(warning => `- ${warning}`).join('\n')
-  : 'No warnings generated'
+${
+  results.warnings.length > 0
+    ? results.warnings.map((warning) => `- ${warning}`).join('\n')
+    : 'No warnings generated'
 }
 
 ## Performance Metrics
@@ -332,19 +359,26 @@ ${this.generateRecommendations(results)}
   /**
    * Apply field mappings to legacy data
    */
-  private applyFieldMappings(legacyData: Record<string, any>, mappings: FieldMapping[]): Record<string, any> {
+  private applyFieldMappings(
+    legacyData: Record<string, any>,
+    mappings: FieldMapping[]
+  ): Record<string, any> {
     const result: Record<string, any> = {};
 
     for (const mapping of mappings) {
       if (mapping.source in legacyData) {
-        const value = legacyData[mapping.source];
+        // REMOVED UNUSED:         const value = legacyData[mapping.source];
 
         if (mapping.transform) {
           // Apply transformation function if specified
           try {
             result[mapping.target] = mapping.transform(value, legacyData);
           } catch (error) {
-            console.warn(chalk.yellow(`⚠️ Transformation failed for field ${mapping.target}: ${error instanceof Error ? error.message : String(error)}`));
+            console.warn(
+              chalk.yellow(
+                `⚠️ Transformation failed for field ${mapping.target}: ${error instanceof Error ? error.message : String(error)}`
+              )
+            );
             result[mapping.target] = value; // Fallback to original value
           }
         } else {
@@ -362,11 +396,11 @@ ${this.generateRecommendations(results)}
    * Read CSV file
    */
   private readCSVFile(filePath: string): any[] {
-    const content = readFileSync(filePath, 'utf8');
+    // REMOVED UNUSED:     const content = readFileSync(filePath, 'utf8');
     return csvParse(content, {
       columns: true,
       skip_empty_lines: true,
-      trim: true
+      trim: true,
     });
   }
 
@@ -374,7 +408,7 @@ ${this.generateRecommendations(results)}
    * Read JSON file
    */
   private readJSONFile(filePath: string): any[] {
-    const content = readFileSync(filePath, 'utf8');
+    // REMOVED UNUSED:     const content = readFileSync(filePath, 'utf8');
 
     if (content.trim().startsWith('[')) {
       // Array of objects
@@ -407,18 +441,23 @@ ${this.generateRecommendations(results)}
   /**
    * Update transformation metrics
    */
-  private updateTransformationMetrics(entityType: string, success: boolean, transformationTime: number): void {
+  private updateTransformationMetrics(
+    entityType: string,
+    success: boolean,
+    transformationTime: number
+  ): void {
     const existingMetrics = this.transformationMetrics.get(entityType) || {
       totalTransformations: 0,
       successfulTransformations: 0,
       failedTransformations: 0,
       totalTransformationTime: 0,
-      averageTransformationTime: 0
+      averageTransformationTime: 0,
     };
 
     existingMetrics.totalTransformations++;
     existingMetrics.totalTransformationTime += transformationTime;
-    existingMetrics.averageTransformationTime = existingMetrics.totalTransformationTime / existingMetrics.totalTransformations;
+    existingMetrics.averageTransformationTime =
+      existingMetrics.totalTransformationTime / existingMetrics.totalTransformations;
 
     if (success) {
       existingMetrics.successfulTransformations++;
@@ -436,18 +475,28 @@ ${this.generateRecommendations(results)}
     const recommendations: string[] = [];
 
     if (results.successRate < 90) {
-      recommendations.push('- **Review field mappings**: Low success rate suggests field mapping issues');
+      recommendations.push(
+        '- **Review field mappings**: Low success rate suggests field mapping issues'
+      );
       recommendations.push('- **Check data quality**: Failed records may have data quality issues');
-      recommendations.push('- **Add error handling**: Implement fallback strategies for common errors');
+      recommendations.push(
+        '- **Add error handling**: Implement fallback strategies for common errors'
+      );
     }
 
     if (results.averageTransformationTime > 100) {
-      recommendations.push('- **Optimize transformations**: Slow transformation suggests complex mapping logic');
-      recommendations.push('- **Batch processing**: Consider processing records in smaller batches');
+      recommendations.push(
+        '- **Optimize transformations**: Slow transformation suggests complex mapping logic'
+      );
+      recommendations.push(
+        '- **Batch processing**: Consider processing records in smaller batches'
+      );
     }
 
     if (results.warnings.length > results.totalRecords * 0.1) {
-      recommendations.push('- **Address warnings**: High warning count suggests data inconsistencies');
+      recommendations.push(
+        '- **Address warnings**: High warning count suggests data inconsistencies'
+      );
       recommendations.push('- **Review transformation rules**: Some mappings may need adjustment');
     }
 
@@ -455,7 +504,7 @@ ${this.generateRecommendations(results)}
       return '✅ No specific recommendations. Transformation completed successfully.';
     }
 
-    return recommendations.map(rec => rec).join('\n');
+    return recommendations.map((rec) => rec).join('\n');
   }
 }
 
@@ -549,7 +598,7 @@ export interface LegacyTransformer {
 export class CustomerTransformer implements LegacyTransformer {
   transform(legacyData: Record<string, any>, mappedData: Record<string, any>): Record<string, any> {
     // Transform legacy customer data to REFUSE Protocol format
-    const transformed = { ...mappedData };
+    // REMOVED UNUSED:     const transformed = { ...mappedData };
 
     // Handle common legacy field patterns
     if (legacyData.customer_type) {
@@ -564,13 +613,14 @@ export class CustomerTransformer implements LegacyTransformer {
     if (legacyData.phone || legacyData.phone_number) {
       transformed.contactInformation = {
         ...transformed.contactInformation,
-        phone: legacyData.phone || legacyData.phone_number
+        phone: legacyData.phone || legacyData.phone_number,
       };
     }
 
     // Handle multiple addresses
     if (legacyData.addresses && Array.isArray(legacyData.addresses)) {
-      const primaryAddress = legacyData.addresses.find((addr: any) => addr.primary) || legacyData.addresses[0];
+      const primaryAddress =
+        legacyData.addresses.find((addr: any) => addr.primary) || legacyData.addresses[0];
       if (primaryAddress) {
         transformed.serviceAddress = this.transformLegacyAddress(primaryAddress);
       }
@@ -581,28 +631,28 @@ export class CustomerTransformer implements LegacyTransformer {
 
   private mapLegacyCustomerType(legacyType: string): string {
     const typeMap: Record<string, string> = {
-      'residential': 'residential',
-      'commercial': 'commercial',
-      'industrial': 'industrial',
-      'municipal': 'municipal',
-      'res': 'residential',
-      'comm': 'commercial',
-      'ind': 'industrial',
-      'muni': 'municipal'
+      residential: 'residential',
+      commercial: 'commercial',
+      industrial: 'industrial',
+      municipal: 'municipal',
+      res: 'residential',
+      comm: 'commercial',
+      ind: 'industrial',
+      muni: 'municipal',
     };
     return typeMap[legacyType.toLowerCase()] || 'commercial';
   }
 
   private mapLegacyCustomerStatus(legacyStatus: string): string {
     const statusMap: Record<string, string> = {
-      'active': 'active',
-      'inactive': 'inactive',
-      'suspended': 'inactive',
-      'pending': 'pending',
-      'approved': 'active',
-      'act': 'active',
-      'inact': 'inactive',
-      'susp': 'inactive'
+      active: 'active',
+      inactive: 'inactive',
+      suspended: 'inactive',
+      pending: 'pending',
+      approved: 'active',
+      act: 'active',
+      inact: 'inactive',
+      susp: 'inactive',
     };
     return statusMap[legacyStatus.toLowerCase()] || 'active';
   }
@@ -614,7 +664,7 @@ export class CustomerTransformer implements LegacyTransformer {
       city: legacyAddress.city,
       state: legacyAddress.state || legacyAddress.province,
       zipCode: legacyAddress.zip || legacyAddress.zipcode || legacyAddress.postal_code,
-      country: legacyAddress.country || 'US'
+      country: legacyAddress.country || 'US',
     };
   }
 }
@@ -624,7 +674,7 @@ export class CustomerTransformer implements LegacyTransformer {
  */
 export class ServiceTransformer implements LegacyTransformer {
   transform(legacyData: Record<string, any>, mappedData: Record<string, any>): Record<string, any> {
-    const transformed = { ...mappedData };
+    // REMOVED UNUSED:     const transformed = { ...mappedData };
 
     // Transform service type
     if (legacyData.service_type) {
@@ -648,31 +698,31 @@ export class ServiceTransformer implements LegacyTransformer {
 
   private mapLegacyServiceType(legacyType: string): string {
     const typeMap: Record<string, string> = {
-      'waste': 'waste',
-      'garbage': 'waste',
-      'trash': 'waste',
-      'recycling': 'recycling',
-      'recycle': 'recycling',
-      'organics': 'organics',
-      'compost': 'organics',
-      'yard_waste': 'organics',
-      'hazardous': 'hazardous',
-      'hazmat': 'hazardous',
-      'bulk': 'bulk',
-      'large_item': 'bulk'
+      waste: 'waste',
+      garbage: 'waste',
+      trash: 'waste',
+      recycling: 'recycling',
+      recycle: 'recycling',
+      organics: 'organics',
+      compost: 'organics',
+      yard_waste: 'organics',
+      hazardous: 'hazardous',
+      hazmat: 'hazardous',
+      bulk: 'bulk',
+      large_item: 'bulk',
     };
     return typeMap[legacyType.toLowerCase()] || 'waste';
   }
 
   private mapLegacyContainerType(legacyType: string): string {
     const typeMap: Record<string, string> = {
-      'cart': 'cart',
-      'bin': 'bin',
-      'dumpster': 'dumpster',
-      'container': 'dumpster',
-      'rolloff': 'rolloff',
-      'roll_off': 'rolloff',
-      'compactor': 'compactor'
+      cart: 'cart',
+      bin: 'bin',
+      dumpster: 'dumpster',
+      container: 'dumpster',
+      rolloff: 'rolloff',
+      roll_off: 'rolloff',
+      compactor: 'compactor',
     };
     return typeMap[legacyType.toLowerCase()] || 'dumpster';
   }
@@ -689,13 +739,13 @@ export class ServiceTransformer implements LegacyTransformer {
   }
 
   private parseScheduleString(scheduleStr: string): Record<string, any> {
-    const parts = scheduleStr.toLowerCase().split('-');
+    // REMOVED UNUSED:     const parts = scheduleStr.toLowerCase().split('-');
     if (parts.length >= 2) {
       return {
         frequency: parts[0],
         dayOfWeek: parts[1],
         startDate: new Date().toISOString().split('T')[0], // Default to today
-        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Default to 1 year
+        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to 1 year
       };
     }
 
@@ -707,7 +757,9 @@ export class ServiceTransformer implements LegacyTransformer {
       frequency: scheduleObj.frequency || 'weekly',
       dayOfWeek: scheduleObj.day || scheduleObj.day_of_week,
       startDate: scheduleObj.start_date || new Date().toISOString().split('T')[0],
-      endDate: scheduleObj.end_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      endDate:
+        scheduleObj.end_date ||
+        new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     };
   }
 }
@@ -717,7 +769,7 @@ export class ServiceTransformer implements LegacyTransformer {
  */
 export class RouteTransformer implements LegacyTransformer {
   transform(legacyData: Record<string, any>, mappedData: Record<string, any>): Record<string, any> {
-    const transformed = { ...mappedData };
+    // REMOVED UNUSED:     const transformed = { ...mappedData };
 
     // Transform route schedule
     if (legacyData.route_schedule || legacyData.schedule) {
@@ -747,13 +799,13 @@ export class RouteTransformer implements LegacyTransformer {
   }
 
   private parseRouteScheduleString(scheduleStr: string): Record<string, any> {
-    const parts = scheduleStr.toLowerCase().split('-');
+    // REMOVED UNUSED:     const parts = scheduleStr.toLowerCase().split('-');
     if (parts.length >= 3) {
       return {
         frequency: parts[0],
         dayOfWeek: parts[1],
         startTime: parts[2].replace(':', ''),
-        endTime: parts[3] ? parts[3].replace(':', '') : '1700'
+        endTime: parts[3] ? parts[3].replace(':', '') : '1700',
       };
     }
 
@@ -765,7 +817,7 @@ export class RouteTransformer implements LegacyTransformer {
       frequency: scheduleObj.frequency || 'weekly',
       dayOfWeek: scheduleObj.day_of_week || scheduleObj.day,
       startTime: scheduleObj.start_time || '0600',
-      endTime: scheduleObj.end_time || '1700'
+      endTime: scheduleObj.end_time || '1700',
     };
   }
 
@@ -780,7 +832,7 @@ export class RouteTransformer implements LegacyTransformer {
         return String(site);
       });
     } else if (typeof legacySites === 'string') {
-      return legacySites.split(',').map(s => s.trim());
+      return legacySites.split(',').map((s) => s.trim());
     }
 
     return [];
@@ -792,7 +844,7 @@ export class RouteTransformer implements LegacyTransformer {
  */
 export class FacilityTransformer implements LegacyTransformer {
   transform(legacyData: Record<string, any>, mappedData: Record<string, any>): Record<string, any> {
-    const transformed = { ...mappedData };
+    // REMOVED UNUSED:     const transformed = { ...mappedData };
 
     // Transform facility type
     if (legacyData.facility_type) {
@@ -816,33 +868,33 @@ export class FacilityTransformer implements LegacyTransformer {
 
   private mapLegacyFacilityType(legacyType: string): string {
     const typeMap: Record<string, string> = {
-      'landfill': 'landfill',
-      'mrf': 'mrf',
-      'transfer': 'transfer',
-      'transfer_station': 'transfer',
-      'composter': 'composter',
-      'compost': 'composter',
-      'export': 'export',
-      'cad': 'cad',
-      'incinerator': 'incinerator',
-      'recycling_center': 'recycling_center',
-      'material_recovery_facility': 'mrf',
-      'transfer_station': 'transfer'
+      landfill: 'landfill',
+      mrf: 'mrf',
+      transfer: 'transfer',
+      transfer_station: 'transfer',
+      composter: 'composter',
+      compost: 'composter',
+      export: 'export',
+      cad: 'cad',
+      incinerator: 'incinerator',
+      recycling_center: 'recycling_center',
+      material_recovery_facility: 'mrf',
+      transfer_station: 'transfer',
     };
     return typeMap[legacyType.toLowerCase()] || 'landfill';
   }
 
   private mapLegacyFacilityStatus(legacyStatus: string): string {
     const statusMap: Record<string, string> = {
-      'operational': 'operational',
-      'active': 'operational',
-      'maintenance': 'maintenance',
-      'closed': 'closed',
-      'planned': 'planned',
-      'limited': 'limited',
-      'op': 'operational',
-      'maint': 'maintenance',
-      'cls': 'closed'
+      operational: 'operational',
+      active: 'operational',
+      maintenance: 'maintenance',
+      closed: 'closed',
+      planned: 'planned',
+      limited: 'limited',
+      op: 'operational',
+      maint: 'maintenance',
+      cls: 'closed',
     };
     return statusMap[legacyStatus.toLowerCase()] || 'operational';
   }
@@ -881,17 +933,17 @@ export class FacilityTransformer implements LegacyTransformer {
 
   private transformDayHours(dayHours: any): Record<string, any> {
     if (typeof dayHours === 'string') {
-      const parts = dayHours.split('-');
+      // REMOVED UNUSED:       const parts = dayHours.split('-');
       if (parts.length === 2) {
         return {
           open: parts[0].trim(),
-          close: parts[1].trim()
+          close: parts[1].trim(),
         };
       }
     } else if (typeof dayHours === 'object') {
       return {
         open: dayHours.open || dayHours.start,
-        close: dayHours.close || dayHours.end
+        close: dayHours.close || dayHours.end,
       };
     }
 
@@ -910,7 +962,7 @@ export class DataTransformerCLI {
   }
 
   async run(args: string[]): Promise<void> {
-    const command = args[0];
+    // REMOVED UNUSED:     const command = args[0];
 
     switch (command) {
       case 'transform':
@@ -940,25 +992,28 @@ export class DataTransformerCLI {
 
     try {
       // Load field mappings if available
-      const mappingFile = `${entityType}-mappings.json`;
+      // REMOVED UNUSED:       const mappingFile = `${entityType}-mappings.json`;
       if (existsSync(mappingFile)) {
         this.transformer.loadFieldMappings(mappingFile);
       }
 
       // Transform data
-      const results = await this.transformer.transformFromFile(inputFile, entityType);
+      // REMOVED UNUSED:       const results = await this.transformer.transformFromFile(inputFile, entityType);
 
       // Save transformed data
-      const savedPath = this.transformer.saveTransformedData(results, outputFile);
+      // REMOVED UNUSED:       const savedPath = this.transformer.saveTransformedData(results, outputFile);
 
       // Generate report
       this.transformer.generateTransformationReport(results);
 
       console.log(chalk.green(`✅ Transformation complete!`));
       console.log(chalk.blue(`📁 Output saved to: ${savedPath}`));
-
     } catch (error) {
-      console.error(chalk.red(`❌ Transformation failed: ${error instanceof Error ? error.message : String(error)}`));
+      console.error(
+        chalk.red(
+          `❌ Transformation failed: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       process.exit(1);
     }
   }
@@ -973,12 +1028,16 @@ export class DataTransformerCLI {
 
     try {
       // Load batch configuration
-      const config = JSON.parse(readFileSync(configFile, 'utf8'));
+      // REMOVED UNUSED:       const config = JSON.parse(readFileSync(configFile, 'utf8'));
 
-      console.log(chalk.blue(`🔄 Starting batch transformation with ${Object.keys(config).length} entity types`));
+      console.log(
+        chalk.blue(
+          `🔄 Starting batch transformation with ${Object.keys(config).length} entity types`
+        )
+      );
 
       for (const [entityType, config] of Object.entries(config)) {
-        const entityConfig = config as any;
+        // REMOVED UNUSED:         const entityConfig = config as any;
 
         if (entityConfig.enabled && entityConfig.inputFile) {
           console.log(chalk.gray(`Processing ${entityType}...`));
@@ -989,7 +1048,10 @@ export class DataTransformerCLI {
           }
 
           // Transform data
-          const results = await this.transformer.transformFromFile(entityConfig.inputFile, entityType);
+          const results = await this.transformer.transformFromFile(
+            entityConfig.inputFile,
+            entityType
+          );
 
           // Save transformed data
           this.transformer.saveTransformedData(results, entityConfig.outputFile);
@@ -1000,21 +1062,26 @@ export class DataTransformerCLI {
       }
 
       console.log(chalk.green('✅ Batch transformation complete!'));
-
     } catch (error) {
-      console.error(chalk.red(`❌ Batch transformation failed: ${error instanceof Error ? error.message : String(error)}`));
+      console.error(
+        chalk.red(
+          `❌ Batch transformation failed: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       process.exit(1);
     }
   }
 
   private reportCommand(args: string[]): void {
-    const metrics = this.transformer.getAllMetrics();
+    // REMOVED UNUSED:     const metrics = this.transformer.getAllMetrics();
 
     console.log(chalk.blue('\n📊 REFUSE Protocol Data Transformation Metrics'));
-    console.log(chalk.gray('=' .repeat(50)));
+    console.log(chalk.gray('='.repeat(50)));
 
     if (metrics.size === 0) {
-      console.log(chalk.yellow('⚠️ No transformation metrics available. Run some transformations first.'));
+      console.log(
+        chalk.yellow('⚠️ No transformation metrics available. Run some transformations first.')
+      );
       return;
     }
 
@@ -1023,7 +1090,11 @@ export class DataTransformerCLI {
       console.log(chalk.gray(`  Total Transformations: ${metric.totalTransformations}`));
       console.log(chalk.green(`  ✅ Successful: ${metric.successfulTransformations}`));
       console.log(chalk.red(`  ❌ Failed: ${metric.failedTransformations}`));
-      console.log(chalk.yellow(`  📈 Success Rate: ${((metric.successfulTransformations / metric.totalTransformations) * 100).toFixed(2)}%`));
+      console.log(
+        chalk.yellow(
+          `  📈 Success Rate: ${((metric.successfulTransformations / metric.totalTransformations) * 100).toFixed(2)}%`
+        )
+      );
       console.log(chalk.gray(`  ⏱️ Avg Time: ${metric.averageTransformationTime.toFixed(2)}ms`));
     }
   }
@@ -1041,11 +1112,11 @@ export class DataTransformerCLI {
       this.transformer.loadFieldMappings(mappingFile);
 
       // Load sample data
-      const data = JSON.parse(readFileSync(sampleData, 'utf8'));
+      // REMOVED UNUSED:       const data = JSON.parse(readFileSync(sampleData, 'utf8'));
 
       // Test transformation
-      const entityType = Object.keys(JSON.parse(readFileSync(mappingFile, 'utf8')))[0];
-      const result = this.transformer.transformRecord(data, entityType);
+      // REMOVED UNUSED:       const entityType = Object.keys(JSON.parse(readFileSync(mappingFile, 'utf8')))[0];
+      // REMOVED UNUSED:       const result = this.transformer.transformRecord(data, entityType);
 
       if (result.success) {
         console.log(chalk.green('✅ Validation successful!'));
@@ -1055,9 +1126,10 @@ export class DataTransformerCLI {
         console.log(chalk.red('❌ Validation failed:'));
         console.log(chalk.red(result.error));
       }
-
     } catch (error) {
-      console.error(chalk.red(`❌ Validation failed: ${error instanceof Error ? error.message : String(error)}`));
+      console.error(
+        chalk.red(`❌ Validation failed: ${error instanceof Error ? error.message : String(error)}`)
+      );
       process.exit(1);
     }
   }
@@ -1067,16 +1139,28 @@ export class DataTransformerCLI {
     console.log(chalk.gray('Usage: data-transformer <command> [options]\n'));
 
     console.log(chalk.green('Commands:'));
-    console.log('  transform <entity-type> <input-file> [output-file]    Transform single entity type');
-    console.log('  batch <config-file> <input-directory>                 Batch transform multiple entities');
-    console.log('  report                                                Show transformation metrics');
-    console.log('  validate <mapping-file> <sample-data>                 Validate transformation setup\n');
+    console.log(
+      '  transform <entity-type> <input-file> [output-file]    Transform single entity type'
+    );
+    console.log(
+      '  batch <config-file> <input-directory>                 Batch transform multiple entities'
+    );
+    console.log(
+      '  report                                                Show transformation metrics'
+    );
+    console.log(
+      '  validate <mapping-file> <sample-data>                 Validate transformation setup\n'
+    );
 
     console.log(chalk.green('Examples:'));
-    console.log('  data-transformer transform customer ./data/customers.csv customers-transformed.json');
+    console.log(
+      '  data-transformer transform customer ./data/customers.csv customers-transformed.json'
+    );
     console.log('  data-transformer batch ./batch-config.json ./legacy-data/');
     console.log('  data-transformer report');
-    console.log('  data-transformer validate ./mappings/customer-mappings.json ./sample-customer.json\n');
+    console.log(
+      '  data-transformer validate ./mappings/customer-mappings.json ./sample-customer.json\n'
+    );
 
     console.log(chalk.green('Configuration Files:'));
     console.log('  Field mappings: JSON file with source->target field mappings');
@@ -1103,5 +1187,5 @@ export type {
   TransformationResult,
   BatchTransformationResult,
   TransformationMetrics,
-  LegacyTransformer
+  LegacyTransformer,
 };

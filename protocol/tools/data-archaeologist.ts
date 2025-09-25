@@ -4,8 +4,8 @@
  * @version 1.0.0
  */
 
-import { readFileSync, existsSync, writeFileSync, readdirSync, statSync } from 'fs';
-import { join, resolve, extname, basename, dirname } from 'path';
+// REMOVED UNUSED IMPORT: // REMOVED UNUSED: import { readFileSync, existsSync, writeFileSync, readdirSync, statSync } from 'fs';
+// REMOVED UNUSED IMPORT: // REMOVED UNUSED: import { join, resolve, extname, basename, dirname } from 'path';
 import { glob } from 'glob';
 import chalk from 'chalk';
 import { v4 as uuidv4 } from 'uuid';
@@ -29,7 +29,7 @@ export class DataArchaeologist {
    * Perform comprehensive legacy system analysis
    */
   async analyzeLegacySystem(options: LegacySystemAnalysisOptions): Promise<LegacySystemAnalysis> {
-    console.log(chalk.blue('🔍 Starting Legacy System Data Archaeology...'));
+// CONSOLE:     console.log(chalk.blue('🔍 Starting Legacy System Data Archaeology...'));
 
     const startTime = Date.now();
     const analysis: LegacySystemAnalysis = {
@@ -42,10 +42,10 @@ export class DataArchaeologist {
         dataFormats: { formats: [], schemaCount: 0 },
         entityMapping: { entities: [], relationships: [] },
         dataQuality: { issues: [], recommendations: [] },
-        migrationComplexity: 'unknown'
+        migrationComplexity: 'unknown',
       },
       patterns: [],
-      recommendations: []
+      recommendations: [],
     };
 
     try {
@@ -72,14 +72,20 @@ export class DataArchaeologist {
 
       const totalTime = Date.now() - startTime;
 
-      console.log(chalk.green(`✅ Legacy system analysis complete in ${totalTime}ms`));
-      console.log(chalk.gray(`   Files analyzed: ${analysis.analysis.fileStructure.files.length}`));
-      console.log(chalk.gray(`   Entities found: ${analysis.analysis.entityMapping.entities.length}`));
-      console.log(chalk.gray(`   Migration complexity: ${analysis.analysis.migrationComplexity}`));
+// CONSOLE:       console.log(chalk.green(`✅ Legacy system analysis complete in ${totalTime}ms`));
+// CONSOLE:       console.log(chalk.gray(`   Files analyzed: ${analysis.analysis.fileStructure.files.length}`));
+// CONSOLE:       console.log(
+        chalk.gray(`   Entities found: ${analysis.analysis.entityMapping.entities.length}`)
+      );
+// CONSOLE:       console.log(chalk.gray(`   Migration complexity: ${analysis.analysis.migrationComplexity}`));
 
       return analysis;
     } catch (error) {
-      console.error(chalk.red(`❌ Legacy system analysis failed: ${error instanceof Error ? error.message : String(error)}`));
+// CONSOLE:       console.error(
+        chalk.red(
+          `❌ Legacy system analysis failed: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       throw error;
     }
   }
@@ -87,8 +93,11 @@ export class DataArchaeologist {
   /**
    * Analyze file structure of legacy system
    */
-  private async analyzeFileStructure(sourcePath: string, analysis: LegacySystemAnalysis): Promise<void> {
-    console.log(chalk.gray('📁 Analyzing file structure...'));
+  private async analyzeFileStructure(
+    sourcePath: string,
+    analysis: LegacySystemAnalysis
+  ): Promise<void> {
+// CONSOLE:     console.log(chalk.gray('📁 Analyzing file structure...'));
 
     const fullPath = resolve(sourcePath);
     const stats = await this.getDirectoryStats(fullPath);
@@ -98,22 +107,25 @@ export class DataArchaeologist {
       directories: stats.directories,
       totalSize: stats.totalSize,
       fileTypes: this.categorizeFileTypes(stats.files),
-      structureComplexity: this.calculateStructureComplexity(stats)
+      structureComplexity: this.calculateStructureComplexity(stats),
     };
   }
 
   /**
    * Analyze data formats and schemas
    */
-  private async analyzeDataFormats(sourcePath: string, analysis: LegacySystemAnalysis): Promise<void> {
-    console.log(chalk.gray('📊 Analyzing data formats...'));
+  private async analyzeDataFormats(
+    sourcePath: string,
+    analysis: LegacySystemAnalysis
+  ): Promise<void> {
+// CONSOLE:     console.log(chalk.gray('📊 Analyzing data formats...'));
 
     const fullPath = resolve(sourcePath);
 
     // Find potential data files
     const dataFiles = await glob('**/*.{json,csv,xml,sql,db,mdb,accdb,xls,xlsx}', {
       cwd: fullPath,
-      ignore: ['**/node_modules/**', '**/dist/**', '**/build/**']
+      ignore: ['**/node_modules/**', '**/dist/**', '**/build/**'],
     });
 
     const formats: DataFormat[] = [];
@@ -131,16 +143,19 @@ export class DataArchaeologist {
 
     analysis.analysis.dataFormats = {
       formats,
-      schemaCount: formats.filter(f => f.hasSchema).length,
-      formatDistribution: this.calculateFormatDistribution(formats)
+      schemaCount: formats.filter((f) => f.hasSchema).length,
+      formatDistribution: this.calculateFormatDistribution(formats),
     };
   }
 
   /**
    * Identify entities and relationships
    */
-  private async identifyEntitiesAndRelationships(sourcePath: string, analysis: LegacySystemAnalysis): Promise<void> {
-    console.log(chalk.gray('🔗 Identifying entities and relationships...'));
+  private async identifyEntitiesAndRelationships(
+    sourcePath: string,
+    analysis: LegacySystemAnalysis
+  ): Promise<void> {
+// CONSOLE:     console.log(chalk.gray('🔗 Identifying entities and relationships...'));
 
     const fullPath = resolve(sourcePath);
     const entities: LegacyEntity[] = [];
@@ -170,15 +185,18 @@ export class DataArchaeologist {
     analysis.analysis.entityMapping = {
       entities: this.deduplicateEntities(entities),
       relationships: this.deduplicateRelationships(relationships),
-      confidence: this.calculateEntityConfidence(entities)
+      confidence: this.calculateEntityConfidence(entities),
     };
   }
 
   /**
    * Assess data quality
    */
-  private async assessDataQuality(sourcePath: string, analysis: LegacySystemAnalysis): Promise<void> {
-    console.log(chalk.gray('✅ Assessing data quality...'));
+  private async assessDataQuality(
+    sourcePath: string,
+    analysis: LegacySystemAnalysis
+  ): Promise<void> {
+// CONSOLE:     console.log(chalk.gray('✅ Assessing data quality...'));
 
     const fullPath = resolve(sourcePath);
     const issues: DataQualityIssue[] = [];
@@ -196,36 +214,40 @@ export class DataArchaeologist {
     }
 
     // Generate recommendations based on issues found
-    if (issues.some(issue => issue.severity === 'high')) {
+    if (issues.some((issue) => issue.severity === 'high')) {
       recommendations.push('Address high-severity data quality issues before migration');
     }
 
-    if (issues.some(issue => issue.category === 'schema')) {
+    if (issues.some((issue) => issue.category === 'schema')) {
       recommendations.push('Standardize schema definitions across files');
     }
 
-    if (issues.some(issue => issue.category === 'encoding')) {
+    if (issues.some((issue) => issue.category === 'encoding')) {
       recommendations.push('Ensure consistent data encoding (UTF-8 recommended)');
     }
 
     analysis.analysis.dataQuality = {
       issues,
       recommendations,
-      overallScore: this.calculateDataQualityScore(issues)
+      overallScore: this.calculateDataQualityScore(issues),
     };
   }
 
   /**
    * Analyze individual data format
    */
-  private async analyzeDataFormat(content: string, fileName: string, extension: string): Promise<DataFormat | null> {
+  private async analyzeDataFormat(
+    content: string,
+    fileName: string,
+    extension: string
+  ): Promise<DataFormat | null> {
     const format: DataFormat = {
       type: this.mapExtensionToFormat(extension),
       fileName,
       size: content.length,
       hasSchema: false,
       encoding: 'unknown',
-      structure: { type: 'unknown', fields: [] }
+      structure: { type: 'unknown', fields: [] },
     };
 
     // Detect encoding
@@ -265,21 +287,21 @@ export class DataArchaeologist {
    * Analyze CSV format
    */
   private analyzeCSVFormat(content: string, format: DataFormat): DataFormat {
-    const lines = content.split('\n').filter(line => line.trim());
+    const lines = content.split('\n').filter((line) => line.trim());
     if (lines.length === 0) return format;
 
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    const headers = lines[0].split(',').map((h) => h.trim().replace(/"/g, ''));
     const sampleData = lines.slice(1, Math.min(6, lines.length));
 
     format.hasSchema = headers.length > 0;
     format.structure = {
       type: 'tabular',
-      fields: headers.map(header => ({
+      fields: headers.map((header) => ({
         name: header,
         type: this.inferFieldType(sampleData, headers.indexOf(header)),
-        required: true // Assume headers indicate required fields
+        required: true, // Assume headers indicate required fields
       })),
-      rowCount: lines.length - 1
+      rowCount: lines.length - 1,
     };
 
     return format;
@@ -291,13 +313,14 @@ export class DataArchaeologist {
   private analyzeXMLFormat(content: string, format: DataFormat): DataFormat {
     // Simple XML analysis - in production would use proper XML parser
     const hasRootElement = content.includes('<') && content.includes('>');
-    const hasNestedElements = content.includes('</') && (content.match(/<[^/>]+>/g)?.length || 0) > 1;
+    const hasNestedElements =
+      content.includes('</') && (content.match(/<[^/>]+>/g)?.length || 0) > 1;
 
     format.hasSchema = hasRootElement;
     format.structure = {
       type: 'hierarchical',
       fields: [],
-      hasNestedStructure: hasNestedElements
+      hasNestedStructure: hasNestedElements,
     };
 
     return format;
@@ -306,7 +329,10 @@ export class DataArchaeologist {
   /**
    * Analyze schema for entities
    */
-  private analyzeSchemaForEntities(schema: any, fileName: string): { entities: LegacyEntity[]; relationships: EntityRelationship[] } {
+  private analyzeSchemaForEntities(
+    schema: any,
+    fileName: string
+  ): { entities: LegacyEntity[]; relationships: EntityRelationship[] } {
     const entities: LegacyEntity[] = [];
     const relationships: EntityRelationship[] = [];
 
@@ -315,14 +341,14 @@ export class DataArchaeologist {
         id: uuidv4(),
         name: this.extractEntityName(fileName, schema),
         type: 'object',
-        fields: Object.keys(schema.properties).map(fieldName => ({
+        fields: Object.keys(schema.properties).map((fieldName) => ({
           name: fieldName,
           type: this.mapJSONTypeToEntityType(schema.properties[fieldName]),
           required: schema.required?.includes(fieldName) || false,
-          description: schema.properties[fieldName].description || ''
+          description: schema.properties[fieldName].description || '',
         })),
         sourceFile: fileName,
-        confidence: this.calculateEntityConfidenceFromSchema(schema)
+        confidence: this.calculateEntityConfidenceFromSchema(schema),
       };
 
       entities.push(entity);
@@ -334,7 +360,10 @@ export class DataArchaeologist {
   /**
    * Analyze data for entities
    */
-  private analyzeDataForEntities(content: string, fileName: string): { entities: LegacyEntity[]; relationships: EntityRelationship[] } {
+  private analyzeDataForEntities(
+    content: string,
+    fileName: string
+  ): { entities: LegacyEntity[]; relationships: EntityRelationship[] } {
     const entities: LegacyEntity[] = [];
     const relationships: EntityRelationship[] = [];
 
@@ -350,14 +379,14 @@ export class DataArchaeologist {
               id: uuidv4(),
               name: this.extractEntityName(fileName),
               type: 'record',
-              fields: Object.keys(firstRecord).map(fieldName => ({
+              fields: Object.keys(firstRecord).map((fieldName) => ({
                 name: fieldName,
                 type: this.inferFieldTypeFromData(firstRecord[fieldName]),
                 required: true,
-                description: ''
+                description: '',
               })),
               sourceFile: fileName,
-              confidence: 0.7
+              confidence: 0.7,
             };
 
             entities.push(entity);
@@ -369,14 +398,14 @@ export class DataArchaeologist {
           id: uuidv4(),
           name: this.extractEntityName(fileName),
           type: 'object',
-          fields: Object.keys(data).map(fieldName => ({
+          fields: Object.keys(data).map((fieldName) => ({
             name: fieldName,
             type: this.inferFieldTypeFromData(data[fieldName]),
             required: true,
-            description: ''
+            description: '',
           })),
           sourceFile: fileName,
-          confidence: 0.6
+          confidence: 0.6,
         };
 
         entities.push(entity);
@@ -402,17 +431,17 @@ export class DataArchaeologist {
         category: 'encoding',
         severity: 'medium',
         description: 'Potential encoding issues detected',
-        recommendation: 'Ensure UTF-8 encoding'
+        recommendation: 'Ensure UTF-8 encoding',
       });
     }
 
     // Check for inconsistent formatting
     const lines = content.split('\n');
-    const nonEmptyLines = lines.filter(line => line.trim());
+    const nonEmptyLines = lines.filter((line) => line.trim());
 
     if (nonEmptyLines.length > 0) {
       // Check for trailing commas/spaces
-      const trailingCommaCount = lines.filter(line => /,\s*$/.test(line)).length;
+      const trailingCommaCount = lines.filter((line) => /,\s*$/.test(line)).length;
       if (trailingCommaCount > nonEmptyLines.length * 0.1) {
         issues.push({
           id: uuidv4(),
@@ -420,7 +449,7 @@ export class DataArchaeologist {
           category: 'formatting',
           severity: 'low',
           description: 'Inconsistent trailing commas detected',
-          recommendation: 'Standardize formatting'
+          recommendation: 'Standardize formatting',
         });
       }
     }
@@ -434,7 +463,7 @@ export class DataArchaeologist {
           category: 'completeness',
           severity: 'high',
           description: 'Customer data appears incomplete',
-          recommendation: 'Verify all required customer fields are present'
+          recommendation: 'Verify all required customer fields are present',
         });
       }
     }
@@ -450,7 +479,10 @@ export class DataArchaeologist {
     const directories: string[] = [];
     let totalSize = 0;
 
-    const processDirectory = async (currentPath: string, relativePath: string = ''): Promise<void> => {
+    const processDirectory = async (
+      currentPath: string,
+      relativePath: string = ''
+    ): Promise<void> => {
       const items = readdirSync(currentPath);
 
       for (const item of items) {
@@ -477,7 +509,7 @@ export class DataArchaeologist {
   private categorizeFileTypes(files: string[]): FileTypeStats[] {
     const typeStats: Map<string, number> = new Map();
 
-    files.forEach(file => {
+    files.forEach((file) => {
       const ext = extname(file).toLowerCase() || 'no_extension';
       typeStats.set(ext, (typeStats.get(ext) || 0) + 1);
     });
@@ -485,7 +517,7 @@ export class DataArchaeologist {
     return Array.from(typeStats.entries()).map(([type, count]) => ({
       type,
       count,
-      percentage: (count / files.length) * 100
+      percentage: (count / files.length) * 100,
     }));
   }
 
@@ -493,12 +525,12 @@ export class DataArchaeologist {
    * Calculate structure complexity
    */
   private calculateStructureComplexity(stats: DirectoryStats): number {
-    const depth = Math.max(...stats.directories.map(dir => dir.split('/').length));
+    const depth = Math.max(...stats.directories.map((dir) => dir.split('/').length));
     const fileCount = stats.files.length;
     const dirCount = stats.directories.length;
 
     // Simple complexity score based on depth and file count
-    return Math.min(100, (depth * 10) + (fileCount * 0.1) + (dirCount * 0.5));
+    return Math.min(100, depth * 10 + fileCount * 0.1 + dirCount * 0.5);
   }
 
   /**
@@ -514,7 +546,7 @@ export class DataArchaeologist {
       '.mdb': 'database',
       '.accdb': 'database',
       '.xls': 'spreadsheet',
-      '.xlsx': 'spreadsheet'
+      '.xlsx': 'spreadsheet',
     };
 
     return formatMap[extension] || 'unknown';
@@ -526,7 +558,7 @@ export class DataArchaeologist {
   private detectEncoding(content: string): string {
     // Simple encoding detection
     if (content.includes('�')) return 'mixed';
-    if (/[^\x00-\x7F]/.test(content)) return 'utf8';
+    if (/[^[ ]-\x7F]/.test(content)) return 'utf8';
     return 'ascii';
   }
 
@@ -534,8 +566,10 @@ export class DataArchaeologist {
    * Check if JSON has schema
    */
   private hasJSONSchema(json: any): boolean {
-    return json.hasOwnProperty('$schema') ||
-           json.hasOwnProperty('type') && json.type === 'object' && json.properties;
+    return (
+      json.hasOwnProperty('$schema') ||
+      (json.hasOwnProperty('type') && json.type === 'object' && json.properties)
+    );
   }
 
   /**
@@ -546,20 +580,20 @@ export class DataArchaeologist {
       return {
         type: 'array',
         elementType: typeof json[0],
-        length: json.length
+        length: json.length,
       };
     } else if (typeof json === 'object' && json !== null) {
       return {
         type: 'object',
-        fields: Object.keys(json).map(key => ({
+        fields: Object.keys(json).map((key) => ({
           name: key,
-          type: typeof json[key]
-        }))
+          type: typeof json[key],
+        })),
       };
     } else {
       return {
         type: 'primitive',
-        valueType: typeof json
+        valueType: typeof json,
       };
     }
   }
@@ -569,20 +603,21 @@ export class DataArchaeologist {
    */
   private inferFieldType(sampleData: string[], columnIndex: number): string {
     const samples = sampleData
-      .map(row => row.split(',')[columnIndex])
-      .filter(val => val !== undefined && val !== '')
+      .map((row) => row.split(',')[columnIndex])
+      .filter((val) => val !== undefined && val !== '')
       .slice(0, 10);
 
     if (samples.length === 0) return 'unknown';
 
     // Check for numeric
-    if (samples.every(val => !isNaN(Number(val)))) return 'number';
+    if (samples.every((val) => !isNaN(Number(val)))) return 'number';
 
     // Check for boolean
-    if (samples.every(val => ['true', 'false', '1', '0'].includes(val.toLowerCase()))) return 'boolean';
+    if (samples.every((val) => ['true', 'false', '1', '0'].includes(val.toLowerCase())))
+      return 'boolean';
 
     // Check for date (basic detection)
-    if (samples.some(val => /^\d{4}-\d{2}-\d{2}/.test(val))) return 'date';
+    if (samples.some((val) => /^\d{4}-\d{2}-\d{2}/.test(val))) return 'date';
 
     return 'string';
   }
@@ -596,7 +631,7 @@ export class DataArchaeologist {
 
     // Extract from filename
     const baseName = basename(fileName, extname(fileName));
-    return baseName.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return baseName.replace(/[-_]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
   }
 
   /**
@@ -662,7 +697,7 @@ export class DataArchaeologist {
   private calculateFormatDistribution(formats: DataFormat[]): FormatDistribution {
     const distribution: FormatDistribution = {};
 
-    formats.forEach(format => {
+    formats.forEach((format) => {
       distribution[format.type] = (distribution[format.type] || 0) + 1;
     });
 
@@ -675,9 +710,9 @@ export class DataArchaeologist {
   private calculateDataQualityScore(issues: DataQualityIssue[]): number {
     if (issues.length === 0) return 100;
 
-    const highSeverityPenalty = issues.filter(i => i.severity === 'high').length * 10;
-    const mediumSeverityPenalty = issues.filter(i => i.severity === 'medium').length * 5;
-    const lowSeverityPenalty = issues.filter(i => i.severity === 'low').length * 2;
+    const highSeverityPenalty = issues.filter((i) => i.severity === 'high').length * 10;
+    const mediumSeverityPenalty = issues.filter((i) => i.severity === 'medium').length * 5;
+    const lowSeverityPenalty = issues.filter((i) => i.severity === 'low').length * 2;
 
     const totalPenalty = highSeverityPenalty + mediumSeverityPenalty + lowSeverityPenalty;
     return Math.max(0, 100 - totalPenalty);
@@ -710,7 +745,7 @@ export class DataArchaeologist {
     const patterns: MigrationPattern[] = [];
 
     // Generate patterns based on analysis
-    analysis.analysis.entityMapping.entities.forEach(entity => {
+    analysis.analysis.entityMapping.entities.forEach((entity) => {
       const pattern = this.generateEntityMigrationPattern(entity, analysis);
       if (pattern) {
         patterns.push(pattern);
@@ -723,7 +758,9 @@ export class DataArchaeologist {
   /**
    * Generate migration recommendations
    */
-  private generateMigrationRecommendations(analysis: LegacySystemAnalysis): MigrationRecommendation[] {
+  private generateMigrationRecommendations(
+    analysis: LegacySystemAnalysis
+  ): MigrationRecommendation[] {
     const recommendations: MigrationRecommendation[] = [];
 
     // Complexity-based recommendations
@@ -735,7 +772,7 @@ export class DataArchaeologist {
           priority: 'high',
           description: 'Simple migration - can use direct mapping approach',
           effort: 'low',
-          impact: 'high'
+          impact: 'high',
         });
         break;
       case 'medium':
@@ -745,7 +782,7 @@ export class DataArchaeologist {
           priority: 'high',
           description: 'Moderate complexity - implement phased migration approach',
           effort: 'medium',
-          impact: 'high'
+          impact: 'high',
         });
         break;
       case 'high':
@@ -755,7 +792,7 @@ export class DataArchaeologist {
           priority: 'critical',
           description: 'High complexity - requires careful planning and data transformation',
           effort: 'high',
-          impact: 'high'
+          impact: 'high',
         });
         break;
       case 'very_high':
@@ -763,9 +800,10 @@ export class DataArchaeologist {
           id: uuidv4(),
           category: 'Migration Strategy',
           priority: 'critical',
-          description: 'Very high complexity - consider parallel migration or legacy system coexistence',
+          description:
+            'Very high complexity - consider parallel migration or legacy system coexistence',
           effort: 'very_high',
-          impact: 'critical'
+          impact: 'critical',
         });
         break;
     }
@@ -778,7 +816,7 @@ export class DataArchaeologist {
         priority: 'high',
         description: 'Address data quality issues before migration',
         effort: 'medium',
-        impact: 'high'
+        impact: 'high',
       });
     }
 
@@ -788,7 +826,10 @@ export class DataArchaeologist {
   /**
    * Generate entity migration pattern
    */
-  private generateEntityMigrationPattern(entity: LegacyEntity, analysis: LegacySystemAnalysis): MigrationPattern | null {
+  private generateEntityMigrationPattern(
+    entity: LegacyEntity,
+    analysis: LegacySystemAnalysis
+  ): MigrationPattern | null {
     // Find matching REFUSE entity
     const refuseEntity = this.findMatchingRefuseEntity(entity);
 
@@ -801,7 +842,7 @@ export class DataArchaeologist {
       fieldMappings: this.generateFieldMappings(entity, refuseEntity),
       transformationRules: this.generateTransformationRules(entity),
       migrationStrategy: this.determineMigrationStrategy(entity, analysis),
-      estimatedComplexity: this.calculatePatternComplexity(entity)
+      estimatedComplexity: this.calculatePatternComplexity(entity),
     };
   }
 
@@ -831,22 +872,22 @@ export class DataArchaeologist {
 
     // Simple field name mapping
     const nameMapping: Record<string, string> = {
-      'customer_id': 'id',
-      'customer_name': 'name',
-      'service_type': 'serviceType',
-      'container_type': 'containerType',
-      'created_date': 'createdAt',
-      'modified_date': 'updatedAt'
+      customer_id: 'id',
+      customer_name: 'name',
+      service_type: 'serviceType',
+      container_type: 'containerType',
+      created_date: 'createdAt',
+      modified_date: 'updatedAt',
     };
 
-    legacyEntity.fields.forEach(field => {
+    legacyEntity.fields.forEach((field) => {
       const mappedName = nameMapping[field.name.toLowerCase()] || field.name;
 
       mappings.push({
         legacyField: field.name,
         refuseField: mappedName,
         transformation: 'direct',
-        required: field.required
+        required: field.required,
       });
     });
 
@@ -860,14 +901,14 @@ export class DataArchaeologist {
     const rules: TransformationRule[] = [];
 
     // Add default transformation rules based on field types
-    entity.fields.forEach(field => {
+    entity.fields.forEach((field) => {
       if (field.type === 'date') {
         rules.push({
           field: field.name,
           type: 'format_conversion',
           fromFormat: 'unknown',
           toFormat: 'ISO-8601',
-          rule: `Convert ${field.name} to ISO-8601 date format`
+          rule: `Convert ${field.name} to ISO-8601 date format`,
         });
       }
     });
@@ -878,7 +919,10 @@ export class DataArchaeologist {
   /**
    * Determine migration strategy
    */
-  private determineMigrationStrategy(entity: LegacyEntity, analysis: LegacySystemAnalysis): MigrationStrategyType {
+  private determineMigrationStrategy(
+    entity: LegacyEntity,
+    analysis: LegacySystemAnalysis
+  ): MigrationStrategyType {
     if (entity.fields.length <= 5 && analysis.analysis.dataFormats.formatDistribution['json'] > 0) {
       return 'direct_mapping';
     } else if (entity.fields.length <= 15) {
@@ -895,8 +939,8 @@ export class DataArchaeologist {
     let complexity = 0;
 
     complexity += entity.fields.length * 0.1; // More fields = more complex
-    complexity += entity.fields.filter(f => f.type === 'object').length * 2; // Object fields are complex
-    complexity += entity.fields.filter(f => f.type === 'array').length * 1.5; // Array fields are somewhat complex
+    complexity += entity.fields.filter((f) => f.type === 'object').length * 2; // Object fields are complex
+    complexity += entity.fields.filter((f) => f.type === 'array').length * 1.5; // Array fields are somewhat complex
 
     return Math.min(10, complexity);
   }
@@ -907,7 +951,7 @@ export class DataArchaeologist {
   private deduplicateEntities(entities: LegacyEntity[]): LegacyEntity[] {
     const uniqueEntities = new Map<string, LegacyEntity>();
 
-    entities.forEach(entity => {
+    entities.forEach((entity) => {
       const key = entity.name.toLowerCase();
       if (!uniqueEntities.has(key)) {
         uniqueEntities.set(key, entity);
@@ -923,7 +967,7 @@ export class DataArchaeologist {
   private deduplicateRelationships(relationships: EntityRelationship[]): EntityRelationship[] {
     const uniqueRelationships = new Map<string, EntityRelationship>();
 
-    relationships.forEach(rel => {
+    relationships.forEach((rel) => {
       const key = `${rel.fromEntity}-${rel.toEntity}-${rel.type}`;
       if (!uniqueRelationships.has(key)) {
         uniqueRelationships.set(key, rel);
@@ -946,10 +990,10 @@ export class DataArchaeologist {
         /company[_-]?name/i,
         /contact[_-]?info/i,
         /billing[_-]?address/i,
-        /service[_-]?address/i
+        /service[_-]?address/i,
       ],
       entityType: 'Customer',
-      confidence: 0.8
+      confidence: 0.8,
     });
 
     // Service data patterns
@@ -961,10 +1005,10 @@ export class DataArchaeologist {
         /pickup[_-]?schedule/i,
         /service[_-]?frequency/i,
         /rate/i,
-        /price/i
+        /price/i,
       ],
       entityType: 'Service',
-      confidence: 0.7
+      confidence: 0.7,
     });
 
     // Route data patterns
@@ -976,10 +1020,10 @@ export class DataArchaeologist {
         /driver[_-]?id/i,
         /vehicle[_-]?id/i,
         /stops/i,
-        /sequence/i
+        /sequence/i,
       ],
       entityType: 'Route',
-      confidence: 0.6
+      confidence: 0.6,
     });
   }
 
@@ -1001,7 +1045,11 @@ export class DataArchaeologist {
         this.migrationStrategies.set(strategy.name, strategy);
       }
     } catch (error) {
-      console.warn(chalk.yellow(`⚠️ Failed to load migration strategies: ${error instanceof Error ? error.message : String(error)}`));
+// CONSOLE:       console.warn(
+        chalk.yellow(
+          `⚠️ Failed to load migration strategies: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
     }
   }
 }
@@ -1107,7 +1155,14 @@ export interface DataFormat {
 /**
  * Data format type
  */
-export type DataFormatType = 'json' | 'csv' | 'xml' | 'sql' | 'database' | 'spreadsheet' | 'unknown';
+export type DataFormatType =
+  | 'json'
+  | 'csv'
+  | 'xml'
+  | 'sql'
+  | 'database'
+  | 'spreadsheet'
+  | 'unknown';
 
 /**
  * Data structure
@@ -1212,7 +1267,11 @@ export interface TransformationRule {
 /**
  * Migration strategy type
  */
-export type MigrationStrategyType = 'direct_mapping' | 'field_mapping' | 'custom_transformation' | 'manual';
+export type MigrationStrategyType =
+  | 'direct_mapping'
+  | 'field_mapping'
+  | 'custom_transformation'
+  | 'manual';
 
 /**
  * Migration recommendation
@@ -1287,7 +1346,7 @@ export class DataArchaeologistCLI {
 
   private async analyzeCommand(args: string[]): Promise<void> {
     const options: LegacySystemAnalysisOptions = {
-      sourcePath: process.cwd()
+      sourcePath: process.cwd(),
     };
 
     // Parse options
@@ -1313,43 +1372,46 @@ export class DataArchaeologistCLI {
       const outputPath = `./legacy-analysis-${Date.now()}.json`;
       writeFileSync(outputPath, JSON.stringify(analysis, null, 2));
 
-      console.log(chalk.green(`✅ Analysis complete! Results saved to: ${outputPath}`));
-      console.log(chalk.gray(`   System: ${analysis.systemName}`));
-      console.log(chalk.gray(`   Files: ${analysis.analysis.fileStructure.files.length}`));
-      console.log(chalk.gray(`   Entities: ${analysis.analysis.entityMapping.entities.length}`));
-      console.log(chalk.gray(`   Migration Complexity: ${analysis.analysis.migrationComplexity}`));
-
+// CONSOLE:       console.log(chalk.green(`✅ Analysis complete! Results saved to: ${outputPath}`));
+// CONSOLE:       console.log(chalk.gray(`   System: ${analysis.systemName}`));
+// CONSOLE:       console.log(chalk.gray(`   Files: ${analysis.analysis.fileStructure.files.length}`));
+// CONSOLE:       console.log(chalk.gray(`   Entities: ${analysis.analysis.entityMapping.entities.length}`));
+// CONSOLE:       console.log(chalk.gray(`   Migration Complexity: ${analysis.analysis.migrationComplexity}`));
     } catch (error) {
-      console.error(chalk.red(`❌ Analysis failed: ${error instanceof Error ? error.message : String(error)}`));
+// CONSOLE:       console.error(
+        chalk.red(`❌ Analysis failed: ${error instanceof Error ? error.message : String(error)}`)
+      );
       process.exit(1);
     }
   }
 
   private patternsCommand(args: string[]): void {
-    console.log(chalk.blue('\n🔍 Data Pattern Matchers'));
-    console.log(chalk.gray('=' .repeat(50)));
+// CONSOLE:     console.log(chalk.blue('\n🔍 Data Pattern Matchers'));
+// CONSOLE:     console.log(chalk.gray('='.repeat(50)));
 
-    console.log(chalk.green('Available Pattern Types:'));
-    console.log('  • Customer Data Patterns');
-    console.log('  • Service Data Patterns');
-    console.log('  • Route Data Patterns');
-    console.log('  • Facility Data Patterns');
-    console.log('  • Container Data Patterns\n');
+// CONSOLE:     console.log(chalk.green('Available Pattern Types:'));
+// CONSOLE:     console.log('  • Customer Data Patterns');
+// CONSOLE:     console.log('  • Service Data Patterns');
+// CONSOLE:     console.log('  • Route Data Patterns');
+// CONSOLE:     console.log('  • Facility Data Patterns');
+// CONSOLE:     console.log('  • Container Data Patterns\n');
 
-    console.log(chalk.green('Usage:'));
-    console.log('  data-archaeologist analyze --source ./legacy-data --patterns customer,service\n');
+// CONSOLE:     console.log(chalk.green('Usage:'));
+// CONSOLE:     console.log(
+      '  data-archaeologist analyze --source ./legacy-data --patterns customer,service\n'
+    );
   }
 
   private reportCommand(args: string[]): void {
     const reportPath = args[0];
     if (!reportPath) {
-      console.error('Usage: report <analysis-file>');
+// CONSOLE:       console.error('Usage: report <analysis-file>');
       process.exit(1);
     }
 
     try {
       if (!existsSync(reportPath)) {
-        console.error(`Analysis file not found: ${reportPath}`);
+// CONSOLE:         console.error(`Analysis file not found: ${reportPath}`);
         process.exit(1);
       }
 
@@ -1358,91 +1420,123 @@ export class DataArchaeologistCLI {
 
       this.printAnalysisReport(analysis);
     } catch (error) {
-      console.error(chalk.red(`❌ Failed to load analysis: ${error instanceof Error ? error.message : String(error)}`));
+// CONSOLE:       console.error(
+        chalk.red(
+          `❌ Failed to load analysis: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       process.exit(1);
     }
   }
 
   private printAnalysisReport(analysis: LegacySystemAnalysis): void {
-    console.log(chalk.blue('\n🏛️ Legacy System Analysis Report'));
-    console.log(chalk.gray('=' .repeat(50)));
-    console.log(chalk.gray(`Analysis ID: ${analysis.id}`));
-    console.log(chalk.gray(`Generated: ${analysis.timestamp}`));
-    console.log(chalk.gray(`System: ${analysis.systemName}`));
-    console.log(chalk.gray(`Source: ${analysis.sourcePath}`));
+// CONSOLE:     console.log(chalk.blue('\n🏛️ Legacy System Analysis Report'));
+// CONSOLE:     console.log(chalk.gray('='.repeat(50)));
+// CONSOLE:     console.log(chalk.gray(`Analysis ID: ${analysis.id}`));
+// CONSOLE:     console.log(chalk.gray(`Generated: ${analysis.timestamp}`));
+// CONSOLE:     console.log(chalk.gray(`System: ${analysis.systemName}`));
+// CONSOLE:     console.log(chalk.gray(`Source: ${analysis.sourcePath}`));
 
-    console.log(chalk.blue('\n📊 File Structure Analysis:'));
-    console.log(chalk.green(`  Total Files: ${analysis.analysis.fileStructure.files.length}`));
-    console.log(chalk.green(`  Directories: ${analysis.analysis.fileStructure.directories.length}`));
-    console.log(chalk.green(`  Total Size: ${(analysis.analysis.fileStructure.totalSize / 1024).toFixed(2)} KB`));
-    console.log(chalk.green(`  Structure Complexity: ${analysis.analysis.fileStructure.structureComplexity.toFixed(1)}/100`));
+// CONSOLE:     console.log(chalk.blue('\n📊 File Structure Analysis:'));
+// CONSOLE:     console.log(chalk.green(`  Total Files: ${analysis.analysis.fileStructure.files.length}`));
+// CONSOLE:     console.log(
+      chalk.green(`  Directories: ${analysis.analysis.fileStructure.directories.length}`)
+    );
+// CONSOLE:     console.log(
+      chalk.green(
+        `  Total Size: ${(analysis.analysis.fileStructure.totalSize / 1024).toFixed(2)} KB`
+      )
+    );
+// CONSOLE:     console.log(
+      chalk.green(
+        `  Structure Complexity: ${analysis.analysis.fileStructure.structureComplexity.toFixed(1)}/100`
+      )
+    );
 
-    console.log(chalk.blue('\n📋 Data Formats:'));
-    console.log(chalk.green(`  Schema Files: ${analysis.analysis.dataFormats.schemaCount}`));
+// CONSOLE:     console.log(chalk.blue('\n📋 Data Formats:'));
+// CONSOLE:     console.log(chalk.green(`  Schema Files: ${analysis.analysis.dataFormats.schemaCount}`));
     Object.entries(analysis.analysis.dataFormats.formatDistribution).forEach(([format, count]) => {
-      console.log(chalk.gray(`  ${format.toUpperCase()}: ${count} files`));
+// CONSOLE:       console.log(chalk.gray(`  ${format.toUpperCase()}: ${count} files`));
     });
 
-    console.log(chalk.blue('\n🔗 Entity Mapping:'));
-    console.log(chalk.green(`  Entities Found: ${analysis.analysis.entityMapping.entities.length}`));
-    console.log(chalk.green(`  Confidence: ${(analysis.analysis.entityMapping.confidence * 100).toFixed(1)}%`));
+// CONSOLE:     console.log(chalk.blue('\n🔗 Entity Mapping:'));
+// CONSOLE:     console.log(
+      chalk.green(`  Entities Found: ${analysis.analysis.entityMapping.entities.length}`)
+    );
+// CONSOLE:     console.log(
+      chalk.green(`  Confidence: ${(analysis.analysis.entityMapping.confidence * 100).toFixed(1)}%`)
+    );
 
-    analysis.analysis.entityMapping.entities.slice(0, 5).forEach(entity => {
-      console.log(chalk.gray(`  • ${entity.name} (${entity.fields.length} fields)`));
+    analysis.analysis.entityMapping.entities.slice(0, 5).forEach((entity) => {
+// CONSOLE:       console.log(chalk.gray(`  • ${entity.name} (${entity.fields.length} fields)`));
     });
 
-    console.log(chalk.blue('\n✅ Data Quality:'));
-    console.log(chalk.green(`  Quality Score: ${analysis.analysis.dataQuality.overallScore.toFixed(1)}/100`));
-    console.log(chalk.green(`  Issues Found: ${analysis.analysis.dataQuality.issues.length}`));
+// CONSOLE:     console.log(chalk.blue('\n✅ Data Quality:'));
+// CONSOLE:     console.log(
+      chalk.green(`  Quality Score: ${analysis.analysis.dataQuality.overallScore.toFixed(1)}/100`)
+    );
+// CONSOLE:     console.log(chalk.green(`  Issues Found: ${analysis.analysis.dataQuality.issues.length}`));
 
     if (analysis.analysis.dataQuality.issues.length > 0) {
-      const highSeverity = analysis.analysis.dataQuality.issues.filter(i => i.severity === 'high').length;
-      const mediumSeverity = analysis.analysis.dataQuality.issues.filter(i => i.severity === 'medium').length;
-      console.log(chalk.red(`  High Priority: ${highSeverity}`));
-      console.log(chalk.yellow(`  Medium Priority: ${mediumSeverity}`));
+      const highSeverity = analysis.analysis.dataQuality.issues.filter(
+        (i) => i.severity === 'high'
+      ).length;
+      const mediumSeverity = analysis.analysis.dataQuality.issues.filter(
+        (i) => i.severity === 'medium'
+      ).length;
+// CONSOLE:       console.log(chalk.red(`  High Priority: ${highSeverity}`));
+// CONSOLE:       console.log(chalk.yellow(`  Medium Priority: ${mediumSeverity}`));
     }
 
-    console.log(chalk.blue('\n🎯 Migration Complexity:'));
-    console.log(chalk.green(`  Overall: ${analysis.analysis.migrationComplexity.replace('_', ' ').toUpperCase()}`));
+// CONSOLE:     console.log(chalk.blue('\n🎯 Migration Complexity:'));
+// CONSOLE:     console.log(
+      chalk.green(
+        `  Overall: ${analysis.analysis.migrationComplexity.replace('_', ' ').toUpperCase()}`
+      )
+    );
 
     if (analysis.patterns.length > 0) {
-      console.log(chalk.blue('\n🔄 Migration Patterns:'));
-      analysis.patterns.slice(0, 3).forEach(pattern => {
-        console.log(chalk.gray(`  ${pattern.legacyEntity} → ${pattern.refuseEntity}`));
-        console.log(chalk.gray(`    Complexity: ${pattern.estimatedComplexity.toFixed(1)}/10`));
+// CONSOLE:       console.log(chalk.blue('\n🔄 Migration Patterns:'));
+      analysis.patterns.slice(0, 3).forEach((pattern) => {
+// CONSOLE:         console.log(chalk.gray(`  ${pattern.legacyEntity} → ${pattern.refuseEntity}`));
+// CONSOLE:         console.log(chalk.gray(`    Complexity: ${pattern.estimatedComplexity.toFixed(1)}/10`));
       });
     }
 
     if (analysis.recommendations.length > 0) {
-      console.log(chalk.blue('\n💡 Recommendations:'));
-      analysis.recommendations.slice(0, 5).forEach(rec => {
-        const priorityColor = rec.priority === 'critical' ? chalk.red :
-                             rec.priority === 'high' ? chalk.yellow : chalk.green;
-        console.log(priorityColor(`  [${rec.priority.toUpperCase()}] ${rec.description}`));
+// CONSOLE:       console.log(chalk.blue('\n💡 Recommendations:'));
+      analysis.recommendations.slice(0, 5).forEach((rec) => {
+        const priorityColor =
+          rec.priority === 'critical'
+            ? chalk.red
+            : rec.priority === 'high'
+              ? chalk.yellow
+              : chalk.green;
+// CONSOLE:         console.log(priorityColor(`  [${rec.priority.toUpperCase()}] ${rec.description}`));
       });
     }
   }
 
   private printUsage(): void {
-    console.log(chalk.blue('\nREFUSE Protocol Data Archaeologist'));
-    console.log(chalk.gray('Usage: data-archaeologist <command> [options]\n'));
+// CONSOLE:     console.log(chalk.blue('\nREFUSE Protocol Data Archaeologist'));
+// CONSOLE:     console.log(chalk.gray('Usage: data-archaeologist <command> [options]\n'));
 
-    console.log(chalk.green('Commands:'));
-    console.log('  analyze [options]     Analyze legacy system data structure');
-    console.log('  patterns              Show available data pattern matchers');
-    console.log('  report <file>         Display analysis report\n');
+// CONSOLE:     console.log(chalk.green('Commands:'));
+// CONSOLE:     console.log('  analyze [options]     Analyze legacy system data structure');
+// CONSOLE:     console.log('  patterns              Show available data pattern matchers');
+// CONSOLE:     console.log('  report <file>         Display analysis report\n');
 
-    console.log(chalk.green('Options for analyze command:'));
-    console.log('  --source <path>       Source directory to analyze (default: current)');
-    console.log('  --name <name>         System name for the analysis');
-    console.log('  --subdirs             Include subdirectories in analysis');
-    console.log('  --binary              Include binary files in analysis');
-    console.log('  --migration-plan      Generate detailed migration plan\n');
+// CONSOLE:     console.log(chalk.green('Options for analyze command:'));
+// CONSOLE:     console.log('  --source <path>       Source directory to analyze (default: current)');
+// CONSOLE:     console.log('  --name <name>         System name for the analysis');
+// CONSOLE:     console.log('  --subdirs             Include subdirectories in analysis');
+// CONSOLE:     console.log('  --binary              Include binary files in analysis');
+// CONSOLE:     console.log('  --migration-plan      Generate detailed migration plan\n');
 
-    console.log(chalk.green('Examples:'));
-    console.log('  data-archaeologist analyze --source ./legacy-data --name "Old Waste System"');
-    console.log('  data-archaeologist analyze --subdirs --migration-plan');
-    console.log('  data-archaeologist report ./legacy-analysis-1703123456789.json\n');
+// CONSOLE:     console.log(chalk.green('Examples:'));
+// CONSOLE:     console.log('  data-archaeologist analyze --source ./legacy-data --name "Old Waste System"');
+// CONSOLE:     console.log('  data-archaeologist analyze --subdirs --migration-plan');
+// CONSOLE:     console.log('  data-archaeologist report ./legacy-analysis-1703123456789.json\n');
   }
 }
 
@@ -1453,7 +1547,9 @@ export function createDataArchaeologist(options?: DataArchaeologistOptions): Dat
   return new DataArchaeologist(options);
 }
 
-export function createDataArchaeologistCLI(options?: DataArchaeologistOptions): DataArchaeologistCLI {
+export function createDataArchaeologistCLI(
+  options?: DataArchaeologistOptions
+): DataArchaeologistCLI {
   return new DataArchaeologistCLI(options);
 }
 
@@ -1482,5 +1578,5 @@ export type {
   MigrationRecommendation,
   MigrationStrategy,
   DataPatternMatcher,
-  DirectoryStats
+  DirectoryStats,
 };

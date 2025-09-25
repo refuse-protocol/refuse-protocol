@@ -21,11 +21,11 @@ describe('Event Entity Schema Validation', () => {
       eventData: {
         customerOnboarded: {
           salesRepId: '123e4567-e89b-12d3-a456-426614174001',
-          contractValue: 15000.00
-        }
+          contractValue: 15000.0,
+        },
       },
       createdAt: new Date().toISOString(),
-      version: 1
+      version: 1,
     };
 
     const result = validateEvent.validate(validEvent);

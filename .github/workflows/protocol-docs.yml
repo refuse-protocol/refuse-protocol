@@ -116,7 +116,13 @@ jobs:
             });
 
             console.log(\`📊 Found \${foundEntities} main entity references in documentation\`);
-            console.log('✅ API documentation validation completed');
+
+            // Basic validation only - main validation is in CI pipeline
+            if (files.length > 0) {
+              console.log('✅ API documentation validation completed');
+            } else {
+              console.warn('⚠️ No documentation files generated');
+            }
           } else {
             console.error('❌ Documentation directory not found');
             process.exit(1);

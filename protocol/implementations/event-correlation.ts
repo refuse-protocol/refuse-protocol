@@ -45,7 +45,7 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
     const insights = this.insightsEngine.generateInsights(event, {
       patterns,
       correlations,
-      anomalies
+      anomalies,
     });
 
     return {
@@ -54,7 +54,7 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
       correlations,
       anomalies,
       insights,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -139,8 +139,9 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
     switch (condition.type) {
       case 'time_range':
         const eventTime = new Date(event.timestamp).getTime();
-        return eventTime >= condition.startTime.getTime() &&
-               eventTime <= condition.endTime.getTime();
+        return (
+          eventTime >= condition.startTime.getTime() && eventTime <= condition.endTime.getTime()
+        );
 
       case 'frequency':
         // Check if event frequency meets the condition
@@ -166,7 +167,7 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
       correlationType: rule.correlationType,
       confidence: rule.confidence || 0.5,
       relatedEvents: [],
-      metadata: rule.metadata || {}
+      metadata: rule.metadata || {},
     };
   }
 
@@ -178,10 +179,13 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
     this.patternDetectors.set('workflow', {
       name: 'Workflow Pattern Detector',
       detect: (event: Event, tracker: AdvancedEventCorrelationTracker) => {
-        const correlationGroup = tracker.getCorrelationGroup(event.entityType, this.extractEntityId(event));
+        const correlationGroup = tracker.getCorrelationGroup(
+          event.entityType,
+          this.extractEntityId(event)
+        );
         if (!correlationGroup || correlationGroup.events.length < 3) return null;
 
-        const eventTypes = [...new Set(correlationGroup.events.map(e => e.eventType))];
+        const eventTypes = [...new Set(correlationGroup.events.map((e) => e.eventType))];
         if (eventTypes.length >= 3) {
           return {
             id: `pattern-${Date.now()}`,
@@ -191,13 +195,13 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
             events: correlationGroup.events,
             metadata: {
               entityType: event.entityType,
-              entityId: this.extractEntityId(event)
-            }
+              entityId: this.extractEntityId(event),
+            },
           };
         }
 
         return null;
-      }
+      },
     });
 
     // Error pattern detector
@@ -207,8 +211,14 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
         if (event.eventType !== 'error' && event.eventType !== 'failed') return null;
 
         // Look for repeated errors
-        const recentEvents = tracker.getCorrelatedEvents(event.entityType, this.extractEntityId(event), 3600000); // Last hour
-        const errorEvents = recentEvents.filter(e => e.eventType === 'error' || e.eventType === 'failed');
+        const recentEvents = tracker.getCorrelatedEvents(
+          event.entityType,
+          this.extractEntityId(event),
+          3600000
+        ); // Last hour
+        const errorEvents = recentEvents.filter(
+          (e) => e.eventType === 'error' || e.eventType === 'failed'
+        );
 
         if (errorEvents.length >= 3) {
           return {
@@ -219,13 +229,13 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
             events: errorEvents,
             metadata: {
               errorCount: errorEvents.length,
-              timeWindow: 3600000
-            }
+              timeWindow: 3600000,
+            },
           };
         }
 
         return null;
-      }
+      },
     });
 
     // Performance pattern detector
@@ -237,9 +247,11 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
 
         const eventData = event.eventData as any;
         if (eventData.duration || eventData.processingTime || eventData.responseTime) {
-          const processingTime = eventData.duration || eventData.processingTime || eventData.responseTime;
+          const processingTime =
+            eventData.duration || eventData.processingTime || eventData.responseTime;
 
-          if (processingTime > 5000) { // 5 seconds
+          if (processingTime > 5000) {
+            // 5 seconds
             return {
               id: `perf-pattern-${Date.now()}`,
               type: 'performance_issue',
@@ -248,14 +260,14 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
               events: [event],
               metadata: {
                 processingTime,
-                threshold: 5000
-              }
+                threshold: 5000,
+              },
             };
           }
         }
 
         return null;
-      }
+      },
     });
   }
 
@@ -275,14 +287,14 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
           {
             type: 'time_range',
             startTime: new Date(Date.now() - 300000), // Last 5 minutes
-            endTime: new Date(Date.now() + 300000)    // Next 5 minutes
-          }
+            endTime: new Date(Date.now() + 300000), // Next 5 minutes
+          },
         ],
         confidence: 0.8,
         metadata: {
           expectedNextEvents: ['service_created'],
-          timeWindow: 600000
-        }
+          timeWindow: 600000,
+        },
       },
       {
         id: 'route-completion-to-ticket',
@@ -295,14 +307,14 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
           {
             type: 'time_range',
             startTime: new Date(Date.now() - 1800000), // Last 30 minutes
-            endTime: new Date(Date.now() + 600000)     // Next 10 minutes
-          }
+            endTime: new Date(Date.now() + 600000), // Next 10 minutes
+          },
         ],
         confidence: 0.9,
         metadata: {
           expectedNextEvents: ['material_ticket_created'],
-          timeWindow: 2400000
-        }
+          timeWindow: 2400000,
+        },
       },
       {
         id: 'facility-capacity-warning',
@@ -315,15 +327,15 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
           {
             type: 'frequency',
             threshold: 5,
-            timeWindow: 3600000 // 1 hour
-          }
+            timeWindow: 3600000, // 1 hour
+          },
         ],
         confidence: 0.7,
         metadata: {
           capacityThreshold: 0.8,
-          warningType: 'capacity'
-        }
-      }
+          warningType: 'capacity',
+        },
+      },
     ];
   }
 
@@ -335,7 +347,7 @@ export class AdvancedEventCorrelationTracker extends EventCorrelationTracker {
       new FrequencyAnomalyDetector(),
       new TimingAnomalyDetector(),
       new VolumeAnomalyDetector(),
-      new ErrorRateAnomalyDetector()
+      new ErrorRateAnomalyDetector(),
     ];
   }
 
@@ -448,11 +460,14 @@ export class InsightsEngine {
   /**
    * Generate insights from event analysis
    */
-  generateInsights(event: Event, analysis: {
-    patterns: DetectedPattern[];
-    correlations: EventCorrelation[];
-    anomalies: Anomaly[];
-  }): string[] {
+  generateInsights(
+    event: Event,
+    analysis: {
+      patterns: DetectedPattern[];
+      correlations: EventCorrelation[];
+      anomalies: Anomaly[];
+    }
+  ): string[] {
     const insights: string[] = [];
 
     // Pattern insights
@@ -503,10 +518,15 @@ export class InsightsEngine {
 export class FrequencyAnomalyDetector implements AnomalyDetector {
   detect(event: Event, tracker: AdvancedEventCorrelationTracker): Anomaly | null {
     // Detect unusual frequency of events
-    const recentEvents = tracker.getCorrelatedEvents(event.entityType, this.extractEntityId(event), 3600000);
+    const recentEvents = tracker.getCorrelatedEvents(
+      event.entityType,
+      this.extractEntityId(event),
+      3600000
+    );
     const frequency = recentEvents.length / (3600000 / 1000); // events per second
 
-    if (frequency > 10) { // More than 10 events per second
+    if (frequency > 10) {
+      // More than 10 events per second
       return {
         id: `freq-anomaly-${Date.now()}`,
         type: 'frequency',
@@ -514,7 +534,7 @@ export class FrequencyAnomalyDetector implements AnomalyDetector {
         description: `Unusual event frequency: ${frequency.toFixed(1)} events/second`,
         confidence: 0.8,
         event,
-        metadata: { frequency, timeWindow: 3600000 }
+        metadata: { frequency, timeWindow: 3600000 },
       };
     }
 
@@ -541,7 +561,8 @@ export class TimingAnomalyDetector implements AnomalyDetector {
     if (eventData.duration || eventData.processingTime) {
       const processingTime = eventData.duration || eventData.processingTime;
 
-      if (processingTime > 10000) { // More than 10 seconds
+      if (processingTime > 10000) {
+        // More than 10 seconds
         return {
           id: `timing-anomaly-${Date.now()}`,
           type: 'timing',
@@ -549,7 +570,7 @@ export class TimingAnomalyDetector implements AnomalyDetector {
           description: `Slow processing detected: ${processingTime}ms`,
           confidence: 0.7,
           event,
-          metadata: { processingTime, threshold: 10000 }
+          metadata: { processingTime, threshold: 10000 },
         };
       }
     }
@@ -570,7 +591,8 @@ export class VolumeAnomalyDetector implements AnomalyDetector {
     if (eventData.volume || eventData.quantity || eventData.amount) {
       const volume = eventData.volume || eventData.quantity || eventData.amount;
 
-      if (volume > 1000) { // Unusually high volume
+      if (volume > 1000) {
+        // Unusually high volume
         return {
           id: `volume-anomaly-${Date.now()}`,
           type: 'volume',
@@ -578,7 +600,7 @@ export class VolumeAnomalyDetector implements AnomalyDetector {
           description: `Unusual volume detected: ${volume}`,
           confidence: 0.6,
           event,
-          metadata: { volume, threshold: 1000 }
+          metadata: { volume, threshold: 1000 },
         };
       }
     }
@@ -594,11 +616,18 @@ export class ErrorRateAnomalyDetector implements AnomalyDetector {
   detect(event: Event, tracker: AdvancedEventCorrelationTracker): Anomaly | null {
     // Detect error rate anomalies
     if (event.eventType === 'error' || event.eventType === 'failed') {
-      const recentEvents = tracker.getCorrelatedEvents(event.entityType, this.extractEntityId(event), 3600000);
-      const errorEvents = recentEvents.filter(e => e.eventType === 'error' || e.eventType === 'failed');
+      const recentEvents = tracker.getCorrelatedEvents(
+        event.entityType,
+        this.extractEntityId(event),
+        3600000
+      );
+      const errorEvents = recentEvents.filter(
+        (e) => e.eventType === 'error' || e.eventType === 'failed'
+      );
       const errorRate = errorEvents.length / recentEvents.length;
 
-      if (errorRate > 0.1) { // More than 10% error rate
+      if (errorRate > 0.1) {
+        // More than 10% error rate
         return {
           id: `error-rate-anomaly-${Date.now()}`,
           type: 'error_rate',
@@ -606,7 +635,11 @@ export class ErrorRateAnomalyDetector implements AnomalyDetector {
           description: `High error rate detected: ${(errorRate * 100).toFixed(1)}%`,
           confidence: 0.9,
           event,
-          metadata: { errorRate, totalEvents: recentEvents.length, errorEvents: errorEvents.length }
+          metadata: {
+            errorRate,
+            totalEvents: recentEvents.length,
+            errorEvents: errorEvents.length,
+          },
         };
       }
     }
@@ -638,5 +671,5 @@ export type {
   EventCorrelation,
   AnomalyDetector,
   Anomaly,
-  EventCorrelationResult
+  EventCorrelationResult,
 };

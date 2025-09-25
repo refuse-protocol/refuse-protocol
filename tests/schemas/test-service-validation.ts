@@ -23,12 +23,12 @@ describe('Service Entity Schema Validation', () => {
         startDate: '2024-01-15',
         dayOfWeek: 'monday',
         startTime: '08:00',
-        endTime: '17:00'
+        endTime: '17:00',
       },
       status: 'active',
       createdAt: new Date(),
       updatedAt: new Date(),
-      version: 1
+      version: 1,
     };
 
     const result = validateService.validate(validService);
@@ -57,13 +57,13 @@ describe('Service Entity Schema Validation', () => {
         endDate: '2024-12-31',
         dayOfWeek: 'tuesday',
         startTime: '09:00',
-        endTime: '17:00'
+        endTime: '17:00',
       },
       pricing: {
-        baseRate: 150.00,
+        baseRate: 150.0,
         rateUnit: 'month',
         fuelSurcharge: 0.15,
-        environmentalFee: 25.00
+        environmentalFee: 25.0,
       },
       status: 'active',
       serviceStartDate: '2024-09-25',
@@ -73,7 +73,7 @@ describe('Service Entity Schema Validation', () => {
       specialInstructions: 'Handle with care - contains hazardous materials',
       createdAt: new Date(),
       updatedAt: new Date(),
-      version: 1
+      version: 1,
     };
 
     const result = validateService.validate(fullService);
@@ -99,9 +99,9 @@ describe('Service Entity Schema Validation', () => {
         city: '', // Invalid: empty city
         state: 'X', // Invalid: too short
         zipCode: 'invalid', // Invalid: not valid zip
-        country: 'USA' // Invalid: too long
+        country: 'USA', // Invalid: too long
       },
-      status: 'invalid_status' // Invalid: not in enum
+      status: 'invalid_status', // Invalid: not in enum
       // Missing required id, createdAt, updatedAt, version
     };
 
@@ -115,7 +115,7 @@ describe('Service Entity Schema Validation', () => {
   test('should validate service type enum values', () => {
     const serviceTypes = ['waste', 'recycling', 'organics', 'hazardous', 'bulk'];
 
-    serviceTypes.forEach(serviceType => {
+    serviceTypes.forEach((serviceType) => {
       const service = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         customerId: '456e7890-e12b-34c5-b678-901234567890',
@@ -125,12 +125,12 @@ describe('Service Entity Schema Validation', () => {
         containerSize: '4_yard',
         schedule: {
           frequency: 'weekly',
-          startDate: '2024-01-15'
+          startDate: '2024-01-15',
         },
         status: 'active',
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
+        version: 1,
       };
 
       const result = validateService.validate(service);
@@ -141,7 +141,7 @@ describe('Service Entity Schema Validation', () => {
   test('should validate container type enum values', () => {
     const containerTypes = ['cart', 'dumpster', 'bin', 'rolloff', 'compactor'];
 
-    containerTypes.forEach(containerType => {
+    containerTypes.forEach((containerType) => {
       const service = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         customerId: '456e7890-e12b-34c5-b678-901234567890',
@@ -151,12 +151,12 @@ describe('Service Entity Schema Validation', () => {
         containerSize: '4_yard',
         schedule: {
           frequency: 'weekly',
-          startDate: '2024-01-15'
+          startDate: '2024-01-15',
         },
         status: 'active',
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
+        version: 1,
       };
 
       const result = validateService.validate(service);
@@ -167,7 +167,7 @@ describe('Service Entity Schema Validation', () => {
   test('should validate frequency enum values', () => {
     const frequencies = ['weekly', 'bi_weekly', 'monthly', 'on_call', 'one_time'];
 
-    frequencies.forEach(frequency => {
+    frequencies.forEach((frequency) => {
       const service = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         customerId: '456e7890-e12b-34c5-b678-901234567890',
@@ -177,12 +177,12 @@ describe('Service Entity Schema Validation', () => {
         containerSize: '4_yard',
         schedule: {
           frequency,
-          startDate: '2024-01-15'
+          startDate: '2024-01-15',
         },
         status: 'active',
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
+        version: 1,
       };
 
       const result = validateService.validate(service);

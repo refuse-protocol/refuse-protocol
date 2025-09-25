@@ -18,13 +18,16 @@ describe('Route Entity Schema Validation', () => {
         frequency: 'weekly' as const,
         dayOfWeek: 'monday',
         startTime: '06:00',
-        endTime: '15:00'
+        endTime: '15:00',
       },
-      assignedSites: ['123e4567-e89b-12d3-a456-426614174002', '123e4567-e89b-12d3-a456-426614174003'],
+      assignedSites: [
+        '123e4567-e89b-12d3-a456-426614174002',
+        '123e4567-e89b-12d3-a456-426614174003',
+      ],
       efficiency: 85.5,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      version: 1
+      version: 1,
     };
 
     const result = validateRoute.validate(validRoute);
@@ -42,7 +45,7 @@ describe('Route Entity Schema Validation', () => {
       type: 'invalid', // Invalid: not in enum
       status: 'invalid', // Invalid: not in enum
       territoryId: 'not-a-uuid', // Invalid: not a UUID format
-      schedule: { startTime: 'invalid', endTime: 'invalid' } // Invalid: not valid time format
+      schedule: { startTime: 'invalid', endTime: 'invalid' }, // Invalid: not valid time format
       // Missing required id, createdAt, updatedAt, version
     };
 

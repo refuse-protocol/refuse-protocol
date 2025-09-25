@@ -14,20 +14,15 @@
  * - Data transformation and legacy system integration
  */
 
-import { CustomerModel } from '../../protocol/implementations/customer'
-import { ServiceModel } from '../../protocol/implementations/service'
-import { RouteModel } from '../../protocol/implementations/route'
-import { FacilityModel } from '../../protocol/implementations/facility'
-import { MaterialTicketModel } from '../../protocol/implementations/material-ticket'
-import { ContractModel } from '../../protocol/implementations/contract'
-import { PaymentModel } from '../../protocol/implementations/payment'
-import { AllocationModel } from '../../protocol/implementations/allocation'
-import { EnvironmentalComplianceModel } from '../../protocol/implementations/environmental-compliance'
-import { EventStreamingSystem } from '../../protocol/implementations/event-system'
-import { DataTransformer } from '../../protocol/tools/data-transformer'
+import { CustomerModel } from '../../protocol/implementations/customer';
+import { ServiceModel } from '../../protocol/implementations/service';
+import { RouteModel } from '../../protocol/implementations/route';
+import { FacilityModel } from '../../protocol/implementations/facility';
+import { MaterialTicketModel } from '../../protocol/implementations/material-ticket';
+import { ContractModel } from '../../protocol/implementations/contract';
+import { PaymentModel } from '../../protocol/implementations/payment';
 
 describe('REFUSE Protocol Entity Unit Tests', () => {
-
   // Customer Entity Tests
   describe('Customer Entity', () => {
     test('should create valid customer with all required fields', () => {
@@ -39,30 +34,30 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         primaryContact: {
           name: 'John Smith',
           email: 'contact@testmfg.com',
-          phone: '555-0123'
+          phone: '555-0123',
         },
         serviceAddress: {
           street1: '123 Industrial Way',
           city: 'Manufacturing City',
           state: 'CA',
           zipCode: '94105',
-          country: 'USA'
+          country: 'USA',
         },
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const customer = new CustomerModel(customerData)
+      const customer = new CustomerModel(customerData);
 
-      expect(customer.id).toBe('CUST-001')
-      expect(customer.name).toBe('Test Manufacturing Inc.')
-      expect(customer.type).toBe('commercial')
-      expect(customer.status).toBe('active')
-      expect(customer.primaryContact?.email).toBe('contact@testmfg.com')
-      expect(customer.serviceAddress.city).toBe('Manufacturing City')
-      expect(customer.version).toBe(1)
-    })
+      expect(customer.id).toBe('CUST-001');
+      expect(customer.name).toBe('Test Manufacturing Inc.');
+      expect(customer.type).toBe('commercial');
+      expect(customer.status).toBe('active');
+      expect(customer.primaryContact?.email).toBe('contact@testmfg.com');
+      expect(customer.serviceAddress.city).toBe('Manufacturing City');
+      expect(customer.version).toBe(1);
+    });
 
     test('should validate customer contact information', () => {
       const customerData = {
@@ -73,22 +68,22 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         primaryContact: {
           name: 'Jane Doe',
           email: 'invalid-email', // Invalid email format
-          phone: '555-0123'
+          phone: '555-0123',
         },
         serviceAddress: {
           street1: '123 Industrial Way',
           city: 'Manufacturing City',
           state: 'CA',
           zipCode: '94105',
-          country: 'USA'
+          country: 'USA',
         },
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      expect(() => new CustomerModel(customerData)).toThrow('Primary contact email is invalid')
-    })
+      expect(() => new CustomerModel(customerData)).toThrow('Primary contact email is invalid');
+    });
 
     test('should handle optimistic locking', () => {
       const customerData = {
@@ -99,29 +94,29 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         primaryContact: {
           name: 'Bob Wilson',
           email: 'test@example.com',
-          phone: '555-0123'
+          phone: '555-0123',
         },
         serviceAddress: {
           street1: '123 Industrial Way',
           city: 'Manufacturing City',
           state: 'CA',
           zipCode: '94105',
-          country: 'USA'
+          country: 'USA',
         },
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const customer = new CustomerModel(customerData)
+      const customer = new CustomerModel(customerData);
 
       // First update should succeed
-      const updatedCustomer1 = customer.update({}, 1)
-      expect(updatedCustomer1.version).toBe(2)
+      const updatedCustomer1 = customer.update({}, 1);
+      expect(updatedCustomer1.version).toBe(2);
 
       // Second update with wrong version should fail - expect version 2 but customer is still version 1
-      expect(() => customer.update({}, 2)).toThrow('Version conflict. Expected: 2, Actual: 1')
-    })
+      expect(() => customer.update({}, 2)).toThrow('Version conflict. Expected: 2, Actual: 1');
+    });
 
     test('should validate customer service types', () => {
       const customer = new CustomerModel({
@@ -132,25 +127,25 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         primaryContact: {
           name: 'Alice Johnson',
           email: 'test@example.com',
-          phone: '555-0123'
+          phone: '555-0123',
         },
         serviceAddress: {
           street1: '123 Industrial Way',
           city: 'Manufacturing City',
           state: 'CA',
           zipCode: '94105',
-          country: 'USA'
+          country: 'USA',
         },
         serviceTypes: ['waste', 'recycling'],
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      })
+        version: 1,
+      });
 
-      expect(customer.serviceTypes).toContain('waste')
-      expect(customer.serviceTypes).toContain('recycling')
-    })
-  })
+      expect(customer.serviceTypes).toContain('waste');
+      expect(customer.serviceTypes).toContain('recycling');
+    });
+  });
 
   // Service Entity Tests
   describe('Service Entity', () => {
@@ -167,27 +162,27 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           dayOfWeek: 'monday',
           startDate: '2024-01-15',
           startTime: '08:00',
-          endTime: '17:00'
+          endTime: '17:00',
         },
         pricing: {
-          baseRate: 150.00,
+          baseRate: 150.0,
           rateUnit: 'month' as const,
-          fuelSurcharge: 0.25
+          fuelSurcharge: 0.25,
         },
         status: 'active' as const,
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const service = new ServiceModel(serviceData)
+      const service = new ServiceModel(serviceData);
 
-      expect(service.id).toBe('SERV-001')
-      expect(service.serviceType).toBe('waste')
-      expect(service.schedule.frequency).toBe('weekly')
-      expect(service.pricing?.baseRate).toBe(150.00)
-      expect(service.pricing?.fuelSurcharge).toBe(0.25)
-    })
+      expect(service.id).toBe('SERV-001');
+      expect(service.serviceType).toBe('waste');
+      expect(service.schedule.frequency).toBe('weekly');
+      expect(service.pricing?.baseRate).toBe(150.0);
+      expect(service.pricing?.fuelSurcharge).toBe(0.25);
+    });
 
     test('should validate service scheduling constraints', () => {
       const serviceData = {
@@ -202,25 +197,25 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           dayOfWeek: 'monday',
           startDate: '2024-01-15',
           startTime: '08:00',
-          endTime: '17:00'
+          endTime: '17:00',
         },
         pricing: {
-          baseRate: 150.00,
-          rateUnit: 'month' as const
+          baseRate: 150.0,
+          rateUnit: 'month' as const,
         },
         status: 'active' as const,
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const service = new ServiceModel(serviceData)
+      const service = new ServiceModel(serviceData);
 
       // Test scheduling properties
-      expect(service.schedule.frequency).toBe('weekly')
-      expect(service.schedule.dayOfWeek).toBe('monday')
-      expect(service.schedule.startTime).toBe('08:00')
-    })
+      expect(service.schedule.frequency).toBe('weekly');
+      expect(service.schedule.dayOfWeek).toBe('monday');
+      expect(service.schedule.startTime).toBe('08:00');
+    });
 
     test('should handle service priority', () => {
       const serviceData = {
@@ -235,25 +230,25 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           dayOfWeek: 'monday',
           startDate: '2024-01-15',
           startTime: '08:00',
-          endTime: '17:00'
+          endTime: '17:00',
         },
         pricing: {
-          baseRate: 150.00,
-          rateUnit: 'month' as const
+          baseRate: 150.0,
+          rateUnit: 'month' as const,
         },
         status: 'active' as const,
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const service = new ServiceModel(serviceData)
+      const service = new ServiceModel(serviceData);
 
       // Test service properties
-      expect(service.serviceType).toBe('waste')
-      expect(service.status).toBe('active')
-    })
-  })
+      expect(service.serviceType).toBe('waste');
+      expect(service.status).toBe('active');
+    });
+  });
 
   // Route Entity Tests
   describe('Route Entity', () => {
@@ -265,23 +260,23 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           frequency: 'weekly' as const,
           dayOfWeek: 'monday',
           startTime: '08:00',
-          endTime: '17:00'
+          endTime: '17:00',
         },
         assignedSites: ['SITE-001', 'SITE-002', 'SITE-003'],
         efficiency: 85,
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const route = new RouteModel(routeData)
+      const route = new RouteModel(routeData);
 
-      expect(route.id).toBe('ROUTE-001')
-      expect(route.name).toBe('Monday Route 1')
-      expect(route.efficiency).toBe(85)
-      expect(route.assignedSites).toHaveLength(3)
-      expect(route.assignedSites).toContain('SITE-001')
-    })
+      expect(route.id).toBe('ROUTE-001');
+      expect(route.name).toBe('Monday Route 1');
+      expect(route.efficiency).toBe(85);
+      expect(route.assignedSites).toHaveLength(3);
+      expect(route.assignedSites).toContain('SITE-001');
+    });
 
     test('should validate route properties', () => {
       const routeData = {
@@ -291,24 +286,24 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           frequency: 'weekly' as const,
           dayOfWeek: 'tuesday',
           startTime: '06:00',
-          endTime: '18:00'
+          endTime: '18:00',
         },
         assignedSites: Array.from({ length: 5 }, (_, i) => `SITE-${i + 10}`), // 5 sites
         efficiency: 75,
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const route = new RouteModel(routeData)
+      const route = new RouteModel(routeData);
 
       // Test route properties
-      expect(route.name).toBe('Tuesday Route 1')
-      expect(route.schedule.dayOfWeek).toBe('tuesday')
-      expect(route.assignedSites).toHaveLength(5)
-      expect(route.efficiency).toBe(75)
-    })
-  })
+      expect(route.name).toBe('Tuesday Route 1');
+      expect(route.schedule.dayOfWeek).toBe('tuesday');
+      expect(route.assignedSites).toHaveLength(5);
+      expect(route.efficiency).toBe(75);
+    });
+  });
 
   // Material Ticket Entity Tests
   describe('Material Ticket Entity', () => {
@@ -323,7 +318,7 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           street: '123 Test St',
           city: 'Test City',
           state: 'CA',
-          zipCode: '94105'
+          zipCode: '94105',
         },
         haulerId: 'HAULER-001',
         driverId: 'DRIVER-001',
@@ -332,22 +327,26 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         grossWeight: 2500,
         tareWeight: 500,
         netWeight: 2000,
-        materials: [{
-          materialId: 'MAT-001',
-          weight: 2000,
-          percentage: 100
-        }],
+        materials: [
+          {
+            materialId: 'MAT-001',
+            weight: 2000,
+            percentage: 100,
+          },
+        ],
         pricing: {
-          rate: 85.50,
+          rate: 85.5,
           rateUnit: 'ton' as const,
-          totalAmount: 171.00
+          totalAmount: 171.0,
         },
         settlementStatus: 'pending' as const,
-        leedAllocations: [{
-          category: 'MR Credit 2: Construction Waste Management',
-          percentage: 100,
-          notes: 'LEED certified materials'
-        }],
+        leedAllocations: [
+          {
+            category: 'MR Credit 2: Construction Waste Management',
+            percentage: 100,
+            notes: 'LEED certified materials',
+          },
+        ],
         qualityGrade: 'excellent' as const,
         contaminationNotes: null,
         photos: [],
@@ -355,18 +354,18 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         processingFacilityId: 'FACILITY-001',
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const ticket = new MaterialTicketModel(ticketData)
+      const ticket = new MaterialTicketModel(ticketData);
 
-      expect(ticket.id).toBe('TICKET-001')
-      expect(ticket.netWeight).toBe(2000)
-      expect(ticket.grossWeight).toBe(2500)
-      expect(ticket.tareWeight).toBe(500)
-      expect(ticket.materials).toHaveLength(1)
-      expect(ticket.materials[0].materialId).toBe('MAT-001')
-    })
+      expect(ticket.id).toBe('TICKET-001');
+      expect(ticket.netWeight).toBe(2000);
+      expect(ticket.grossWeight).toBe(2500);
+      expect(ticket.tareWeight).toBe(500);
+      expect(ticket.materials).toHaveLength(1);
+      expect(ticket.materials[0].materialId).toBe('MAT-001');
+    });
 
     test('should validate material ticket data integrity', () => {
       const ticketData = {
@@ -379,7 +378,7 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           street: '123 Test St',
           city: 'Test City',
           state: 'CA',
-          zipCode: '94105'
+          zipCode: '94105',
         },
         haulerId: 'HAULER-001',
         driverId: 'DRIVER-001',
@@ -387,15 +386,17 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         grossWeight: 2500,
         tareWeight: 500,
         netWeight: 2000, // Valid weight
-        materials: [{
-          materialId: 'MAT-002',
-          weight: 2000,
-          percentage: 100
-        }],
+        materials: [
+          {
+            materialId: 'MAT-002',
+            weight: 2000,
+            percentage: 100,
+          },
+        ],
         pricing: {
-          rate: 120.00,
+          rate: 120.0,
           rateUnit: 'ton' as const,
-          totalAmount: 240.00
+          totalAmount: 240.0,
         },
         settlementStatus: 'pending' as const,
         leedAllocations: [],
@@ -406,17 +407,17 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         processingFacilityId: 'FACILITY-001',
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const ticket = new MaterialTicketModel(ticketData)
+      const ticket = new MaterialTicketModel(ticketData);
 
       // Test weight calculations
-      expect(ticket.grossWeight).toBe(2500)
-      expect(ticket.tareWeight).toBe(500)
-      expect(ticket.netWeight).toBe(2000)
-    })
-  })
+      expect(ticket.grossWeight).toBe(2500);
+      expect(ticket.tareWeight).toBe(500);
+      expect(ticket.netWeight).toBe(2000);
+    });
+  });
 
   // Facility Entity Tests
   describe('Facility Entity', () => {
@@ -432,30 +433,30 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           city: 'Industrial City',
           state: 'CA',
           zipCode: '94107',
-          country: 'USA'
+          country: 'USA',
         },
         contactInformation: {
           name: 'John Smith',
           email: 'operations@mainprocessing.com',
-          phone: '555-0100'
+          phone: '555-0100',
         },
         operatingHours: {
           monday: { open: '06:00', close: '18:00' },
           tuesday: { open: '06:00', close: '18:00' },
           wednesday: { open: '06:00', close: '18:00' },
           thursday: { open: '06:00', close: '18:00' },
-          friday: { open: '06:00', close: '18:00' }
+          friday: { open: '06:00', close: '18:00' },
         },
         capacity: {
           dailyLimit: 1000,
           monthlyLimit: 30000,
-          currentUtilization: 250
+          currentUtilization: 250,
         },
         acceptedMaterials: ['waste', 'recycling', 'organics', 'hazardous'],
         pricing: {
-          tippingFee: 45.00,
-          minimumCharge: 25.00,
-          surcharges: []
+          tippingFee: 45.0,
+          minimumCharge: 25.0,
+          surcharges: [],
         },
         permits: [
           {
@@ -463,15 +464,15 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
             issuingAuthority: 'Environmental Protection Agency',
             validFrom: '2024-01-01',
             validTo: '2024-12-31',
-            permitType: 'Operating Permit'
+            permitType: 'Operating Permit',
           },
           {
             permitNumber: 'OSHA-2024-001',
             issuingAuthority: 'Occupational Safety and Health Administration',
             validFrom: '2024-01-01',
             validTo: '2024-12-31',
-            permitType: 'Safety Permit'
-          }
+            permitType: 'Safety Permit',
+          },
         ],
         environmentalControls: ['dust_control', 'odor_management', 'water_treatment'],
         complianceRecords: ['compliance-2024-001'],
@@ -479,34 +480,32 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           currentLevel: 250,
           dailyAverage: 200,
           monthlyAverage: 6000,
-          peakUtilization: 950
+          peakUtilization: 950,
         },
         processingRates: [
           { materialType: 'waste', processingRate: 500, rateUnit: 'tons/day' },
           { materialType: 'recycling', processingRate: 300, rateUnit: 'tons/day' },
-          { materialType: 'organics', processingRate: 200, rateUnit: 'tons/day' }
+          { materialType: 'organics', processingRate: 200, rateUnit: 'tons/day' },
         ],
-        qualityStandards: [
-          'Recycling must meet 85% purity standard'
-        ],
+        qualityStandards: ['Recycling must meet 85% purity standard'],
         assignedRoutes: ['ROUTE-001', 'ROUTE-002'],
         materialTickets: ['TICKET-001', 'TICKET-002'],
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const facility = new FacilityModel(facilityData)
+      const facility = new FacilityModel(facilityData);
 
-      expect(facility.id).toBe('FACILITY-001')
-      expect(facility.capacity?.dailyLimit).toBe(1000)
-      expect(facility.capacity?.currentUtilization).toBe(250)
-      expect(facility.utilization?.currentLevel).toBe(250)
+      expect(facility.id).toBe('FACILITY-001');
+      expect(facility.capacity?.dailyLimit).toBe(1000);
+      expect(facility.capacity?.currentUtilization).toBe(250);
+      expect(facility.utilization?.currentLevel).toBe(250);
 
       // Test facility properties
-      expect(facility.acceptedMaterials).toContain('waste')
-      expect(facility.acceptedMaterials).toContain('recycling')
-    })
+      expect(facility.acceptedMaterials).toContain('waste');
+      expect(facility.acceptedMaterials).toContain('recycling');
+    });
 
     test('should validate facility operations compliance', () => {
       const facilityData = {
@@ -520,30 +519,30 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           city: 'Industrial City',
           state: 'CA',
           zipCode: '94107',
-          country: 'USA'
+          country: 'USA',
         },
         contactInformation: {
           name: 'Jane Doe',
           email: 'operations@secondary.com',
-          phone: '555-0200'
+          phone: '555-0200',
         },
         operatingHours: {
           monday: { open: '06:00', close: '18:00' },
           tuesday: { open: '06:00', close: '18:00' },
           wednesday: { open: '06:00', close: '18:00' },
           thursday: { open: '06:00', close: '18:00' },
-          friday: { open: '06:00', close: '18:00' }
+          friday: { open: '06:00', close: '18:00' },
         },
         capacity: {
           dailyLimit: 500,
           monthlyLimit: 15000,
-          currentUtilization: 50
+          currentUtilization: 50,
         },
         acceptedMaterials: ['waste'],
         pricing: {
-          tippingFee: 35.00,
-          minimumCharge: 20.00,
-          surcharges: []
+          tippingFee: 35.0,
+          minimumCharge: 20.0,
+          surcharges: [],
         },
         permits: [
           {
@@ -551,8 +550,8 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
             issuingAuthority: 'Environmental Protection Agency',
             validFrom: '2024-01-01',
             validTo: '2024-12-31',
-            permitType: 'Operating Permit'
-          }
+            permitType: 'Operating Permit',
+          },
         ],
         environmentalControls: ['dust_control'],
         complianceRecords: ['compliance-2024-002'],
@@ -560,28 +559,26 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           currentLevel: 50,
           dailyAverage: 40,
           monthlyAverage: 1200,
-          peakUtilization: 475
+          peakUtilization: 475,
         },
-        processingRates: [
-          { materialType: 'waste', processingRate: 500, rateUnit: 'tons/day' }
-        ],
+        processingRates: [{ materialType: 'waste', processingRate: 500, rateUnit: 'tons/day' }],
         qualityStandards: [],
         assignedRoutes: [],
         materialTickets: [],
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const facility = new FacilityModel(facilityData)
+      const facility = new FacilityModel(facilityData);
 
       // Test facility properties
-      expect(facility.acceptedMaterials).toContain('waste')
-      expect(facility.acceptedMaterials).not.toContain('hazardous_waste')
-      expect(facility.type).toBe('transfer')
-      expect(facility.status).toBe('operational')
-    })
-  })
+      expect(facility.acceptedMaterials).toContain('waste');
+      expect(facility.acceptedMaterials).not.toContain('hazardous_waste');
+      expect(facility.type).toBe('transfer');
+      expect(facility.status).toBe('operational');
+    });
+  });
 
   // Contract Entity Tests
   describe('Contract Entity', () => {
@@ -593,28 +590,28 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         serviceTypes: ['waste'],
         guaranteedServices: ['waste'],
         pricing: {
-          baseRate: 150.00,
+          baseRate: 150.0,
           rateUnit: 'month',
-          fuelSurcharge: 0.25
+          fuelSurcharge: 0.25,
         },
         term: {
           startDate: '2024-01-01',
-          endDate: '2024-12-31'
+          endDate: '2024-12-31',
         },
         contractStatus: 'active' as const,
         createdAt: new Date('2023-12-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const contract = new ContractModel(contractData)
+      const contract = new ContractModel(contractData);
 
-      expect(contract.id).toBe('CONTRACT-001')
-      expect(contract.contractNumber).toBe('CONT-2024-001')
-      expect(contract.pricing.baseRate).toBe(150.00)
-      expect(contract.term.startDate).toBe('2024-01-01')
-      expect(contract.term.endDate).toBe('2024-12-31')
-    })
+      expect(contract.id).toBe('CONTRACT-001');
+      expect(contract.contractNumber).toBe('CONT-2024-001');
+      expect(contract.pricing.baseRate).toBe(150.0);
+      expect(contract.term.startDate).toBe('2024-01-01');
+      expect(contract.term.endDate).toBe('2024-12-31');
+    });
 
     test('should validate contract terms and conditions', () => {
       const contractData = {
@@ -624,26 +621,26 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         serviceTypes: ['waste'],
         guaranteedServices: ['waste'],
         pricing: {
-          baseRate: 150.00,
-          rateUnit: 'month'
+          baseRate: 150.0,
+          rateUnit: 'month',
         },
         term: {
           startDate: '2024-01-01',
-          endDate: '2024-12-31'
+          endDate: '2024-12-31',
         },
         contractStatus: 'draft' as const,
         createdAt: new Date('2023-12-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const contract = new ContractModel(contractData)
+      const contract = new ContractModel(contractData);
 
       // Test contract properties
-      expect(contract.contractNumber).toBe('CONT-2024-002')
-      expect(contract.pricing.baseRate).toBe(150.00)
-    })
-  })
+      expect(contract.contractNumber).toBe('CONT-2024-002');
+      expect(contract.pricing.baseRate).toBe(150.0);
+    });
+  });
 
   // Payment Entity Tests
   describe('Payment Entity', () => {
@@ -654,7 +651,7 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         customerId: 'CUST-001',
         customerName: 'Test Manufacturing Company',
         type: 'invoice_payment' as const,
-        amount: 150.00,
+        amount: 150.0,
         currency: 'USD' as const,
         paymentDate: '2024-01-15',
         paymentMethod: 'ach' as const,
@@ -663,7 +660,7 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           city: 'Test City',
           state: 'CA',
           zipCode: '94105',
-          country: 'USA'
+          country: 'USA',
         },
         invoiceIds: ['INV-2024-001'],
         status: 'completed' as const,
@@ -671,28 +668,28 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         bankInformation: {
           bankName: 'Test Bank',
           accountNumber: '****1234',
-          routingNumber: '123456789'
+          routingNumber: '123456789',
         },
         processingDetails: {
           processor: 'PaymentTech Inc.',
           transactionId: 'TXN-2024-001',
-          processedAt: '2024-01-15T10:00:00Z'
+          processedAt: '2024-01-15T10:00:00Z',
         },
         fees: [],
         adjustments: [],
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const payment = new PaymentModel(paymentData)
+      const payment = new PaymentModel(paymentData);
 
-      expect(payment.id).toBe('PAYMENT-001')
-      expect(payment.amount).toBe(150.00)
-      expect(payment.paymentMethod).toBe('ach')
-      expect(payment.status).toBe('completed')
-      expect(payment.paymentDate).toBe('2024-01-15')
-    })
+      expect(payment.id).toBe('PAYMENT-001');
+      expect(payment.amount).toBe(150.0);
+      expect(payment.paymentMethod).toBe('ach');
+      expect(payment.status).toBe('completed');
+      expect(payment.paymentDate).toBe('2024-01-15');
+    });
 
     test('should handle payment adjustments and refunds', () => {
       const paymentData = {
@@ -701,7 +698,7 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         customerId: 'CUST-002',
         customerName: 'Another Test Company',
         type: 'adjustment' as const,
-        amount: 300.00,
+        amount: 300.0,
         currency: 'USD' as const,
         paymentDate: '2024-01-15',
         paymentMethod: 'credit_card' as const,
@@ -710,7 +707,7 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
           city: 'Test City',
           state: 'CA',
           zipCode: '94105',
-          country: 'USA'
+          country: 'USA',
         },
         invoiceIds: ['INV-2024-002'],
         status: 'completed' as const,
@@ -718,32 +715,32 @@ describe('REFUSE Protocol Entity Unit Tests', () => {
         bankInformation: {
           bankName: 'Test Bank',
           accountNumber: '****5678',
-          routingNumber: '123456789'
+          routingNumber: '123456789',
         },
         processingDetails: {
           processor: 'PaymentTech Inc.',
           transactionId: 'TXN-2024-002',
-          processedAt: '2024-01-15T11:00:00Z'
+          processedAt: '2024-01-15T11:00:00Z',
         },
         fees: [],
         adjustments: [],
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date(),
-        version: 1
-      }
+        version: 1,
+      };
 
-      const payment = new PaymentModel(paymentData)
+      const payment = new PaymentModel(paymentData);
 
       // Test payment properties
-      expect(payment.amount).toBe(300.00)
-      expect(payment.paymentMethod).toBe('credit_card')
-      expect(payment.status).toBe('completed')
-    })
-  })
+      expect(payment.amount).toBe(300.0);
+      expect(payment.paymentMethod).toBe('credit_card');
+      expect(payment.status).toBe('completed');
+    });
+  });
 
   // Environmental Compliance functionality would be tested as part of other entities
   // LEED allocations and environmental metrics are tracked within MaterialTicket entities
 
   // Add more comprehensive tests for other entities...
   // Event system, data transformation, and integration tests would follow
-})
+});

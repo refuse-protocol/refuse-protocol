@@ -28,10 +28,12 @@ export class ComplianceValidator {
   /**
    * Run comprehensive compliance validation
    */
-  async runFullComplianceValidation(options: ComplianceValidationOptions): Promise<ComplianceReport> {
+  async runFullComplianceValidation(
+    options: ComplianceValidationOptions
+  ): Promise<ComplianceReport> {
     console.log(chalk.blue('🔍 Running REFUSE Protocol Compliance Validation...'));
 
-    const startTime = Date.now();
+    // REMOVED UNUSED:     const startTime = Date.now();
     const report: ComplianceReport = {
       id: uuidv4(),
       timestamp: new Date().toISOString(),
@@ -43,8 +45,8 @@ export class ComplianceValidator {
         nonCompliant: 0,
         warnings: 0,
         errors: 0,
-        overallCompliance: 0
-      }
+        overallCompliance: 0,
+      },
     };
 
     try {
@@ -54,34 +56,48 @@ export class ComplianceValidator {
         this.validateSafetyCompliance(options),
         this.validateDataPrivacyCompliance(options),
         this.validateReportingCompliance(options),
-        this.validateOperationalCompliance(options)
+        this.validateOperationalCompliance(options),
       ];
 
       // Execute validations in parallel where possible
-      const results = await Promise.all(validations);
+      // REMOVED UNUSED:       const results = await Promise.all(validations);
 
       // Aggregate results
       for (const result of results) {
         report.validations.push(result);
         report.summary.totalValidations += result.requirements.length;
-        report.summary.compliant += result.requirements.filter(r => r.status === 'compliant').length;
-        report.summary.nonCompliant += result.requirements.filter(r => r.status === 'non_compliant').length;
-        report.summary.warnings += result.requirements.filter(r => r.status === 'warning').length;
-        report.summary.errors += result.requirements.filter(r => r.status === 'error').length;
+        report.summary.compliant += result.requirements.filter(
+          (r) => r.status === 'compliant'
+        ).length;
+        report.summary.nonCompliant += result.requirements.filter(
+          (r) => r.status === 'non_compliant'
+        ).length;
+        report.summary.warnings += result.requirements.filter((r) => r.status === 'warning').length;
+        report.summary.errors += result.requirements.filter((r) => r.status === 'error').length;
       }
 
       // Calculate overall compliance score
       report.summary.overallCompliance = this.calculateComplianceScore(report);
 
-      const totalTime = Date.now() - startTime;
+      // REMOVED UNUSED:       const totalTime = Date.now() - startTime;
 
       console.log(chalk.green(`✅ Compliance validation complete in ${totalTime}ms`));
-      console.log(chalk.gray(`   Overall Compliance: ${report.summary.overallCompliance.toFixed(1)}%`));
-      console.log(chalk.gray(`   Compliant: ${report.summary.compliant}, Non-Compliant: ${report.summary.nonCompliant}, Warnings: ${report.summary.warnings}`));
+      console.log(
+        chalk.gray(`   Overall Compliance: ${report.summary.overallCompliance.toFixed(1)}%`)
+      );
+      console.log(
+        chalk.gray(
+          `   Compliant: ${report.summary.compliant}, Non-Compliant: ${report.summary.nonCompliant}, Warnings: ${report.summary.warnings}`
+        )
+      );
 
       return report;
     } catch (error) {
-      console.error(chalk.red(`❌ Compliance validation failed: ${error instanceof Error ? error.message : String(error)}`));
+      console.error(
+        chalk.red(
+          `❌ Compliance validation failed: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       throw error;
     }
   }
@@ -89,29 +105,31 @@ export class ComplianceValidator {
   /**
    * Validate environmental compliance
    */
-  private async validateEnvironmentalCompliance(options: ComplianceValidationOptions): Promise<ComplianceValidationResult> {
+  private async validateEnvironmentalCompliance(
+    options: ComplianceValidationOptions
+  ): Promise<ComplianceValidationResult> {
     const result: ComplianceValidationResult = {
       category: 'Environmental Compliance',
       framework: 'EPA & Local Environmental Regulations',
       status: 'compliant',
       score: 100,
       requirements: [],
-      recommendations: []
+      recommendations: [],
     };
 
     try {
-      const targetPath = resolve(options.targetPath || process.cwd());
+      // REMOVED UNUSED:       const targetPath = resolve(options.targetPath || process.cwd());
 
       // Check for environmental compliance in schemas
-      const schemaFiles = await glob('**/*schema*.json', { cwd: targetPath });
+      // REMOVED UNUSED:       const schemaFiles = await glob('**/*schema*.json', { cwd: targetPath });
 
       for (const schemaFile of schemaFiles) {
-        const fullPath = join(targetPath, schemaFile);
-        const schemaContent = readFileSync(fullPath, 'utf8');
-        const schema = JSON.parse(schemaContent);
+        // REMOVED UNUSED:         const fullPath = join(targetPath, schemaFile);
+        // REMOVED UNUSED:         const schemaContent = readFileSync(fullPath, 'utf8');
+        // REMOVED UNUSED:         const schema = JSON.parse(schemaContent);
 
         // Check for environmental tracking fields
-        const envCheck = this.validateEnvironmentalFields(schema, schemaFile);
+        // REMOVED UNUSED:         const envCheck = this.validateEnvironmentalFields(schema, schemaFile);
 
         result.requirements.push(...envCheck.requirements);
 
@@ -122,14 +140,14 @@ export class ComplianceValidator {
       }
 
       // Check implementation files for environmental compliance
-      const implFiles = await glob('**/*impl*.ts', { cwd: targetPath });
+      // REMOVED UNUSED:       const implFiles = await glob('**/*impl*.ts', { cwd: targetPath });
 
       for (const implFile of implFiles) {
-        const fullPath = join(targetPath, implFile);
-        const content = readFileSync(fullPath, 'utf8');
+        // REMOVED UNUSED:         const fullPath = join(targetPath, implFile);
+        // REMOVED UNUSED:         const content = readFileSync(fullPath, 'utf8');
 
         // Check for environmental compliance implementation
-        const envImplCheck = this.validateEnvironmentalImplementation(content, implFile);
+        // REMOVED UNUSED:         const envImplCheck = this.validateEnvironmentalImplementation(content, implFile);
 
         result.requirements.push(...envImplCheck.requirements);
 
@@ -141,7 +159,6 @@ export class ComplianceValidator {
 
       result.score = Math.max(0, Math.min(100, result.score));
       result.recommendations = this.generateEnvironmentalRecommendations(result.requirements);
-
     } catch (error) {
       result.status = 'error';
       result.score = 0;
@@ -151,7 +168,7 @@ export class ComplianceValidator {
         requirement: 'Environmental validation system check',
         status: 'error',
         message: `Environmental compliance validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        severity: 'error'
+        severity: 'error',
       });
     }
 
@@ -161,28 +178,30 @@ export class ComplianceValidator {
   /**
    * Validate safety compliance
    */
-  private async validateSafetyCompliance(options: ComplianceValidationOptions): Promise<ComplianceValidationResult> {
+  private async validateSafetyCompliance(
+    options: ComplianceValidationOptions
+  ): Promise<ComplianceValidationResult> {
     const result: ComplianceValidationResult = {
       category: 'Safety Compliance',
       framework: 'OSHA & Workplace Safety Regulations',
       status: 'compliant',
       score: 100,
       requirements: [],
-      recommendations: []
+      recommendations: [],
     };
 
     try {
-      const targetPath = resolve(options.targetPath || process.cwd());
+      // REMOVED UNUSED:       const targetPath = resolve(options.targetPath || process.cwd());
 
       // Check for safety compliance in data models
-      const modelFiles = await glob('**/*model*.ts', { cwd: targetPath });
+      // REMOVED UNUSED:       const modelFiles = await glob('**/*model*.ts', { cwd: targetPath });
 
       for (const modelFile of modelFiles) {
-        const fullPath = join(targetPath, modelFile);
-        const content = readFileSync(fullPath, 'utf8');
+        // REMOVED UNUSED:         const fullPath = join(targetPath, modelFile);
+        // REMOVED UNUSED:         const content = readFileSync(fullPath, 'utf8');
 
         // Check for safety-related entities and fields
-        const safetyCheck = this.validateSafetyFields(content, modelFile);
+        // REMOVED UNUSED:         const safetyCheck = this.validateSafetyFields(content, modelFile);
 
         result.requirements.push(...safetyCheck.requirements);
 
@@ -193,7 +212,7 @@ export class ComplianceValidator {
       }
 
       // Check for safety documentation
-      const hasSafetyDocs = await this.checkSafetyDocumentation(targetPath);
+      // REMOVED UNUSED:       const hasSafetyDocs = await this.checkSafetyDocumentation(targetPath);
       if (!hasSafetyDocs) {
         result.requirements.push({
           id: uuidv4(),
@@ -201,7 +220,7 @@ export class ComplianceValidator {
           requirement: 'Workplace safety documentation',
           status: 'warning',
           message: 'Safety documentation not found or incomplete',
-          severity: 'warning'
+          severity: 'warning',
         });
         result.score -= 10;
         result.status = 'warning';
@@ -212,13 +231,12 @@ export class ComplianceValidator {
           requirement: 'Workplace safety documentation',
           status: 'compliant',
           message: 'Safety documentation is present',
-          severity: 'info'
+          severity: 'info',
         });
       }
 
       result.score = Math.max(0, Math.min(100, result.score));
       result.recommendations = this.generateSafetyRecommendations(result.requirements);
-
     } catch (error) {
       result.status = 'error';
       result.score = 0;
@@ -228,7 +246,7 @@ export class ComplianceValidator {
         requirement: 'Safety validation system check',
         status: 'error',
         message: `Safety compliance validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        severity: 'error'
+        severity: 'error',
       });
     }
 
@@ -238,21 +256,23 @@ export class ComplianceValidator {
   /**
    * Validate data privacy compliance
    */
-  private async validateDataPrivacyCompliance(options: ComplianceValidationOptions): Promise<ComplianceValidationResult> {
+  private async validateDataPrivacyCompliance(
+    options: ComplianceValidationOptions
+  ): Promise<ComplianceValidationResult> {
     const result: ComplianceValidationResult = {
       category: 'Data Privacy Compliance',
       framework: 'GDPR, CCPA & Industry Standards',
       status: 'compliant',
       score: 100,
       requirements: [],
-      recommendations: []
+      recommendations: [],
     };
 
     try {
-      const targetPath = resolve(options.targetPath || process.cwd());
+      // REMOVED UNUSED:       const targetPath = resolve(options.targetPath || process.cwd());
 
       // Check for PII data handling
-      const privacyCheck = await this.validatePrivacyCompliance(targetPath);
+      // REMOVED UNUSED:       const privacyCheck = await this.validatePrivacyCompliance(targetPath);
 
       result.requirements.push(...privacyCheck.requirements);
 
@@ -262,7 +282,7 @@ export class ComplianceValidator {
       }
 
       // Check for data retention policies
-      const hasRetentionPolicy = await this.checkDataRetentionPolicy(targetPath);
+      // REMOVED UNUSED:       const hasRetentionPolicy = await this.checkDataRetentionPolicy(targetPath);
       if (!hasRetentionPolicy) {
         result.requirements.push({
           id: uuidv4(),
@@ -270,7 +290,7 @@ export class ComplianceValidator {
           requirement: 'Data retention and deletion policy',
           status: 'warning',
           message: 'Data retention policy not found',
-          severity: 'warning'
+          severity: 'warning',
         });
         result.score -= 15;
         result.status = 'warning';
@@ -281,13 +301,12 @@ export class ComplianceValidator {
           requirement: 'Data retention and deletion policy',
           status: 'compliant',
           message: 'Data retention policy is documented',
-          severity: 'info'
+          severity: 'info',
         });
       }
 
       result.score = Math.max(0, Math.min(100, result.score));
       result.recommendations = this.generatePrivacyRecommendations(result.requirements);
-
     } catch (error) {
       result.status = 'error';
       result.score = 0;
@@ -297,7 +316,7 @@ export class ComplianceValidator {
         requirement: 'Privacy validation system check',
         status: 'error',
         message: `Data privacy compliance validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        severity: 'error'
+        severity: 'error',
       });
     }
 
@@ -307,28 +326,30 @@ export class ComplianceValidator {
   /**
    * Validate reporting compliance
    */
-  private async validateReportingCompliance(options: ComplianceValidationOptions): Promise<ComplianceValidationResult> {
+  private async validateReportingCompliance(
+    options: ComplianceValidationOptions
+  ): Promise<ComplianceValidationResult> {
     const result: ComplianceValidationResult = {
       category: 'Reporting Compliance',
       framework: 'Environmental & Regulatory Reporting Requirements',
       status: 'compliant',
       score: 100,
       requirements: [],
-      recommendations: []
+      recommendations: [],
     };
 
     try {
-      const targetPath = resolve(options.targetPath || process.cwd());
+      // REMOVED UNUSED:       const targetPath = resolve(options.targetPath || process.cwd());
 
       // Check for reporting capabilities in entities
-      const entityFiles = await glob('**/*entity*.ts', { cwd: targetPath });
+      // REMOVED UNUSED:       const entityFiles = await glob('**/*entity*.ts', { cwd: targetPath });
 
       for (const entityFile of entityFiles) {
-        const fullPath = join(targetPath, entityFile);
-        const content = readFileSync(fullPath, 'utf8');
+        // REMOVED UNUSED:         const fullPath = join(targetPath, entityFile);
+        // REMOVED UNUSED:         const content = readFileSync(fullPath, 'utf8');
 
         // Check for reporting fields and methods
-        const reportingCheck = this.validateReportingCapabilities(content, entityFile);
+        // REMOVED UNUSED:         const reportingCheck = this.validateReportingCapabilities(content, entityFile);
 
         result.requirements.push(...reportingCheck.requirements);
 
@@ -339,7 +360,7 @@ export class ComplianceValidator {
       }
 
       // Check for report generation utilities
-      const hasReportUtils = await this.checkReportGenerationUtilities(targetPath);
+      // REMOVED UNUSED:       const hasReportUtils = await this.checkReportGenerationUtilities(targetPath);
       if (!hasReportUtils) {
         result.requirements.push({
           id: uuidv4(),
@@ -347,7 +368,7 @@ export class ComplianceValidator {
           requirement: 'Environmental report generation utilities',
           status: 'warning',
           message: 'Report generation utilities not found',
-          severity: 'warning'
+          severity: 'warning',
         });
         result.score -= 20;
         result.status = 'warning';
@@ -358,13 +379,12 @@ export class ComplianceValidator {
           requirement: 'Environmental report generation utilities',
           status: 'compliant',
           message: 'Report generation utilities are present',
-          severity: 'info'
+          severity: 'info',
         });
       }
 
       result.score = Math.max(0, Math.min(100, result.score));
       result.recommendations = this.generateReportingRecommendations(result.requirements);
-
     } catch (error) {
       result.status = 'error';
       result.score = 0;
@@ -374,7 +394,7 @@ export class ComplianceValidator {
         requirement: 'Reporting validation system check',
         status: 'error',
         message: `Reporting compliance validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        severity: 'error'
+        severity: 'error',
       });
     }
 
@@ -384,21 +404,23 @@ export class ComplianceValidator {
   /**
    * Validate operational compliance
    */
-  private async validateOperationalCompliance(options: ComplianceValidationOptions): Promise<ComplianceValidationResult> {
+  private async validateOperationalCompliance(
+    options: ComplianceValidationOptions
+  ): Promise<ComplianceValidationResult> {
     const result: ComplianceValidationResult = {
       category: 'Operational Compliance',
       framework: 'Industry Standards & Best Practices',
       status: 'compliant',
       score: 100,
       requirements: [],
-      recommendations: []
+      recommendations: [],
     };
 
     try {
-      const targetPath = resolve(options.targetPath || process.cwd());
+      // REMOVED UNUSED:       const targetPath = resolve(options.targetPath || process.cwd());
 
       // Check for operational standards compliance
-      const operationalCheck = await this.validateOperationalStandards(targetPath);
+      // REMOVED UNUSED:       const operationalCheck = await this.validateOperationalStandards(targetPath);
 
       result.requirements.push(...operationalCheck.requirements);
 
@@ -408,7 +430,7 @@ export class ComplianceValidator {
       }
 
       // Check for audit trail implementation
-      const hasAuditTrail = await this.checkAuditTrailImplementation(targetPath);
+      // REMOVED UNUSED:       const hasAuditTrail = await this.checkAuditTrailImplementation(targetPath);
       if (!hasAuditTrail) {
         result.requirements.push({
           id: uuidv4(),
@@ -416,7 +438,7 @@ export class ComplianceValidator {
           requirement: 'Audit trail and logging',
           status: 'warning',
           message: 'Comprehensive audit trail not implemented',
-          severity: 'warning'
+          severity: 'warning',
         });
         result.score -= 10;
         result.status = 'warning';
@@ -427,13 +449,12 @@ export class ComplianceValidator {
           requirement: 'Audit trail and logging',
           status: 'compliant',
           message: 'Audit trail implementation is present',
-          severity: 'info'
+          severity: 'info',
         });
       }
 
       result.score = Math.max(0, Math.min(100, result.score));
       result.recommendations = this.generateOperationalRecommendations(result.requirements);
-
     } catch (error) {
       result.status = 'error';
       result.score = 0;
@@ -443,7 +464,7 @@ export class ComplianceValidator {
         requirement: 'Operational validation system check',
         status: 'error',
         message: `Operational compliance validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        severity: 'error'
+        severity: 'error',
       });
     }
 
@@ -453,17 +474,24 @@ export class ComplianceValidator {
   /**
    * Validate environmental fields in schema
    */
-  private validateEnvironmentalFields(schema: any, fileName: string): { requirements: ComplianceRequirement[]; hasIssues: boolean } {
+  private validateEnvironmentalFields(
+    schema: any,
+    fileName: string
+  ): { requirements: ComplianceRequirement[]; hasIssues: boolean } {
     const requirements: ComplianceRequirement[] = [];
-    let hasIssues = false;
+    // REMOVED UNUSED:     let hasIssues = false;
 
     // Check for environmental tracking fields
     const requiredEnvFields = [
-      'environmentalPermits', 'environmentalControls', 'environmentalImpact',
-      'carbonFootprint', 'landfillDiversion', 'recyclingRate'
+      'environmentalPermits',
+      'environmentalControls',
+      'environmentalImpact',
+      'carbonFootprint',
+      'landfillDiversion',
+      'recyclingRate',
     ];
 
-    const availableFields = Object.keys(schema.properties || {});
+    // REMOVED UNUSED:     const availableFields = Object.keys(schema.properties || {});
 
     for (const field of requiredEnvFields) {
       if (availableFields.includes(field)) {
@@ -473,7 +501,7 @@ export class ComplianceValidator {
           requirement: `Environmental field: ${field}`,
           status: 'compliant',
           message: `Environmental field ${field} is present`,
-          severity: 'info'
+          severity: 'info',
         });
       } else {
         requirements.push({
@@ -482,7 +510,7 @@ export class ComplianceValidator {
           requirement: `Environmental field: ${field}`,
           status: 'warning',
           message: `Environmental field ${field} is missing`,
-          severity: 'warning'
+          severity: 'warning',
         });
         hasIssues = true;
       }
@@ -494,13 +522,18 @@ export class ComplianceValidator {
   /**
    * Validate environmental implementation
    */
-  private validateEnvironmentalImplementation(content: string, fileName: string): { requirements: ComplianceRequirement[]; hasIssues: boolean } {
+  private validateEnvironmentalImplementation(
+    content: string,
+    fileName: string
+  ): { requirements: ComplianceRequirement[]; hasIssues: boolean } {
     const requirements: ComplianceRequirement[] = [];
-    let hasIssues = false;
+    // REMOVED UNUSED:     let hasIssues = false;
 
     // Check for environmental compliance methods
     const envMethods = [
-      'calculateCarbonFootprint', 'trackEnvironmentalImpact', 'validateEnvironmentalCompliance'
+      'calculateCarbonFootprint',
+      'trackEnvironmentalImpact',
+      'validateEnvironmentalCompliance',
     ];
 
     for (const method of envMethods) {
@@ -511,7 +544,7 @@ export class ComplianceValidator {
           requirement: `Environmental method: ${method}`,
           status: 'compliant',
           message: `Environmental method ${method} is implemented`,
-          severity: 'info'
+          severity: 'info',
         });
       } else {
         requirements.push({
@@ -520,7 +553,7 @@ export class ComplianceValidator {
           requirement: `Environmental method: ${method}`,
           status: 'warning',
           message: `Environmental method ${method} should be implemented`,
-          severity: 'warning'
+          severity: 'warning',
         });
         hasIssues = true;
       }
@@ -532,16 +565,17 @@ export class ComplianceValidator {
   /**
    * Validate safety fields
    */
-  private validateSafetyFields(content: string, fileName: string): { requirements: ComplianceRequirement[]; hasIssues: boolean } {
+  private validateSafetyFields(
+    content: string,
+    fileName: string
+  ): { requirements: ComplianceRequirement[]; hasIssues: boolean } {
     const requirements: ComplianceRequirement[] = [];
-    let hasIssues = false;
+    // REMOVED UNUSED:     let hasIssues = false;
 
     // Check for safety-related content
-    const safetyKeywords = [
-      'safety', 'hazard', 'risk', 'accident', 'incident', 'PPE', 'training'
-    ];
+    // REMOVED UNUSED:     const safetyKeywords = ['safety', 'hazard', 'risk', 'accident', 'incident', 'PPE', 'training'];
 
-    const hasSafetyContent = safetyKeywords.some(keyword =>
+    const hasSafetyContent = safetyKeywords.some((keyword) =>
       content.toLowerCase().includes(keyword.toLowerCase())
     );
 
@@ -552,7 +586,7 @@ export class ComplianceValidator {
         requirement: 'Safety-related fields and methods',
         status: 'compliant',
         message: 'Safety considerations are included in implementation',
-        severity: 'info'
+        severity: 'info',
       });
     } else {
       requirements.push({
@@ -561,7 +595,7 @@ export class ComplianceValidator {
         requirement: 'Safety-related fields and methods',
         status: 'warning',
         message: 'Safety considerations should be included in implementation',
-        severity: 'warning'
+        severity: 'warning',
       });
       hasIssues = true;
     }
@@ -572,30 +606,33 @@ export class ComplianceValidator {
   /**
    * Validate privacy compliance
    */
-  private async validatePrivacyCompliance(targetPath: string): Promise<{ requirements: ComplianceRequirement[]; hasIssues: boolean; scorePenalty: number }> {
+  private async validatePrivacyCompliance(
+    targetPath: string
+  ): Promise<{ requirements: ComplianceRequirement[]; hasIssues: boolean; scorePenalty: number }> {
     const requirements: ComplianceRequirement[] = [];
-    let hasIssues = false;
-    let scorePenalty = 0;
+    // REMOVED UNUSED:     let hasIssues = false;
+    // REMOVED UNUSED:     let scorePenalty = 0;
 
     // Check for PII fields in schemas
-    const schemaFiles = await glob('**/*schema*.json', { cwd: targetPath });
+    // REMOVED UNUSED:     const schemaFiles = await glob('**/*schema*.json', { cwd: targetPath });
 
     for (const schemaFile of schemaFiles) {
-      const fullPath = join(targetPath, schemaFile);
-      const schemaContent = readFileSync(fullPath, 'utf8');
-      const schema = JSON.parse(schemaContent);
+      // REMOVED UNUSED:       const fullPath = join(targetPath, schemaFile);
+      // REMOVED UNUSED:       const schemaContent = readFileSync(fullPath, 'utf8');
+      // REMOVED UNUSED:       const schema = JSON.parse(schemaContent);
 
       // Check for PII fields
-      const piiFields = ['email', 'phone', 'address', 'ssn', 'license', 'birthDate'];
-      const schemaFields = Object.keys(schema.properties || {});
+      // REMOVED UNUSED:       const piiFields = ['email', 'phone', 'address', 'ssn', 'license', 'birthDate'];
+      // REMOVED UNUSED:       const schemaFields = Object.keys(schema.properties || {});
 
-      const hasPII = piiFields.some(field => schemaFields.includes(field));
+      // REMOVED UNUSED:       const hasPII = piiFields.some((field) => schemaFields.includes(field));
 
       if (hasPII) {
         // Check if PII handling is documented
-        const hasPrivacyNotes = schema.description?.toLowerCase().includes('privacy') ||
-                               schema.description?.toLowerCase().includes('pii') ||
-                               schema.description?.toLowerCase().includes('gdpr');
+        const hasPrivacyNotes =
+          schema.description?.toLowerCase().includes('privacy') ||
+          schema.description?.toLowerCase().includes('pii') ||
+          schema.description?.toLowerCase().includes('gdpr');
 
         if (hasPrivacyNotes) {
           requirements.push({
@@ -604,7 +641,7 @@ export class ComplianceValidator {
             requirement: 'PII data protection',
             status: 'compliant',
             message: 'PII fields are properly documented with privacy considerations',
-            severity: 'info'
+            severity: 'info',
           });
         } else {
           requirements.push({
@@ -613,7 +650,7 @@ export class ComplianceValidator {
             requirement: 'PII data protection',
             status: 'warning',
             message: 'PII fields should have privacy protection documentation',
-            severity: 'warning'
+            severity: 'warning',
           });
           hasIssues = true;
           scorePenalty += 10;
@@ -627,18 +664,17 @@ export class ComplianceValidator {
   /**
    * Validate reporting capabilities
    */
-  private validateReportingCapabilities(content: string, fileName: string): { requirements: ComplianceRequirement[]; hasIssues: boolean } {
+  private validateReportingCapabilities(
+    content: string,
+    fileName: string
+  ): { requirements: ComplianceRequirement[]; hasIssues: boolean } {
     const requirements: ComplianceRequirement[] = [];
-    let hasIssues = false;
+    // REMOVED UNUSED:     let hasIssues = false;
 
     // Check for reporting methods
-    const reportingMethods = [
-      'generateReport', 'getReport', 'createReport', 'exportData'
-    ];
+    // REMOVED UNUSED:     const reportingMethods = ['generateReport', 'getReport', 'createReport', 'exportData'];
 
-    const hasReporting = reportingMethods.some(method =>
-      content.includes(method)
-    );
+    // REMOVED UNUSED:     const hasReporting = reportingMethods.some((method) => content.includes(method));
 
     if (hasReporting) {
       requirements.push({
@@ -647,7 +683,7 @@ export class ComplianceValidator {
         requirement: 'Report generation capabilities',
         status: 'compliant',
         message: 'Report generation methods are implemented',
-        severity: 'info'
+        severity: 'info',
       });
     } else {
       requirements.push({
@@ -656,7 +692,7 @@ export class ComplianceValidator {
         requirement: 'Report generation capabilities',
         status: 'warning',
         message: 'Report generation methods should be implemented',
-        severity: 'warning'
+        severity: 'warning',
       });
       hasIssues = true;
     }
@@ -667,24 +703,30 @@ export class ComplianceValidator {
   /**
    * Validate operational standards
    */
-  private async validateOperationalStandards(targetPath: string): Promise<{ requirements: ComplianceRequirement[]; hasIssues: boolean; scorePenalty: number }> {
+  private async validateOperationalStandards(
+    targetPath: string
+  ): Promise<{ requirements: ComplianceRequirement[]; hasIssues: boolean; scorePenalty: number }> {
     const requirements: ComplianceRequirement[] = [];
-    let hasIssues = false;
-    let scorePenalty = 0;
+    // REMOVED UNUSED:     let hasIssues = false;
+    // REMOVED UNUSED:     let scorePenalty = 0;
 
     // Check for operational standards compliance
-    const operationalFiles = await glob('**/*operation*.ts', { cwd: targetPath });
+    // REMOVED UNUSED:     const operationalFiles = await glob('**/*operation*.ts', { cwd: targetPath });
 
     for (const opFile of operationalFiles) {
-      const fullPath = join(targetPath, opFile);
-      const content = readFileSync(fullPath, 'utf8');
+      // REMOVED UNUSED:       const fullPath = join(targetPath, opFile);
+      // REMOVED UNUSED:       const content = readFileSync(fullPath, 'utf8');
 
       // Check for operational best practices
       const bestPractices = [
-        'error handling', 'logging', 'monitoring', 'performance', 'scalability'
+        'error handling',
+        'logging',
+        'monitoring',
+        'performance',
+        'scalability',
       ];
 
-      const hasBestPractices = bestPractices.some(practice =>
+      const hasBestPractices = bestPractices.some((practice) =>
         content.toLowerCase().includes(practice.toLowerCase())
       );
 
@@ -695,7 +737,7 @@ export class ComplianceValidator {
           requirement: 'Operational best practices',
           status: 'compliant',
           message: 'Operational best practices are implemented',
-          severity: 'info'
+          severity: 'info',
         });
       } else {
         requirements.push({
@@ -704,7 +746,7 @@ export class ComplianceValidator {
           requirement: 'Operational best practices',
           status: 'warning',
           message: 'Operational best practices should be implemented',
-          severity: 'warning'
+          severity: 'warning',
         });
         hasIssues = true;
         scorePenalty += 15;
@@ -718,18 +760,19 @@ export class ComplianceValidator {
    * Check safety documentation
    */
   private async checkSafetyDocumentation(targetPath: string): Promise<boolean> {
-    const safetyDocs = await glob('**/*safety*.md', { cwd: targetPath });
-    const hasSafetySection = safetyDocs.length > 0;
+    // REMOVED UNUSED:     const safetyDocs = await glob('**/*safety*.md', { cwd: targetPath });
+    // REMOVED UNUSED:     const hasSafetySection = safetyDocs.length > 0;
 
     // Also check for safety content in README
-    const readmeFiles = await glob('**/README.md', { cwd: targetPath });
-    let hasSafetyInReadme = false;
+    // REMOVED UNUSED:     const readmeFiles = await glob('**/README.md', { cwd: targetPath });
+    // REMOVED UNUSED:     let hasSafetyInReadme = false;
 
     for (const readmeFile of readmeFiles) {
-      const readmeContent = readFileSync(join(targetPath, readmeFile), 'utf8');
-      hasSafetyInReadme = readmeContent.toLowerCase().includes('safety') ||
-                         readmeContent.toLowerCase().includes('hazard') ||
-                         readmeContent.toLowerCase().includes('osha');
+      // REMOVED UNUSED:       const readmeContent = readFileSync(join(targetPath, readmeFile), 'utf8');
+      hasSafetyInReadme =
+        readmeContent.toLowerCase().includes('safety') ||
+        readmeContent.toLowerCase().includes('hazard') ||
+        readmeContent.toLowerCase().includes('osha');
     }
 
     return hasSafetySection || hasSafetyInReadme;
@@ -739,16 +782,17 @@ export class ComplianceValidator {
    * Check data retention policy
    */
   private async checkDataRetentionPolicy(targetPath: string): Promise<boolean> {
-    const policyFiles = await glob('**/*policy*.md', { cwd: targetPath });
-    const privacyFiles = await glob('**/*privacy*.md', { cwd: targetPath });
+    // REMOVED UNUSED:     const policyFiles = await glob('**/*policy*.md', { cwd: targetPath });
+    // REMOVED UNUSED:     const privacyFiles = await glob('**/*privacy*.md', { cwd: targetPath });
 
-    let hasRetentionPolicy = false;
+    // REMOVED UNUSED:     let hasRetentionPolicy = false;
 
     for (const policyFile of [...policyFiles, ...privacyFiles]) {
-      const policyContent = readFileSync(join(targetPath, policyFile), 'utf8');
-      hasRetentionPolicy = policyContent.toLowerCase().includes('retention') ||
-                          policyContent.toLowerCase().includes('deletion') ||
-                          policyContent.toLowerCase().includes('gdpr');
+      // REMOVED UNUSED:       const policyContent = readFileSync(join(targetPath, policyFile), 'utf8');
+      hasRetentionPolicy =
+        policyContent.toLowerCase().includes('retention') ||
+        policyContent.toLowerCase().includes('deletion') ||
+        policyContent.toLowerCase().includes('gdpr');
     }
 
     return hasRetentionPolicy;
@@ -758,8 +802,8 @@ export class ComplianceValidator {
    * Check report generation utilities
    */
   private async checkReportGenerationUtilities(targetPath: string): Promise<boolean> {
-    const reportFiles = await glob('**/*report*.ts', { cwd: targetPath });
-    const exportFiles = await glob('**/*export*.ts', { cwd: targetPath });
+    // REMOVED UNUSED:     const reportFiles = await glob('**/*report*.ts', { cwd: targetPath });
+    // REMOVED UNUSED:     const exportFiles = await glob('**/*export*.ts', { cwd: targetPath });
 
     return reportFiles.length > 0 || exportFiles.length > 0;
   }
@@ -768,8 +812,8 @@ export class ComplianceValidator {
    * Check audit trail implementation
    */
   private async checkAuditTrailImplementation(targetPath: string): Promise<boolean> {
-    const auditFiles = await glob('**/*audit*.ts', { cwd: targetPath });
-    const logFiles = await glob('**/*log*.ts', { cwd: targetPath });
+    // REMOVED UNUSED:     const auditFiles = await glob('**/*audit*.ts', { cwd: targetPath });
+    // REMOVED UNUSED:     const logFiles = await glob('**/*log*.ts', { cwd: targetPath });
 
     return auditFiles.length > 0 || logFiles.length > 0;
   }
@@ -778,15 +822,15 @@ export class ComplianceValidator {
    * Calculate overall compliance score
    */
   private calculateComplianceScore(report: ComplianceReport): number {
-    const totalRequirements = report.summary.totalValidations;
+    // REMOVED UNUSED:     const totalRequirements = report.summary.totalValidations;
     if (totalRequirements === 0) return 100;
 
-    const compliantWeight = report.summary.compliant * 100;
+    // REMOVED UNUSED:     const compliantWeight = report.summary.compliant * 100;
     const warningWeight = report.summary.warnings * 25; // Warnings reduce score by 75%
     const nonCompliantWeight = report.summary.nonCompliant * 0; // Non-compliant = 0%
     const errorWeight = report.summary.errors * 0; // Errors = 0%
 
-    const totalWeighted = compliantWeight + warningWeight + nonCompliantWeight + errorWeight;
+    // REMOVED UNUSED:     const totalWeighted = compliantWeight + warningWeight + nonCompliantWeight + errorWeight;
     return totalWeighted / totalRequirements;
   }
 
@@ -801,22 +845,22 @@ export class ComplianceValidator {
         regulation: 'EPA GHG Reporting',
         requirement: 'Must track and report carbon emissions',
         severity: 'high',
-        check: (data: any) => this.hasEnvironmentalImpactTracking(data)
+        check: (data: any) => this.hasEnvironmentalImpactTracking(data),
       },
       {
         name: 'Waste Diversion Measurement',
         regulation: 'EPA Waste Reduction Model',
         requirement: 'Must measure landfill diversion rates',
         severity: 'high',
-        check: (data: any) => this.hasWasteDiversionTracking(data)
+        check: (data: any) => this.hasWasteDiversionTracking(data),
       },
       {
         name: 'Environmental Permit Compliance',
         regulation: 'Clean Air Act',
         requirement: 'Must track environmental permits and compliance',
         severity: 'critical',
-        check: (data: any) => this.hasEnvironmentalPermits(data)
-      }
+        check: (data: any) => this.hasEnvironmentalPermits(data),
+      },
     ]);
 
     // Safety compliance rules
@@ -826,15 +870,15 @@ export class ComplianceValidator {
         regulation: 'OSHA 1910.132',
         requirement: 'Must document safety training requirements',
         severity: 'high',
-        check: (data: any) => this.hasSafetyTrainingDocumentation(data)
+        check: (data: any) => this.hasSafetyTrainingDocumentation(data),
       },
       {
         name: 'Hazard Communication',
         regulation: 'OSHA 1910.1200',
         requirement: 'Must implement hazard communication standards',
         severity: 'critical',
-        check: (data: any) => this.hasHazardCommunication(data)
-      }
+        check: (data: any) => this.hasHazardCommunication(data),
+      },
     ]);
 
     // Data privacy compliance rules
@@ -844,15 +888,15 @@ export class ComplianceValidator {
         regulation: 'GDPR Article 25',
         requirement: 'Must implement data protection by design principles',
         severity: 'high',
-        check: (data: any) => this.hasPrivacyByDesign(data)
+        check: (data: any) => this.hasPrivacyByDesign(data),
       },
       {
         name: 'Data Subject Rights',
         regulation: 'GDPR Articles 15-22',
         requirement: 'Must support data subject access and deletion rights',
         severity: 'critical',
-        check: (data: any) => this.hasDataSubjectRights(data)
-      }
+        check: (data: any) => this.hasDataSubjectRights(data),
+      },
     ]);
   }
 
@@ -863,18 +907,22 @@ export class ComplianceValidator {
     if (!frameworksDir) return;
 
     try {
-      const frameworksPath = resolve(frameworksDir);
+      // REMOVED UNUSED:       const frameworksPath = resolve(frameworksDir);
       if (!existsSync(frameworksPath)) return;
 
-      const frameworkFiles = await glob('**/*.json', { cwd: frameworksPath });
+      // REMOVED UNUSED:       const frameworkFiles = await glob('**/*.json', { cwd: frameworksPath });
 
       for (const file of frameworkFiles) {
-        const content = readFileSync(join(frameworksPath, file), 'utf8');
-        const framework = JSON.parse(content) as RegulatoryFramework;
+        // REMOVED UNUSED:         const content = readFileSync(join(frameworksPath, file), 'utf8');
+        // REMOVED UNUSED:         const framework = JSON.parse(content) as RegulatoryFramework;
         this.regulatoryFrameworks.set(framework.name, framework);
       }
     } catch (error) {
-      console.warn(chalk.yellow(`⚠️ Failed to load regulatory frameworks: ${error instanceof Error ? error.message : String(error)}`));
+      console.warn(
+        chalk.yellow(
+          `⚠️ Failed to load regulatory frameworks: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
     }
   }
 
@@ -884,20 +932,22 @@ export class ComplianceValidator {
   private generateEnvironmentalRecommendations(requirements: ComplianceRequirement[]): string[] {
     const recommendations: string[] = [];
 
-    const missingEnvFields = requirements.filter(r =>
-      r.regulation === 'EPA Standards' &&
-      r.status === 'warning' &&
-      r.requirement.includes('Environmental field')
+    const missingEnvFields = requirements.filter(
+      (r) =>
+        r.regulation === 'EPA Standards' &&
+        r.status === 'warning' &&
+        r.requirement.includes('Environmental field')
     );
 
     if (missingEnvFields.length > 0) {
       recommendations.push('Add missing environmental tracking fields to schemas');
     }
 
-    const missingEnvMethods = requirements.filter(r =>
-      r.regulation === 'EPA Standards' &&
-      r.status === 'warning' &&
-      r.requirement.includes('Environmental method')
+    const missingEnvMethods = requirements.filter(
+      (r) =>
+        r.regulation === 'EPA Standards' &&
+        r.status === 'warning' &&
+        r.requirement.includes('Environmental method')
     );
 
     if (missingEnvMethods.length > 0) {
@@ -910,8 +960,8 @@ export class ComplianceValidator {
   private generateSafetyRecommendations(requirements: ComplianceRequirement[]): string[] {
     const recommendations: string[] = [];
 
-    const safetyWarnings = requirements.filter(r =>
-      r.regulation === 'OSHA 1910' && r.status === 'warning'
+    const safetyWarnings = requirements.filter(
+      (r) => r.regulation === 'OSHA 1910' && r.status === 'warning'
     );
 
     if (safetyWarnings.length > 0) {
@@ -925,8 +975,8 @@ export class ComplianceValidator {
   private generatePrivacyRecommendations(requirements: ComplianceRequirement[]): string[] {
     const recommendations: string[] = [];
 
-    const privacyWarnings = requirements.filter(r =>
-      r.regulation?.includes('GDPR') && r.status === 'warning'
+    const privacyWarnings = requirements.filter(
+      (r) => r.regulation?.includes('GDPR') && r.status === 'warning'
     );
 
     if (privacyWarnings.length > 0) {
@@ -941,8 +991,8 @@ export class ComplianceValidator {
   private generateReportingRecommendations(requirements: ComplianceRequirement[]): string[] {
     const recommendations: string[] = [];
 
-    const reportingWarnings = requirements.filter(r =>
-      r.regulation === 'EPA Reporting' && r.status === 'warning'
+    const reportingWarnings = requirements.filter(
+      (r) => r.regulation === 'EPA Reporting' && r.status === 'warning'
     );
 
     if (reportingWarnings.length > 0) {
@@ -956,8 +1006,8 @@ export class ComplianceValidator {
   private generateOperationalRecommendations(requirements: ComplianceRequirement[]): string[] {
     const recommendations: string[] = [];
 
-    const operationalWarnings = requirements.filter(r =>
-      r.regulation === 'Industry Standard' && r.status === 'warning'
+    const operationalWarnings = requirements.filter(
+      (r) => r.regulation === 'Industry Standard' && r.status === 'warning'
     );
 
     if (operationalWarnings.length > 0) {
@@ -969,13 +1019,27 @@ export class ComplianceValidator {
   }
 
   // Placeholder compliance check functions
-  private hasEnvironmentalImpactTracking(data: any): boolean { return true; }
-  private hasWasteDiversionTracking(data: any): boolean { return true; }
-  private hasEnvironmentalPermits(data: any): boolean { return true; }
-  private hasSafetyTrainingDocumentation(data: any): boolean { return true; }
-  private hasHazardCommunication(data: any): boolean { return true; }
-  private hasPrivacyByDesign(data: any): boolean { return true; }
-  private hasDataSubjectRights(data: any): boolean { return true; }
+  private hasEnvironmentalImpactTracking(data: any): boolean {
+    return true;
+  }
+  private hasWasteDiversionTracking(data: any): boolean {
+    return true;
+  }
+  private hasEnvironmentalPermits(data: any): boolean {
+    return true;
+  }
+  private hasSafetyTrainingDocumentation(data: any): boolean {
+    return true;
+  }
+  private hasHazardCommunication(data: any): boolean {
+    return true;
+  }
+  private hasPrivacyByDesign(data: any): boolean {
+    return true;
+  }
+  private hasDataSubjectRights(data: any): boolean {
+    return true;
+  }
 }
 
 /**
@@ -1079,7 +1143,7 @@ export class ComplianceValidatorCLI {
   }
 
   async run(args: string[]): Promise<void> {
-    const command = args[0];
+    // REMOVED UNUSED:     const command = args[0];
 
     switch (command) {
       case 'validate':
@@ -1098,12 +1162,12 @@ export class ComplianceValidatorCLI {
 
   private async validateCommand(args: string[]): Promise<void> {
     const options: ComplianceValidationOptions = {
-      targetPath: process.cwd()
+      targetPath: process.cwd(),
     };
 
     // Parse options
     for (let i = 0; i < args.length; i++) {
-      const arg = args[i];
+      // REMOVED UNUSED:       const arg = args[i];
       if (arg === '--target' && args[i + 1]) {
         options.targetPath = args[++i];
       } else if (arg === '--frameworks' && args[i + 1]) {
@@ -1116,30 +1180,43 @@ export class ComplianceValidatorCLI {
     }
 
     try {
-      const report = await this.validator.runFullComplianceValidation(options);
+      // REMOVED UNUSED:       const report = await this.validator.runFullComplianceValidation(options);
 
       this.printReport(report);
 
       // Exit with error code if compliance is low
       if (report.summary.overallCompliance < 70) {
-        console.log(chalk.red(`❌ Compliance score too low: ${report.summary.overallCompliance.toFixed(1)}%`));
+        console.log(
+          chalk.red(`❌ Compliance score too low: ${report.summary.overallCompliance.toFixed(1)}%`)
+        );
         process.exit(1);
       } else if (report.summary.overallCompliance < 90) {
-        console.log(chalk.yellow(`⚠️ Compliance score acceptable but could be improved: ${report.summary.overallCompliance.toFixed(1)}%`));
+        console.log(
+          chalk.yellow(
+            `⚠️ Compliance score acceptable but could be improved: ${report.summary.overallCompliance.toFixed(1)}%`
+          )
+        );
         process.exit(0);
       } else {
-        console.log(chalk.green(`✅ Compliance validation passed: ${report.summary.overallCompliance.toFixed(1)}%`));
+        console.log(
+          chalk.green(
+            `✅ Compliance validation passed: ${report.summary.overallCompliance.toFixed(1)}%`
+          )
+        );
         process.exit(0);
       }
-
     } catch (error) {
-      console.error(chalk.red(`❌ Compliance validation failed: ${error instanceof Error ? error.message : String(error)}`));
+      console.error(
+        chalk.red(
+          `❌ Compliance validation failed: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       process.exit(1);
     }
   }
 
   private reportCommand(args: string[]): void {
-    const reportPath = args[0];
+    // REMOVED UNUSED:     const reportPath = args[0];
     if (!reportPath) {
       console.error('Usage: report <report-file>');
       process.exit(1);
@@ -1151,19 +1228,23 @@ export class ComplianceValidatorCLI {
         process.exit(1);
       }
 
-      const reportContent = readFileSync(reportPath, 'utf8');
-      const report = JSON.parse(reportContent) as ComplianceReport;
+      // REMOVED UNUSED:       const reportContent = readFileSync(reportPath, 'utf8');
+      // REMOVED UNUSED:       const report = JSON.parse(reportContent) as ComplianceReport;
 
       this.printReport(report);
     } catch (error) {
-      console.error(chalk.red(`❌ Failed to load report: ${error instanceof Error ? error.message : String(error)}`));
+      console.error(
+        chalk.red(
+          `❌ Failed to load report: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       process.exit(1);
     }
   }
 
   private frameworksCommand(args: string[]): void {
     console.log(chalk.blue('\n🏛️ Regulatory Frameworks'));
-    console.log(chalk.gray('=' .repeat(50)));
+    console.log(chalk.gray('='.repeat(50)));
 
     console.log(chalk.green('Available Frameworks:'));
     console.log('  • EPA Environmental Regulations');
@@ -1179,13 +1260,15 @@ export class ComplianceValidatorCLI {
 
   private printReport(report: ComplianceReport): void {
     console.log(chalk.blue('\n🏛️ REFUSE Protocol Compliance Report'));
-    console.log(chalk.gray('=' .repeat(50)));
+    console.log(chalk.gray('='.repeat(50)));
     console.log(chalk.gray(`Report ID: ${report.id}`));
     console.log(chalk.gray(`Generated: ${report.timestamp}`));
     console.log(chalk.gray(`Target: ${report.target}`));
 
     console.log(chalk.blue('\n📋 Summary:'));
-    console.log(chalk.green(`  Overall Compliance: ${report.summary.overallCompliance.toFixed(1)}%`));
+    console.log(
+      chalk.green(`  Overall Compliance: ${report.summary.overallCompliance.toFixed(1)}%`)
+    );
     console.log(chalk.green(`  Compliant: ${report.summary.compliant}`));
     console.log(chalk.red(`  Non-Compliant: ${report.summary.nonCompliant}`));
     console.log(chalk.yellow(`  Warnings: ${report.summary.warnings}`));
@@ -1193,20 +1276,31 @@ export class ComplianceValidatorCLI {
 
     console.log(chalk.blue('\n📊 Category Breakdown:'));
     for (const validation of report.validations) {
-      const statusIcon = validation.status === 'compliant' ? '✅' :
-                        validation.status === 'warning' ? '⚠️' : '❌';
-      const statusColor = validation.status === 'compliant' ? chalk.green :
-                         validation.status === 'warning' ? chalk.yellow : chalk.red;
+      const statusIcon =
+        validation.status === 'compliant' ? '✅' : validation.status === 'warning' ? '⚠️' : '❌';
+      const statusColor =
+        validation.status === 'compliant'
+          ? chalk.green
+          : validation.status === 'warning'
+            ? chalk.yellow
+            : chalk.red;
 
-      console.log(statusColor(`  ${statusIcon} ${validation.category} (${validation.framework}): ${validation.score.toFixed(1)}%`));
+      console.log(
+        statusColor(
+          `  ${statusIcon} ${validation.category} (${validation.framework}): ${validation.score.toFixed(1)}%`
+        )
+      );
 
       // Show key requirements
-      const keyRequirements = validation.requirements.slice(0, 3);
-      keyRequirements.forEach(req => {
-        const reqIcon = req.status === 'compliant' ? '✓' :
-                       req.status === 'warning' ? '⚠' : '✗';
-        const reqColor = req.status === 'compliant' ? chalk.green :
-                        req.status === 'warning' ? chalk.yellow : chalk.red;
+      // REMOVED UNUSED:       const keyRequirements = validation.requirements.slice(0, 3);
+      keyRequirements.forEach((req) => {
+        // REMOVED UNUSED:         const reqIcon = req.status === 'compliant' ? '✓' : req.status === 'warning' ? '⚠' : '✗';
+        const reqColor =
+          req.status === 'compliant'
+            ? chalk.green
+            : req.status === 'warning'
+              ? chalk.yellow
+              : chalk.red;
 
         console.log(chalk.gray(`    ${reqIcon} ${req.requirement}`));
       });
@@ -1216,12 +1310,12 @@ export class ComplianceValidatorCLI {
       }
     }
 
-    if (report.validations.some(v => v.recommendations.length > 0)) {
+    if (report.validations.some((v) => v.recommendations.length > 0)) {
       console.log(chalk.blue('\n💡 Recommendations:'));
       for (const validation of report.validations) {
         if (validation.recommendations.length > 0) {
           console.log(chalk.gray(`  ${validation.category}:`));
-          validation.recommendations.forEach(rec => {
+          validation.recommendations.forEach((rec) => {
             console.log(chalk.gray(`    - ${rec}`));
           });
         }
@@ -1255,11 +1349,15 @@ export class ComplianceValidatorCLI {
 /**
  * Export factory functions
  */
-export function createComplianceValidator(options?: ComplianceValidatorOptions): ComplianceValidator {
+export function createComplianceValidator(
+  options?: ComplianceValidatorOptions
+): ComplianceValidator {
   return new ComplianceValidator(options);
 }
 
-export function createComplianceValidatorCLI(options?: ComplianceValidatorOptions): ComplianceValidatorCLI {
+export function createComplianceValidatorCLI(
+  options?: ComplianceValidatorOptions
+): ComplianceValidatorCLI {
   return new ComplianceValidatorCLI(options);
 }
 
@@ -1271,5 +1369,5 @@ export type {
   ComplianceRequirement,
   ComplianceValidationResult,
   ComplianceReport,
-  RegulatoryFramework
+  RegulatoryFramework,
 };

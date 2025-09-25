@@ -14,7 +14,7 @@ export class JSDocParser {
       properties: [],
       methods: [],
       examples: [],
-      tags: {}
+      tags: {},
     };
 
     // Extract description (first JSDoc comment)
@@ -24,12 +24,14 @@ export class JSDocParser {
     }
 
     // Extract @property tags
-    const propertyMatches = content.matchAll(/@property\s+{(\w+)}\s+(\w+)\s+-\s*(.*?)(?=\n\s*\*|$)/g);
+    const propertyMatches = content.matchAll(
+      /@property\s+{(\w+)}\s+(\w+)\s+-\s*(.*?)(?=\n\s*\*|$)/g
+    );
     for (const match of propertyMatches) {
       result.properties.push({
         type: match[1],
         name: match[2],
-        description: this.cleanJSDocComment(match[3])
+        description: this.cleanJSDocComment(match[3]),
       });
     }
 
@@ -40,7 +42,7 @@ export class JSDocParser {
         type: match[1],
         name: match[2],
         description: this.cleanJSDocComment(match[3]),
-        isParameter: true
+        isParameter: true,
       });
     }
 
@@ -49,7 +51,7 @@ export class JSDocParser {
     for (const match of methodMatches) {
       result.methods.push({
         name: match[1],
-        description: this.cleanJSDocComment(match[2])
+        description: this.cleanJSDocComment(match[2]),
       });
     }
 
@@ -65,7 +67,7 @@ export class JSDocParser {
   private cleanJSDocComment(comment: string): string {
     return comment
       .split('\n')
-      .map(line => line.replace(/^\s*\*/, '').trim())
+      .map((line) => line.replace(/^\s*\*/, '').trim())
       .join(' ')
       .trim();
   }

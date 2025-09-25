@@ -36,11 +36,17 @@ export class FleetModel implements Fleet {
   operatingHours?: number;
 
   private static readonly VALID_FLEET_TYPES: Fleet['type'][] = [
-    'vehicle', 'equipment', 'container'
+    'vehicle',
+    'equipment',
+    'container',
   ];
 
   private static readonly VALID_STATUSES: Fleet['status'][] = [
-    'active', 'maintenance', 'out_of_service', 'retired', 'reserved'
+    'active',
+    'maintenance',
+    'out_of_service',
+    'retired',
+    'reserved',
   ];
 
   constructor(data: Partial<Fleet>) {
@@ -50,7 +56,9 @@ export class FleetModel implements Fleet {
   /**
    * Create a new fleet asset with validation
    */
-  static create(data: Omit<Fleet, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): FleetModel {
+  static create(
+    data: Omit<Fleet, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>
+  ): FleetModel {
     const now = new Date();
     const fleetData: Partial<Fleet> = {
       id: uuidv4(),
@@ -61,8 +69,8 @@ export class FleetModel implements Fleet {
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'fleet_system'
-      }
+        source: 'fleet_system',
+      },
     };
 
     return new FleetModel(fleetData);
@@ -85,8 +93,8 @@ export class FleetModel implements Fleet {
         ...this.metadata,
         ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new FleetModel(updatedData);
@@ -114,7 +122,12 @@ export class FleetModel implements Fleet {
     }
 
     // Validate year if provided
-    if (data.year && (typeof data.year !== 'number' || data.year < 1900 || data.year > new Date().getFullYear() + 1)) {
+    if (
+      data.year &&
+      (typeof data.year !== 'number' ||
+        data.year < 1900 ||
+        data.year > new Date().getFullYear() + 1)
+    ) {
       throw new Error('Year must be a valid number between 1900 and next year');
     }
 
@@ -155,12 +168,18 @@ export class FleetModel implements Fleet {
     }
 
     // Validate fuel efficiency if provided
-    if (data.fuelEfficiency && (typeof data.fuelEfficiency !== 'number' || data.fuelEfficiency <= 0)) {
+    if (
+      data.fuelEfficiency &&
+      (typeof data.fuelEfficiency !== 'number' || data.fuelEfficiency <= 0)
+    ) {
       throw new Error('Fuel efficiency must be a positive number');
     }
 
     // Validate operating hours if provided
-    if (data.operatingHours && (typeof data.operatingHours !== 'number' || data.operatingHours < 0)) {
+    if (
+      data.operatingHours &&
+      (typeof data.operatingHours !== 'number' || data.operatingHours < 0)
+    ) {
       throw new Error('Operating hours must be a non-negative number');
     }
 
@@ -194,7 +213,7 @@ export class FleetModel implements Fleet {
   updateLocation(location: Address, timestamp?: Date): FleetModel {
     const updateData: Partial<Fleet> = {
       currentLocation: location,
-      lastGpsUpdate: timestamp || new Date()
+      lastGpsUpdate: timestamp || new Date(),
     };
 
     return this.update(updateData, this.version);
@@ -236,7 +255,7 @@ export class FleetModel implements Fleet {
 
     const newRecord: MaintenanceRecord = {
       id: uuidv4(),
-      ...record
+      ...record,
     };
 
     const newRecords = [...this.maintenanceRecords, newRecord];
@@ -247,7 +266,7 @@ export class FleetModel implements Fleet {
    * Remove maintenance record
    */
   removeMaintenanceRecord(recordId: string): FleetModel {
-    const newRecords = this.maintenanceRecords.filter(record => record.id !== recordId);
+    const newRecords = this.maintenanceRecords.filter((record) => record.id !== recordId);
     return this.update({ maintenanceRecords: newRecords }, this.version);
   }
 
@@ -301,8 +320,9 @@ export class FleetModel implements Fleet {
   getLastMaintenanceDate(): MaintenanceRecord | null {
     if (this.maintenanceRecords.length === 0) return null;
 
-    return this.maintenanceRecords
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    return this.maintenanceRecords.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )[0];
   }
 
   /**
@@ -330,7 +350,7 @@ export class FleetModel implements Fleet {
    */
   getMaintenanceCostForPeriod(startDate: string, endDate: string): number {
     return this.maintenanceRecords
-      .filter(record => record.date >= startDate && record.date <= endDate)
+      .filter((record) => record.date >= startDate && record.date <= endDate)
       .reduce((total, record) => total + record.cost, 0);
   }
 
@@ -369,7 +389,7 @@ export class FleetModel implements Fleet {
   calculateDepreciationValue(originalValue: number, usefulLifeYears: number): number {
     const age = this.getAgeInYears();
     const depreciationRate = originalValue / usefulLifeYears;
-    const currentValue = Math.max(0, originalValue - (depreciationRate * age));
+    const currentValue = Math.max(0, originalValue - depreciationRate * age);
     return Math.round(currentValue * 100) / 100;
   }
 
@@ -422,7 +442,7 @@ export class FleetModel implements Fleet {
       operatingHours: this.operatingHours || 0,
       fuelEfficiency: this.fuelEfficiency || null,
       hasGpsLocation: !!this.currentLocation,
-      lastGpsUpdate: this.lastGpsUpdate?.toISOString() || null
+      lastGpsUpdate: this.lastGpsUpdate?.toISOString() || null,
     };
   }
 
@@ -451,7 +471,7 @@ export class FleetModel implements Fleet {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -473,7 +493,7 @@ export class FleetModel implements Fleet {
       eventType,
       timestamp: new Date(),
       eventData: this.toEventData(),
-      version: 1
+      version: 1,
     };
   }
 
@@ -530,7 +550,9 @@ export class FleetFactory {
   static fromLegacyData(legacyData: Record<string, any>): FleetModel {
     // Data archaeology: Handle various legacy field names and formats
     const mappedData: Partial<Fleet> = {
-      externalIds: [legacyData.asset_id || legacyData.ASSET_ID || legacyData.vehicle_id || legacyData.id],
+      externalIds: [
+        legacyData.asset_id || legacyData.ASSET_ID || legacyData.vehicle_id || legacyData.id,
+      ],
       type: this.mapLegacyFleetType(legacyData.asset_type || legacyData.type || 'vehicle'),
       make: legacyData.make || legacyData.MAKE || legacyData.manufacturer || 'Unknown',
       model: legacyData.model || legacyData.MODEL || 'Unknown',
@@ -544,7 +566,8 @@ export class FleetFactory {
       specifications: this.mapLegacySpecifications(legacyData),
       maintenanceRecords: this.mapLegacyMaintenanceRecords(legacyData),
       fuelEfficiency: legacyData.fuel_efficiency || legacyData.FUEL_EFFICIENCY || legacyData.mpg,
-      operatingHours: legacyData.operating_hours || legacyData.OPERATING_HOURS || legacyData.odometer,
+      operatingHours:
+        legacyData.operating_hours || legacyData.OPERATING_HOURS || legacyData.odometer,
       metadata: {
         legacySystemId: legacyData.system_id || 'legacy',
         originalFieldNames: Object.keys(legacyData),
@@ -555,9 +578,9 @@ export class FleetFactory {
           department: legacyData.department || 'operations',
           acquisitionDate: legacyData.acquisition_date,
           warrantyExpiry: legacyData.warranty_expiry,
-          insuranceProvider: legacyData.insurance_provider
-        }
-      }
+          insuranceProvider: legacyData.insurance_provider,
+        },
+      },
     };
 
     return FleetModel.create(mappedData as any);
@@ -568,17 +591,17 @@ export class FleetFactory {
    */
   private static mapLegacyFleetType(legacyType: string): Fleet['type'] {
     const typeMap: Record<string, Fleet['type']> = {
-      'vehicle': 'vehicle',
-      'veh': 'vehicle',
-      'v': 'vehicle',
-      'equipment': 'equipment',
-      'equip': 'equipment',
-      'eq': 'equipment',
-      'container': 'container',
-      'cont': 'container',
-      'c': 'container',
-      'truck': 'vehicle',
-      'trailer': 'equipment'
+      vehicle: 'vehicle',
+      veh: 'vehicle',
+      v: 'vehicle',
+      equipment: 'equipment',
+      equip: 'equipment',
+      eq: 'equipment',
+      container: 'container',
+      cont: 'container',
+      c: 'container',
+      truck: 'vehicle',
+      trailer: 'equipment',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'vehicle';
@@ -589,19 +612,19 @@ export class FleetFactory {
    */
   private static mapLegacyStatus(legacyStatus: string): Fleet['status'] {
     const statusMap: Record<string, Fleet['status']> = {
-      'active': 'active',
-      'a': 'active',
-      'maintenance': 'maintenance',
-      'maint': 'maintenance',
-      'm': 'maintenance',
-      'out_of_service': 'out_of_service',
-      'oos': 'out_of_service',
-      'retired': 'retired',
-      'r': 'retired',
-      'reserved': 'reserved',
-      'res': 'reserved',
-      'in_service': 'active',
-      'available': 'active'
+      active: 'active',
+      a: 'active',
+      maintenance: 'maintenance',
+      maint: 'maintenance',
+      m: 'maintenance',
+      out_of_service: 'out_of_service',
+      oos: 'out_of_service',
+      retired: 'retired',
+      r: 'retired',
+      reserved: 'reserved',
+      res: 'reserved',
+      in_service: 'active',
+      available: 'active',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'active';
@@ -628,7 +651,7 @@ export class FleetFactory {
           city: 'GPS Tracked',
           state: 'N/A',
           zipCode: '00000',
-          country: 'US'
+          country: 'US',
         };
       }
     }
@@ -677,21 +700,26 @@ export class FleetFactory {
         performedBy: record.performed_by || record.vendor || 'Unknown',
         description: record.description || record.notes,
         odometerReading: record.odometer || record.mileage,
-        nextServiceDue: record.next_service || record.next_due
+        nextServiceDue: record.next_service || record.next_due,
       }));
     }
 
     // Handle single maintenance record
-    return [{
-      id: uuidv4(),
-      maintenanceType: maintenanceData.type || maintenanceData.maintenance_type || 'general',
-      date: maintenanceData.date || maintenanceData.service_date || new Date().toISOString().split('T')[0],
-      cost: maintenanceData.cost || maintenanceData.amount || 0,
-      performedBy: maintenanceData.performed_by || maintenanceData.vendor || 'Unknown',
-      description: maintenanceData.description || maintenanceData.notes,
-      odometerReading: maintenanceData.odometer || maintenanceData.mileage,
-      nextServiceDue: maintenanceData.next_service || maintenanceData.next_due
-    }];
+    return [
+      {
+        id: uuidv4(),
+        maintenanceType: maintenanceData.type || maintenanceData.maintenance_type || 'general',
+        date:
+          maintenanceData.date ||
+          maintenanceData.service_date ||
+          new Date().toISOString().split('T')[0],
+        cost: maintenanceData.cost || maintenanceData.amount || 0,
+        performedBy: maintenanceData.performed_by || maintenanceData.vendor || 'Unknown',
+        description: maintenanceData.description || maintenanceData.notes,
+        odometerReading: maintenanceData.odometer || maintenanceData.mileage,
+        nextServiceDue: maintenanceData.next_service || maintenanceData.next_due,
+      },
+    ];
   }
 }
 
@@ -709,7 +737,7 @@ export class FleetValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -743,10 +771,16 @@ export class FleetManager {
   /**
    * Get maintenance schedule
    */
-  static getMaintenanceSchedule(fleet: FleetModel[]): Array<{ asset: FleetModel; dueDate: Date; priority: 'low' | 'medium' | 'high' }> {
-    const schedule: Array<{ asset: FleetModel; dueDate: Date; priority: 'low' | 'medium' | 'high' }> = [];
+  static getMaintenanceSchedule(
+    fleet: FleetModel[]
+  ): Array<{ asset: FleetModel; dueDate: Date; priority: 'low' | 'medium' | 'high' }> {
+    const schedule: Array<{
+      asset: FleetModel;
+      dueDate: Date;
+      priority: 'low' | 'medium' | 'high';
+    }> = [];
 
-    fleet.forEach(asset => {
+    fleet.forEach((asset) => {
       if (asset.requiresMaintenance()) {
         const daysSinceMaintenance = asset.getDaysSinceLastMaintenance();
         let priority: 'low' | 'medium' | 'high' = 'low';
@@ -772,19 +806,22 @@ export class FleetManager {
    * Calculate fleet efficiency metrics
    */
   static getFleetEfficiencyMetrics(fleet: FleetModel[]): Record<string, any> {
-    const activeAssets = fleet.filter(asset => asset.isActive());
+    const activeAssets = fleet.filter((asset) => asset.isActive());
     const totalAssets = fleet.length;
 
     const totalEfficiency = fleet.reduce((sum, asset) => sum + asset.getEfficiencyScore(), 0);
     const averageEfficiency = fleet.length > 0 ? totalEfficiency / fleet.length : 0;
 
-    const assetsRequiringMaintenance = fleet.filter(asset => asset.requiresMaintenance()).length;
+    const assetsRequiringMaintenance = fleet.filter((asset) => asset.requiresMaintenance()).length;
     const maintenanceRate = totalAssets > 0 ? (assetsRequiringMaintenance / totalAssets) * 100 : 0;
 
-    const assetsWithGps = fleet.filter(asset => asset.currentLocation !== undefined).length;
+    const assetsWithGps = fleet.filter((asset) => asset.currentLocation !== undefined).length;
     const gpsCoverage = totalAssets > 0 ? (assetsWithGps / totalAssets) * 100 : 0;
 
-    const totalMaintenanceCost = fleet.reduce((sum, asset) => sum + asset.getTotalMaintenanceCost(), 0);
+    const totalMaintenanceCost = fleet.reduce(
+      (sum, asset) => sum + asset.getTotalMaintenanceCost(),
+      0
+    );
     const averageMaintenanceCost = fleet.length > 0 ? totalMaintenanceCost / fleet.length : 0;
 
     return {
@@ -796,7 +833,7 @@ export class FleetManager {
       gpsCoverage: Math.round(gpsCoverage * 100) / 100,
       totalMaintenanceCost: Math.round(totalMaintenanceCost * 100) / 100,
       averageMaintenanceCost: Math.round(averageMaintenanceCost * 100) / 100,
-      averageAge: fleet.reduce((sum, asset) => sum + asset.getAgeInYears(), 0) / fleet.length
+      averageAge: fleet.reduce((sum, asset) => sum + asset.getAgeInYears(), 0) / fleet.length,
     };
   }
 
@@ -806,7 +843,7 @@ export class FleetManager {
   static checkFleetConflicts(fleet: FleetModel[]): string[] {
     const conflicts: string[] = [];
 
-    fleet.forEach(asset => {
+    fleet.forEach((asset) => {
       if (asset.status === 'active' && asset.requiresMaintenance()) {
         conflicts.push(`Asset ${asset.make} ${asset.model} (${asset.id}) requires maintenance`);
       }
@@ -816,7 +853,7 @@ export class FleetManager {
       }
 
       const businessRuleErrors = asset.validateBusinessRules();
-      conflicts.push(...businessRuleErrors.map(error => `${asset.id}: ${error}`));
+      conflicts.push(...businessRuleErrors.map((error) => `${asset.id}: ${error}`));
     });
 
     return conflicts;
@@ -825,10 +862,16 @@ export class FleetManager {
   /**
    * Get fleet replacement recommendations
    */
-  static getReplacementRecommendations(fleet: FleetModel[]): Array<{ asset: FleetModel; reason: string; priority: 'low' | 'medium' | 'high' }> {
-    const recommendations: Array<{ asset: FleetModel; reason: string; priority: 'low' | 'medium' | 'high' }> = [];
+  static getReplacementRecommendations(
+    fleet: FleetModel[]
+  ): Array<{ asset: FleetModel; reason: string; priority: 'low' | 'medium' | 'high' }> {
+    const recommendations: Array<{
+      asset: FleetModel;
+      reason: string;
+      priority: 'low' | 'medium' | 'high';
+    }> = [];
 
-    fleet.forEach(asset => {
+    fleet.forEach((asset) => {
       const age = asset.getAgeInYears();
       const efficiency = asset.getEfficiencyScore();
 
@@ -836,19 +879,19 @@ export class FleetManager {
         recommendations.push({
           asset,
           reason: 'Asset has exceeded typical useful life (15+ years)',
-          priority: 'high'
+          priority: 'high',
         });
       } else if (age > 10 && efficiency < 60) {
         recommendations.push({
           asset,
           reason: 'Asset is aging and has low efficiency',
-          priority: 'medium'
+          priority: 'medium',
         });
       } else if (efficiency < 40) {
         recommendations.push({
           asset,
           reason: 'Asset has very low efficiency score',
-          priority: 'high'
+          priority: 'high',
         });
       }
     });

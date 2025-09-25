@@ -1,4 +1,4 @@
-name: Protocol Validation & Testing
+name: Complete CI Pipeline
 
 on:
   push:
@@ -7,9 +7,10 @@ on:
     branches: [ main, master, develop ]
 
 jobs:
-  protocol-validation:
+  # Main CI job that runs comprehensive validation
+  ci-checks:
     runs-on: ubuntu-22.04
-    name: Validate Protocol Specifications
+    name: Full CI Validation
 
     steps:
     - name: Checkout code
@@ -24,25 +25,28 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    # Core protocol validation
     - name: Validate Protocol Schemas
-      run: |
-        npm run validate:schemas
+      run: npm run validate:schemas
 
-    - name: Run Protocol Tests
+    - name: Run All Protocol Tests
       run: npm run test:protocol
 
     - name: Check Implementation Conformance
       run: npm run test:conformance
 
+    # Documentation validation
     - name: Validate Documentation
       run: npm run validate:docs
 
+    # Security checks
     - name: Run Security Audit
       run: npm audit --audit-level=moderate || echo "Security audit completed with warnings"
 
-  frontend-tests:
+  # Frontend-specific checks
+  frontend-checks:
     runs-on: ubuntu-22.04
-    name: Frontend Quality Checks
+    name: Frontend Quality & Build
 
     steps:
     - name: Checkout code

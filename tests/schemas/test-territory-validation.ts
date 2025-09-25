@@ -13,7 +13,11 @@ const validateTerritory = {
       if (!data.name || typeof data.name !== 'string') {
         throw new Error('Territory name is required and must be a string');
       }
-      if (!data.boundary || !data.boundary.type || !['Polygon', 'MultiPolygon'].includes(data.boundary.type)) {
+      if (
+        !data.boundary ||
+        !data.boundary.type ||
+        !['Polygon', 'MultiPolygon'].includes(data.boundary.type)
+      ) {
         throw new Error('Valid boundary with type Polygon or MultiPolygon is required');
       }
       if (!Array.isArray(data.boundary.coordinates) || data.boundary.coordinates.length === 0) {
@@ -30,10 +34,10 @@ const validateTerritory = {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown error']
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
       };
     }
-  }
+  },
 };
 
 describe('Territory Entity Schema Validation', () => {
@@ -43,23 +47,30 @@ describe('Territory Entity Schema Validation', () => {
       name: 'North County Service Area',
       boundary: {
         type: 'Polygon',
-        coordinates: [[
-          [-96.7970, 32.7767],
-          [-96.7960, 32.7767],
-          [-96.7960, 32.7777],
-          [-96.7970, 32.7777],
-          [-96.7970, 32.7767]
-        ]]
+        coordinates: [
+          [
+            [-96.797, 32.7767],
+            [-96.796, 32.7767],
+            [-96.796, 32.7777],
+            [-96.797, 32.7777],
+            [-96.797, 32.7767],
+          ],
+        ],
       },
-      pricingRules: [{
-        serviceType: 'waste',
-        baseRate: 150.00,
-        rateUnit: 'month'
-      }],
-      assignedRoutes: ['123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002'],
+      pricingRules: [
+        {
+          serviceType: 'waste',
+          baseRate: 150.0,
+          rateUnit: 'month',
+        },
+      ],
+      assignedRoutes: [
+        '123e4567-e89b-12d3-a456-426614174001',
+        '123e4567-e89b-12d3-a456-426614174002',
+      ],
       createdAt: new Date(),
       updatedAt: new Date(),
-      version: 1
+      version: 1,
     };
 
     const result = validateTerritory.validate(validTerritory);
@@ -73,7 +84,7 @@ describe('Territory Entity Schema Validation', () => {
   test('should reject invalid territory data', () => {
     const invalidTerritory = {
       name: '', // Invalid: empty name
-      boundary: { type: 'InvalidType' } // Invalid: not in enum
+      boundary: { type: 'InvalidType' }, // Invalid: not in enum
       // Missing required id, createdAt, updatedAt, version
     };
 

@@ -4,8 +4,8 @@
  * @version 1.0.0
  */
 
-import { readFileSync, existsSync } from 'fs';
-import { join, dirname, resolve } from 'path';
+// REMOVED UNUSED IMPORT: // REMOVED UNUSED: import { readFileSync, existsSync } from 'fs';
+// REMOVED UNUSED IMPORT: // REMOVED UNUSED: import { join, dirname, resolve } from 'path';
 import Ajv, { ValidateFunction, ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 import addErrors from 'ajv-errors';
@@ -29,7 +29,7 @@ export class SchemaValidator {
       strict: options.strict ?? false,
       verbose: options.verbose ?? true,
       code: { esm: true },
-      schemas: options.preloadSchemas ? this.loadPredefinedSchemas() : []
+      schemas: options.preloadSchemas ? this.loadPredefinedSchemas() : [],
     });
 
     // Add format support
@@ -47,7 +47,7 @@ export class SchemaValidator {
    * Load a schema from file path
    */
   async loadSchema(schemaPath: string): Promise<ValidateFunction> {
-    const absolutePath = resolve(schemaPath);
+    // REMOVED UNUSED:     const absolutePath = resolve(schemaPath);
 
     if (this.schemas.has(absolutePath)) {
       return this.schemas.get(absolutePath)!;
@@ -58,23 +58,25 @@ export class SchemaValidator {
     }
 
     try {
-      const schemaContent = readFileSync(absolutePath, 'utf8');
-      const schema = JSON.parse(schemaContent) as JSONSchema7;
+      // REMOVED UNUSED:       const schemaContent = readFileSync(absolutePath, 'utf8');
+      // REMOVED UNUSED:       const schema = JSON.parse(schemaContent) as JSONSchema7;
 
       // Validate schema itself first
-      const isValidSchema = this.ajv.validateSchema(schema);
+      // REMOVED UNUSED:       const isValidSchema = this.ajv.validateSchema(schema);
       if (!isValidSchema) {
         throw new Error(`Invalid schema definition in ${absolutePath}: ${this.ajv.errorsText()}`);
       }
 
       // Compile the schema
-      const validate = this.ajv.compile(schema);
+      // REMOVED UNUSED:       const validate = this.ajv.compile(schema);
       this.schemas.set(absolutePath, validate);
       this.schemaCache.set(absolutePath, schema);
 
       return validate;
     } catch (error) {
-      throw new Error(`Failed to load schema from ${absolutePath}: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to load schema from ${absolutePath}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -82,7 +84,7 @@ export class SchemaValidator {
    * Load all schemas from contracts directory
    */
   async loadAllSchemas(contractsDir: string): Promise<void> {
-    const contractsPath = resolve(contractsDir);
+    // REMOVED UNUSED:     const contractsPath = resolve(contractsDir);
 
     if (!existsSync(contractsPath)) {
       throw new Error(`Contracts directory not found: ${contractsPath}`);
@@ -105,39 +107,43 @@ export class SchemaValidator {
       'yard-schema.json',
       'site-schema.json',
       'order-schema.json',
-      'material-schema.json'
+      'material-schema.json',
     ];
 
-    console.log(chalk.blue('🔍 Loading REFUSE Protocol schemas...'));
+// CONSOLE:     console.log(chalk.blue('🔍 Loading REFUSE Protocol schemas...'));
 
     for (const schemaFile of schemaFiles) {
-      const schemaPath = join(contractsPath, schemaFile);
+      // REMOVED UNUSED:       const schemaPath = join(contractsPath, schemaFile);
       try {
         await this.loadSchema(schemaPath);
-        console.log(chalk.green(`✅ Loaded ${schemaFile}`));
+// CONSOLE:         console.log(chalk.green(`✅ Loaded ${schemaFile}`));
       } catch (error) {
-        console.warn(chalk.yellow(`⚠️ Failed to load ${schemaFile}: ${error instanceof Error ? error.message : String(error)}`));
+// CONSOLE:         console.warn(
+          chalk.yellow(
+            `⚠️ Failed to load ${schemaFile}: ${error instanceof Error ? error.message : String(error)}`
+          )
+        );
       }
     }
 
-    console.log(chalk.green(`✅ Loaded ${this.schemas.size} schemas successfully`));
+// CONSOLE:     console.log(chalk.green(`✅ Loaded ${this.schemas.size} schemas successfully`));
   }
 
   /**
    * Validate data against a schema
    */
   validate<T = any>(schemaPath: string, data: T): ValidationResult<T> {
-    const startTime = Date.now();
-    const validate = this.schemas.get(resolve(schemaPath));
+    // REMOVED UNUSED:     const startTime = Date.now();
+    // REMOVED UNUSED:     const validate = this.schemas.get(resolve(schemaPath));
 
     if (!validate) {
       throw new Error(`Schema not loaded: ${schemaPath}. Call loadSchema() first.`);
     }
 
-    const isValid = validate(data);
+    // REMOVED UNUSED:     const isValid = validate(data);
 
-    const validationTime = Date.now() - startTime;
-    const metricsKey = resolve(schemaPath);
+    // REMOVED UNUSED:     const validationTime = Date.now() - startTime;
+    // REMOVED UNUSED:     const metricsKey = resolve(schemaPath);
 
     // Update metrics
     const existingMetrics = this.validationMetrics.get(metricsKey) || {
@@ -145,12 +151,13 @@ export class SchemaValidator {
       validCount: 0,
       invalidCount: 0,
       totalValidationTime: 0,
-      averageValidationTime: 0
+      averageValidationTime: 0,
     };
 
     existingMetrics.totalValidations++;
     existingMetrics.totalValidationTime += validationTime;
-    existingMetrics.averageValidationTime = existingMetrics.totalValidationTime / existingMetrics.totalValidations;
+    existingMetrics.averageValidationTime =
+      existingMetrics.totalValidationTime / existingMetrics.totalValidations;
 
     if (isValid) {
       existingMetrics.validCount++;
@@ -160,8 +167,8 @@ export class SchemaValidator {
 
     this.validationMetrics.set(metricsKey, existingMetrics);
 
-    const errors = validate.errors || [];
-    const detailedErrors = this.processValidationErrors(errors);
+    // REMOVED UNUSED:     const errors = validate.errors || [];
+    // REMOVED UNUSED:     const detailedErrors = this.processValidationErrors(errors);
 
     return {
       isValid,
@@ -172,8 +179,8 @@ export class SchemaValidator {
       metadata: {
         dataType: typeof data,
         dataSize: JSON.stringify(data).length,
-        schemaVersion: this.getSchemaVersion(schemaPath)
-      }
+        schemaVersion: this.getSchemaVersion(schemaPath),
+      },
     };
   }
 
@@ -182,18 +189,18 @@ export class SchemaValidator {
    */
   validateBatch<T = any>(schemaPath: string, dataArray: T[]): BatchValidationResult<T> {
     const results: ValidationResult<T>[] = [];
-    let totalValidationTime = 0;
-    let totalErrors = 0;
+    // REMOVED UNUSED:     let totalValidationTime = 0;
+    // REMOVED UNUSED:     let totalErrors = 0;
 
     for (const data of dataArray) {
-      const result = this.validate(schemaPath, data);
+      // REMOVED UNUSED:       const result = this.validate(schemaPath, data);
       results.push(result);
       totalValidationTime += result.validationTime;
       totalErrors += result.errorCount;
     }
 
-    const validCount = results.filter(r => r.isValid).length;
-    const invalidCount = results.length - validCount;
+    // REMOVED UNUSED:     const validCount = results.filter((r) => r.isValid).length;
+    // REMOVED UNUSED:     const invalidCount = results.length - validCount;
 
     return {
       totalItems: dataArray.length,
@@ -206,8 +213,8 @@ export class SchemaValidator {
       summary: {
         successRate: (validCount / dataArray.length) * 100,
         errorRate: (invalidCount / dataArray.length) * 100,
-        averageErrorsPerInvalid: invalidCount > 0 ? totalErrors / invalidCount : 0
-      }
+        averageErrorsPerInvalid: invalidCount > 0 ? totalErrors / invalidCount : 0,
+      },
     };
   }
 
@@ -235,7 +242,7 @@ export class SchemaValidator {
       totalValidations: 0,
       totalValid: 0,
       totalInvalid: 0,
-      schemaMetrics: {}
+      schemaMetrics: {},
     };
 
     for (const [schemaPath, metrics] of this.validationMetrics) {
@@ -245,7 +252,8 @@ export class SchemaValidator {
 
       report.schemaMetrics[schemaPath] = {
         ...metrics,
-        successRate: metrics.totalValidations > 0 ? (metrics.validCount / metrics.totalValidations) * 100 : 0
+        successRate:
+          metrics.totalValidations > 0 ? (metrics.validCount / metrics.totalValidations) * 100 : 0,
       };
     }
 
@@ -264,8 +272,8 @@ export class SchemaValidator {
       summary: {
         overallSuccessRate: 0,
         totalErrors: 0,
-        errorsByType: {}
-      }
+        errorsByType: {},
+      },
     };
 
     // This would scan the data directory and validate all JSON files
@@ -283,22 +291,27 @@ export class SchemaValidator {
     this.ajv.addKeyword({
       keyword: 'isUUID',
       validate: (schema: any, data: string) => {
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        const uuidRegex =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         return typeof data === 'string' && uuidRegex.test(data);
       },
-      error: { message: 'must be a valid UUID' }
+      error: { message: 'must be a valid UUID' },
     });
 
     // Add custom keyword for geographic coordinates
     this.ajv.addKeyword({
       keyword: 'isGeoCoordinate',
       validate: (schema: any, data: number[]) => {
-        return Array.isArray(data) &&
-               data.length >= 2 &&
-               data[0] >= -180 && data[0] <= 180 &&
-               data[1] >= -90 && data[1] <= 90;
+        return (
+          Array.isArray(data) &&
+          data.length >= 2 &&
+          data[0] >= -180 &&
+          data[0] <= 180 &&
+          data[1] >= -90 &&
+          data[1] <= 90
+        );
       },
-      error: { message: 'must be a valid geographic coordinate [longitude, latitude]' }
+      error: { message: 'must be a valid geographic coordinate [longitude, latitude]' },
     });
 
     // Add custom keyword for positive monetary values
@@ -307,7 +320,7 @@ export class SchemaValidator {
       validate: (schema: any, data: number) => {
         return typeof data === 'number' && data >= 0 && Number.isFinite(data);
       },
-      error: { message: 'must be a positive finite number' }
+      error: { message: 'must be a positive finite number' },
     });
   }
 
@@ -324,7 +337,7 @@ export class SchemaValidator {
    * Process validation errors into detailed format
    */
   private processValidationErrors(errors: ErrorObject[]): DetailedValidationError[] {
-    return errors.map(error => ({
+    return errors.map((error) => ({
       id: uuidv4(),
       message: error.message || 'Unknown validation error',
       path: error.instancePath || '/',
@@ -334,7 +347,7 @@ export class SchemaValidator {
       data: error.data,
       severity: this.determineErrorSeverity(error),
       suggestion: this.generateErrorSuggestion(error),
-      category: this.categorizeError(error)
+      category: this.categorizeError(error),
     }));
   }
 
@@ -342,8 +355,8 @@ export class SchemaValidator {
    * Determine error severity level
    */
   private determineErrorSeverity(error: ErrorObject): 'error' | 'warning' | 'info' {
-    const criticalKeywords = ['required', 'type', 'enum'];
-    const warningKeywords = ['minLength', 'maxLength', 'pattern', 'format'];
+    // REMOVED UNUSED:     const criticalKeywords = ['required', 'type', 'enum'];
+    // REMOVED UNUSED:     const warningKeywords = ['minLength', 'maxLength', 'pattern', 'format'];
 
     if (criticalKeywords.includes(error.keyword)) return 'error';
     if (warningKeywords.includes(error.keyword)) return 'warning';
@@ -380,9 +393,12 @@ export class SchemaValidator {
   private categorizeError(error: ErrorObject): string {
     if (error.instancePath.startsWith('/id')) return 'identity';
     if (error.instancePath.includes('address')) return 'location';
-    if (error.instancePath.includes('price') || error.instancePath.includes('cost')) return 'financial';
-    if (error.instancePath.includes('date') || error.instancePath.includes('time')) return 'temporal';
-    if (error.instancePath.includes('compliance') || error.instancePath.includes('regulation')) return 'regulatory';
+    if (error.instancePath.includes('price') || error.instancePath.includes('cost'))
+      return 'financial';
+    if (error.instancePath.includes('date') || error.instancePath.includes('time'))
+      return 'temporal';
+    if (error.instancePath.includes('compliance') || error.instancePath.includes('regulation'))
+      return 'regulatory';
     return 'data';
   }
 
@@ -390,7 +406,7 @@ export class SchemaValidator {
    * Get schema version
    */
   private getSchemaVersion(schemaPath: string): string {
-    const schema = this.schemaCache.get(resolve(schemaPath));
+    // REMOVED UNUSED:     const schema = this.schemaCache.get(resolve(schemaPath));
     return schema?.version || 'unknown';
   }
 }
@@ -507,7 +523,7 @@ export class SchemaValidatorCLI {
    * Run validation from command line arguments
    */
   async run(args: string[]): Promise<void> {
-    const command = args[0];
+    // REMOVED UNUSED:     const command = args[0];
 
     switch (command) {
       case 'validate':
@@ -532,7 +548,7 @@ export class SchemaValidatorCLI {
    */
   private async validateCommand(args: string[]): Promise<void> {
     if (args.length < 2) {
-      console.error('Usage: validate <schema> <data-file>');
+// CONSOLE:       console.error('Usage: validate <schema> <data-file>');
       process.exit(1);
     }
 
@@ -547,15 +563,17 @@ export class SchemaValidatorCLI {
         throw new Error(`Data file not found: ${dataFile}`);
       }
 
-      const dataContent = readFileSync(dataFile, 'utf8');
-      const data = JSON.parse(dataContent);
+      // REMOVED UNUSED:       const dataContent = readFileSync(dataFile, 'utf8');
+      // REMOVED UNUSED:       const data = JSON.parse(dataContent);
 
       // Validate
-      const result = this.validator.validate(schemaPath, data);
+      // REMOVED UNUSED:       const result = this.validator.validate(schemaPath, data);
 
       this.printValidationResult(result);
     } catch (error) {
-      console.error(chalk.red(`❌ Validation failed: ${error instanceof Error ? error.message : String(error)}`));
+// CONSOLE:       console.error(
+        chalk.red(`❌ Validation failed: ${error instanceof Error ? error.message : String(error)}`)
+      );
       process.exit(1);
     }
   }
@@ -565,7 +583,7 @@ export class SchemaValidatorCLI {
    */
   private async batchCommand(args: string[]): Promise<void> {
     if (args.length < 2) {
-      console.error('Usage: batch <schema> <data-directory>');
+// CONSOLE:       console.error('Usage: batch <schema> <data-directory>');
       process.exit(1);
     }
 
@@ -576,10 +594,14 @@ export class SchemaValidatorCLI {
 
       // This would scan the directory for JSON files
       // For now, just demonstrate the interface
-      console.log(chalk.blue(`🔍 Batch validation for ${dataDir} against ${schemaPath}`));
-      console.log(chalk.yellow('⚠️ Batch validation implementation pending'));
+// CONSOLE:       console.log(chalk.blue(`🔍 Batch validation for ${dataDir} against ${schemaPath}`));
+// CONSOLE:       console.log(chalk.yellow('⚠️ Batch validation implementation pending'));
     } catch (error) {
-      console.error(chalk.red(`❌ Batch validation failed: ${error instanceof Error ? error.message : String(error)}`));
+// CONSOLE:       console.error(
+        chalk.red(
+          `❌ Batch validation failed: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       process.exit(1);
     }
   }
@@ -588,28 +610,32 @@ export class SchemaValidatorCLI {
    * Generate validation report
    */
   private reportCommand(): void {
-    const report = this.validator.generateReport();
-    console.log(chalk.blue('\n📊 REFUSE Protocol Validation Report'));
-    console.log(chalk.gray(`Generated: ${report.timestamp}\n`));
+    // REMOVED UNUSED:     const report = this.validator.generateReport();
+// CONSOLE:     console.log(chalk.blue('\n📊 REFUSE Protocol Validation Report'));
+// CONSOLE:     console.log(chalk.gray(`Generated: ${report.timestamp}\n`));
 
-    console.log(chalk.green(`✅ Schemas Loaded: ${report.totalSchemas}`));
-    console.log(chalk.green(`🔍 Total Validations: ${report.totalValidations}`));
-    console.log(chalk.green(`✅ Valid: ${report.totalValid}`));
-    console.log(chalk.red(`❌ Invalid: ${report.totalInvalid}`));
-    console.log(chalk.yellow(`📈 Success Rate: ${((report.totalValid / report.totalValidations) * 100).toFixed(2)}%\n`));
+// CONSOLE:     console.log(chalk.green(`✅ Schemas Loaded: ${report.totalSchemas}`));
+// CONSOLE:     console.log(chalk.green(`🔍 Total Validations: ${report.totalValidations}`));
+// CONSOLE:     console.log(chalk.green(`✅ Valid: ${report.totalValid}`));
+// CONSOLE:     console.log(chalk.red(`❌ Invalid: ${report.totalInvalid}`));
+// CONSOLE:     console.log(
+      chalk.yellow(
+        `📈 Success Rate: ${((report.totalValid / report.totalValidations) * 100).toFixed(2)}%\n`
+      )
+    );
 
     if (report.totalValidations === 0) {
-      console.log(chalk.yellow('⚠️ No validation data available. Run some validations first.'));
+// CONSOLE:       console.log(chalk.yellow('⚠️ No validation data available. Run some validations first.'));
       return;
     }
 
-    console.log(chalk.blue('📋 Schema Performance:'));
+// CONSOLE:     console.log(chalk.blue('📋 Schema Performance:'));
     for (const [schemaPath, metrics] of Object.entries(report.schemaMetrics)) {
-      const schemaName = schemaPath.split('/').pop();
-      console.log(chalk.gray(`  ${schemaName}:`));
-      console.log(chalk.green(`    ✅ Success Rate: ${metrics.successRate.toFixed(2)}%`));
-      console.log(chalk.gray(`    🔍 Validations: ${metrics.totalValidations}`));
-      console.log(chalk.gray(`    ⏱️ Avg Time: ${metrics.averageValidationTime.toFixed(2)}ms`));
+      // REMOVED UNUSED:       const schemaName = schemaPath.split('/').pop();
+// CONSOLE:       console.log(chalk.gray(`  ${schemaName}:`));
+// CONSOLE:       console.log(chalk.green(`    ✅ Success Rate: ${metrics.successRate.toFixed(2)}%`));
+// CONSOLE:       console.log(chalk.gray(`    🔍 Validations: ${metrics.totalValidations}`));
+// CONSOLE:       console.log(chalk.gray(`    ⏱️ Avg Time: ${metrics.averageValidationTime.toFixed(2)}ms`));
     }
   }
 
@@ -618,19 +644,23 @@ export class SchemaValidatorCLI {
    */
   private async conformanceCommand(args: string[]): Promise<void> {
     if (args.length < 1) {
-      console.error('Usage: conformance <data-directory>');
+// CONSOLE:       console.error('Usage: conformance <data-directory>');
       process.exit(1);
     }
 
     const [dataDir] = args;
 
     try {
-      console.log(chalk.blue(`🔍 Running protocol conformance check on ${dataDir}`));
+// CONSOLE:       console.log(chalk.blue(`🔍 Running protocol conformance check on ${dataDir}`));
 
-      const result = await this.validator.validateProtocolConformance(dataDir);
-      console.log(chalk.yellow('⚠️ Protocol conformance implementation pending'));
+      // REMOVED UNUSED:       const result = await this.validator.validateProtocolConformance(dataDir);
+// CONSOLE:       console.log(chalk.yellow('⚠️ Protocol conformance implementation pending'));
     } catch (error) {
-      console.error(chalk.red(`❌ Conformance check failed: ${error instanceof Error ? error.message : String(error)}`));
+// CONSOLE:       console.error(
+        chalk.red(
+          `❌ Conformance check failed: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       process.exit(1);
     }
   }
@@ -639,27 +669,31 @@ export class SchemaValidatorCLI {
    * Print validation result
    */
   private printValidationResult(result: ValidationResult): void {
-    console.log(chalk.blue('\n🔍 Validation Result'));
-    console.log(chalk.gray(`Schema: ${result.schemaPath}`));
-    console.log(chalk.gray(`Time: ${result.validationTime}ms`));
-    console.log(chalk.gray(`Data Size: ${result.metadata.dataSize} bytes\n`));
+// CONSOLE:     console.log(chalk.blue('\n🔍 Validation Result'));
+// CONSOLE:     console.log(chalk.gray(`Schema: ${result.schemaPath}`));
+// CONSOLE:     console.log(chalk.gray(`Time: ${result.validationTime}ms`));
+// CONSOLE:     console.log(chalk.gray(`Data Size: ${result.metadata.dataSize} bytes\n`));
 
     if (result.isValid) {
-      console.log(chalk.green('✅ VALIDATION PASSED'));
+// CONSOLE:       console.log(chalk.green('✅ VALIDATION PASSED'));
       return;
     }
 
-    console.log(chalk.red(`❌ VALIDATION FAILED (${result.errorCount} errors)\n`));
+// CONSOLE:     console.log(chalk.red(`❌ VALIDATION FAILED (${result.errorCount} errors)\n`));
 
-    console.log(chalk.yellow('🔧 Detailed Errors:'));
+// CONSOLE:     console.log(chalk.yellow('🔧 Detailed Errors:'));
     result.errors.forEach((error, index) => {
-      const severityColor = error.severity === 'error' ? chalk.red :
-                           error.severity === 'warning' ? chalk.yellow : chalk.blue;
+      const severityColor =
+        error.severity === 'error'
+          ? chalk.red
+          : error.severity === 'warning'
+            ? chalk.yellow
+            : chalk.blue;
 
-      console.log(severityColor(`  ${index + 1}. ${error.message}`));
-      console.log(chalk.gray(`     Path: ${error.path}`));
-      console.log(chalk.gray(`     Type: ${error.category} | Severity: ${error.severity}`));
-      console.log(chalk.gray(`     Suggestion: ${error.suggestion}\n`));
+// CONSOLE:       console.log(severityColor(`  ${index + 1}. ${error.message}`));
+// CONSOLE:       console.log(chalk.gray(`     Path: ${error.path}`));
+// CONSOLE:       console.log(chalk.gray(`     Type: ${error.category} | Severity: ${error.severity}`));
+// CONSOLE:       console.log(chalk.gray(`     Suggestion: ${error.suggestion}\n`));
     });
   }
 
@@ -667,20 +701,22 @@ export class SchemaValidatorCLI {
    * Print usage information
    */
   private printUsage(): void {
-    console.log(chalk.blue('\nREFUSE Protocol Schema Validator'));
-    console.log(chalk.gray('Usage: schema-validator <command> [options]\n'));
+// CONSOLE:     console.log(chalk.blue('\nREFUSE Protocol Schema Validator'));
+// CONSOLE:     console.log(chalk.gray('Usage: schema-validator <command> [options]\n'));
 
-    console.log(chalk.green('Commands:'));
-    console.log('  validate <schema> <data-file>    Validate single file against schema');
-    console.log('  batch <schema> <data-directory>  Batch validate all files in directory');
-    console.log('  report                           Generate validation performance report');
-    console.log('  conformance <data-directory>     Run protocol conformance check\n');
+// CONSOLE:     console.log(chalk.green('Commands:'));
+// CONSOLE:     console.log('  validate <schema> <data-file>    Validate single file against schema');
+// CONSOLE:     console.log('  batch <schema> <data-directory>  Batch validate all files in directory');
+// CONSOLE:     console.log('  report                           Generate validation performance report');
+// CONSOLE:     console.log('  conformance <data-directory>     Run protocol conformance check\n');
 
-    console.log(chalk.green('Examples:'));
-    console.log('  schema-validator validate ./contracts/customer-schema.json ./data/customer.json');
-    console.log('  schema-validator batch ./contracts/route-schema.json ./data/routes/');
-    console.log('  schema-validator report');
-    console.log('  schema-validator conformance ./data/\n');
+// CONSOLE:     console.log(chalk.green('Examples:'));
+// CONSOLE:     console.log(
+      '  schema-validator validate ./contracts/customer-schema.json ./data/customer.json'
+    );
+// CONSOLE:     console.log('  schema-validator batch ./contracts/route-schema.json ./data/routes/');
+// CONSOLE:     console.log('  schema-validator report');
+// CONSOLE:     console.log('  schema-validator conformance ./data/\n');
   }
 }
 
@@ -706,5 +742,5 @@ export type {
   DetailedValidationError,
   ValidationMetrics,
   ValidationReport,
-  ProtocolConformanceResult
+  ProtocolConformanceResult,
 };

@@ -21,7 +21,14 @@ export class MaterialModel implements Material {
 
   name: string;
   code: string;
-  category: 'waste' | 'recyclable' | 'organic' | 'hazardous' | 'electronic' | 'bulk' | 'construction';
+  category:
+    | 'waste'
+    | 'recyclable'
+    | 'organic'
+    | 'hazardous'
+    | 'electronic'
+    | 'bulk'
+    | 'construction';
   subcategory?: string;
 
   // Physical Properties
@@ -104,31 +111,39 @@ export class MaterialModel implements Material {
   }>;
 
   private static readonly VALID_CATEGORIES: Material['category'][] = [
-    'waste', 'recyclable', 'organic', 'hazardous', 'electronic', 'bulk', 'construction'
+    'waste',
+    'recyclable',
+    'organic',
+    'hazardous',
+    'electronic',
+    'bulk',
+    'construction',
   ];
 
   private static readonly VALID_PHYSICAL_STATES: Material['physicalState'][] = [
-    'solid', 'liquid', 'gas', 'sludge', 'powder'
+    'solid',
+    'liquid',
+    'gas',
+    'sludge',
+    'powder',
   ];
 
-  private static readonly VALID_RECYCLING_METHODS: Material['recyclingClassification']['recyclingMethod'][] = [
-    'mechanical', 'chemical', 'biological', 'thermal', 'manual', 'none'
-  ];
+  private static readonly VALID_RECYCLING_METHODS: Material['recyclingClassification']['recyclingMethod'][] =
+    ['mechanical', 'chemical', 'biological', 'thermal', 'manual', 'none'];
 
-  private static readonly VALID_HAZARD_LEVELS: Material['environmentalClassification']['hazardLevel'][] = [
-    'low', 'medium', 'high', 'extreme'
-  ];
+  private static readonly VALID_HAZARD_LEVELS: Material['environmentalClassification']['hazardLevel'][] =
+    ['low', 'medium', 'high', 'extreme'];
 
-  private static readonly VALID_TOXICITY_LEVELS: Material['environmentalClassification']['toxicity'][] = [
-    'none', 'low', 'medium', 'high'
-  ];
+  private static readonly VALID_TOXICITY_LEVELS: Material['environmentalClassification']['toxicity'][] =
+    ['none', 'low', 'medium', 'high'];
 
-  private static readonly VALID_ENVIRONMENTAL_IMPACTS: Material['environmentalClassification']['environmentalImpact'][] = [
-    'minimal', 'moderate', 'significant', 'severe'
-  ];
+  private static readonly VALID_ENVIRONMENTAL_IMPACTS: Material['environmentalClassification']['environmentalImpact'][] =
+    ['minimal', 'moderate', 'significant', 'severe'];
 
   private static readonly VALID_MARKET_VOLATILITY: Material['marketValue']['marketVolatility'][] = [
-    'low', 'medium', 'high'
+    'low',
+    'medium',
+    'high',
   ];
 
   constructor(data: Partial<Material>) {
@@ -138,7 +153,9 @@ export class MaterialModel implements Material {
   /**
    * Create a new material with validation
    */
-  static create(data: Omit<Material, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): MaterialModel {
+  static create(
+    data: Omit<Material, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>
+  ): MaterialModel {
     const now = new Date();
     const materialData: Partial<Material> = {
       id: uuidv4(),
@@ -149,8 +166,8 @@ export class MaterialModel implements Material {
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'material_system'
-      }
+        source: 'material_system',
+      },
     };
 
     return new MaterialModel(materialData);
@@ -159,7 +176,10 @@ export class MaterialModel implements Material {
   /**
    * Update material with optimistic locking
    */
-  update(updates: Partial<Omit<Material, keyof BaseEntity>>, expectedVersion: number): MaterialModel {
+  update(
+    updates: Partial<Omit<Material, keyof BaseEntity>>,
+    expectedVersion: number
+  ): MaterialModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -173,8 +193,8 @@ export class MaterialModel implements Material {
         ...this.metadata,
         ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new MaterialModel(updatedData);
@@ -198,7 +218,9 @@ export class MaterialModel implements Material {
     }
 
     if (!data.physicalState || !MaterialModel.VALID_PHYSICAL_STATES.includes(data.physicalState)) {
-      throw new Error(`Physical state must be one of: ${MaterialModel.VALID_PHYSICAL_STATES.join(', ')}`);
+      throw new Error(
+        `Physical state must be one of: ${MaterialModel.VALID_PHYSICAL_STATES.join(', ')}`
+      );
     }
 
     // Validate recycling classification
@@ -210,11 +232,18 @@ export class MaterialModel implements Material {
       throw new Error('Recyclable must be a boolean');
     }
 
-    if (!MaterialModel.VALID_RECYCLING_METHODS.includes(data.recyclingClassification.recyclingMethod)) {
-      throw new Error(`Recycling method must be one of: ${MaterialModel.VALID_RECYCLING_METHODS.join(', ')}`);
+    if (
+      !MaterialModel.VALID_RECYCLING_METHODS.includes(data.recyclingClassification.recyclingMethod)
+    ) {
+      throw new Error(
+        `Recycling method must be one of: ${MaterialModel.VALID_RECYCLING_METHODS.join(', ')}`
+      );
     }
 
-    if (data.recyclingClassification.recyclingEfficiency < 0 || data.recyclingClassification.recyclingEfficiency > 100) {
+    if (
+      data.recyclingClassification.recyclingEfficiency < 0 ||
+      data.recyclingClassification.recyclingEfficiency > 100
+    ) {
       throw new Error('Recycling efficiency must be between 0 and 100');
     }
 
@@ -224,15 +253,23 @@ export class MaterialModel implements Material {
     }
 
     if (!MaterialModel.VALID_HAZARD_LEVELS.includes(data.environmentalClassification.hazardLevel)) {
-      throw new Error(`Hazard level must be one of: ${MaterialModel.VALID_HAZARD_LEVELS.join(', ')}`);
+      throw new Error(
+        `Hazard level must be one of: ${MaterialModel.VALID_HAZARD_LEVELS.join(', ')}`
+      );
     }
 
     if (!MaterialModel.VALID_TOXICITY_LEVELS.includes(data.environmentalClassification.toxicity)) {
       throw new Error(`Toxicity must be one of: ${MaterialModel.VALID_TOXICITY_LEVELS.join(', ')}`);
     }
 
-    if (!MaterialModel.VALID_ENVIRONMENTAL_IMPACTS.includes(data.environmentalClassification.environmentalImpact)) {
-      throw new Error(`Environmental impact must be one of: ${MaterialModel.VALID_ENVIRONMENTAL_IMPACTS.join(', ')}`);
+    if (
+      !MaterialModel.VALID_ENVIRONMENTAL_IMPACTS.includes(
+        data.environmentalClassification.environmentalImpact
+      )
+    ) {
+      throw new Error(
+        `Environmental impact must be one of: ${MaterialModel.VALID_ENVIRONMENTAL_IMPACTS.join(', ')}`
+      );
     }
 
     // Validate density if provided
@@ -241,7 +278,12 @@ export class MaterialModel implements Material {
     }
 
     // Validate moisture content if provided
-    if (data.moistureContent && (typeof data.moistureContent !== 'number' || data.moistureContent < 0 || data.moistureContent > 100)) {
+    if (
+      data.moistureContent &&
+      (typeof data.moistureContent !== 'number' ||
+        data.moistureContent < 0 ||
+        data.moistureContent > 100)
+    ) {
       throw new Error('Moisture content must be between 0 and 100');
     }
 
@@ -250,7 +292,10 @@ export class MaterialModel implements Material {
       throw new Error('Market value information is required');
     }
 
-    if (data.marketValue.basePrice && (typeof data.marketValue.basePrice !== 'number' || data.marketValue.basePrice < 0)) {
+    if (
+      data.marketValue.basePrice &&
+      (typeof data.marketValue.basePrice !== 'number' || data.marketValue.basePrice < 0)
+    ) {
       throw new Error('Base price must be a non-negative number');
     }
 
@@ -259,7 +304,9 @@ export class MaterialModel implements Material {
     }
 
     if (!MaterialModel.VALID_MARKET_VOLATILITY.includes(data.marketValue.marketVolatility)) {
-      throw new Error(`Market volatility must be one of: ${MaterialModel.VALID_MARKET_VOLATILITY.join(', ')}`);
+      throw new Error(
+        `Market volatility must be one of: ${MaterialModel.VALID_MARKET_VOLATILITY.join(', ')}`
+      );
     }
 
     // Validate handling requirements
@@ -267,11 +314,13 @@ export class MaterialModel implements Material {
       throw new Error('Handling requirements are required');
     }
 
-    if (!Array.isArray(data.handlingRequirements.storage) ||
-        !Array.isArray(data.handlingRequirements.transportation) ||
-        !Array.isArray(data.handlingRequirements.processing) ||
-        !Array.isArray(data.handlingRequirements.disposal) ||
-        !Array.isArray(data.handlingRequirements.safetyPrecautions)) {
+    if (
+      !Array.isArray(data.handlingRequirements.storage) ||
+      !Array.isArray(data.handlingRequirements.transportation) ||
+      !Array.isArray(data.handlingRequirements.processing) ||
+      !Array.isArray(data.handlingRequirements.disposal) ||
+      !Array.isArray(data.handlingRequirements.safetyPrecautions)
+    ) {
       throw new Error('All handling requirement arrays must be provided');
     }
 
@@ -280,12 +329,17 @@ export class MaterialModel implements Material {
       throw new Error('Processing specifications are required');
     }
 
-    if (!Array.isArray(data.processingSpecifications.acceptedForms) || data.processingSpecifications.acceptedForms.length === 0) {
+    if (
+      !Array.isArray(data.processingSpecifications.acceptedForms) ||
+      data.processingSpecifications.acceptedForms.length === 0
+    ) {
       throw new Error('At least one accepted form must be specified');
     }
 
-    if (!Array.isArray(data.processingSpecifications.compatibleProcessingMethods) ||
-        data.processingSpecifications.compatibleProcessingMethods.length === 0) {
+    if (
+      !Array.isArray(data.processingSpecifications.compatibleProcessingMethods) ||
+      data.processingSpecifications.compatibleProcessingMethods.length === 0
+    ) {
       throw new Error('At least one compatible processing method must be specified');
     }
 
@@ -296,7 +350,11 @@ export class MaterialModel implements Material {
           throw new Error(`Quality standard ${index}: parameter is required`);
         }
 
-        if (standard.minValue !== undefined && standard.maxValue !== undefined && standard.minValue > standard.maxValue) {
+        if (
+          standard.minValue !== undefined &&
+          standard.maxValue !== undefined &&
+          standard.minValue > standard.maxValue
+        ) {
           throw new Error(`Quality standard ${index}: min value cannot be greater than max value`);
         }
 
@@ -343,11 +401,15 @@ export class MaterialModel implements Material {
         }
 
         if (new Date(doc.validFrom) >= new Date(doc.validTo)) {
-          throw new Error(`Compliance document ${index}: valid from date must be before valid to date`);
+          throw new Error(
+            `Compliance document ${index}: valid from date must be before valid to date`
+          );
         }
 
         if (!['active', 'expired', 'pending', 'revoked'].includes(doc.status)) {
-          throw new Error(`Compliance document ${index}: status must be active, expired, pending, or revoked`);
+          throw new Error(
+            `Compliance document ${index}: status must be active, expired, pending, or revoked`
+          );
         }
       });
     }
@@ -370,7 +432,9 @@ export class MaterialModel implements Material {
   /**
    * Update recycling classification
    */
-  updateRecyclingClassification(updates: Partial<Material['recyclingClassification']>): MaterialModel {
+  updateRecyclingClassification(
+    updates: Partial<Material['recyclingClassification']>
+  ): MaterialModel {
     const newClassification = { ...this.recyclingClassification, ...updates };
 
     if (newClassification.recyclingEfficiency < 0 || newClassification.recyclingEfficiency > 100) {
@@ -383,7 +447,9 @@ export class MaterialModel implements Material {
   /**
    * Update environmental classification
    */
-  updateEnvironmentalClassification(updates: Partial<Material['environmentalClassification']>): MaterialModel {
+  updateEnvironmentalClassification(
+    updates: Partial<Material['environmentalClassification']>
+  ): MaterialModel {
     const newClassification = { ...this.environmentalClassification, ...updates };
 
     if (newClassification.carbonFootprint && newClassification.carbonFootprint < 0) {
@@ -396,7 +462,12 @@ export class MaterialModel implements Material {
   /**
    * Add regulatory code
    */
-  addRegulatoryCode(regulatoryCode: Omit<Material['regulatoryCodes'][0], 'system' | 'code'> & { system: string; code: string }): MaterialModel {
+  addRegulatoryCode(
+    regulatoryCode: Omit<Material['regulatoryCodes'][0], 'system' | 'code'> & {
+      system: string;
+      code: string;
+    }
+  ): MaterialModel {
     if (!regulatoryCode.system || typeof regulatoryCode.system !== 'string') {
       throw new Error('Regulatory system is required');
     }
@@ -409,7 +480,7 @@ export class MaterialModel implements Material {
       system: regulatoryCode.system,
       code: regulatoryCode.code,
       description: regulatoryCode.description,
-      restrictions: regulatoryCode.restrictions
+      restrictions: regulatoryCode.restrictions,
     };
 
     const newCodes = [...this.regulatoryCodes, newCode];
@@ -420,7 +491,9 @@ export class MaterialModel implements Material {
    * Remove regulatory code
    */
   removeRegulatoryCode(system: string, code: string): MaterialModel {
-    const newCodes = this.regulatoryCodes.filter(rc => !(rc.system === system && rc.code === code));
+    const newCodes = this.regulatoryCodes.filter(
+      (rc) => !(rc.system === system && rc.code === code)
+    );
     return this.update({ regulatoryCodes: newCodes }, this.version);
   }
 
@@ -435,7 +508,9 @@ export class MaterialModel implements Material {
     }
 
     if (!MaterialModel.VALID_MARKET_VOLATILITY.includes(newMarketValue.marketVolatility)) {
-      throw new Error(`Market volatility must be one of: ${MaterialModel.VALID_MARKET_VOLATILITY.join(', ')}`);
+      throw new Error(
+        `Market volatility must be one of: ${MaterialModel.VALID_MARKET_VOLATILITY.join(', ')}`
+      );
     }
 
     return this.update({ marketValue: newMarketValue }, this.version);
@@ -448,7 +523,7 @@ export class MaterialModel implements Material {
     const priceEntry = {
       date: new Date().toISOString().split('T')[0],
       price,
-      source
+      source,
     };
 
     const newPriceHistory = [...(this.marketValue.priceHistory || []), priceEntry];
@@ -477,18 +552,23 @@ export class MaterialModel implements Material {
    * Remove certification
    */
   removeCertification(certification: string): MaterialModel {
-    const newCertifications = this.certifications.filter(cert => cert !== certification);
+    const newCertifications = this.certifications.filter((cert) => cert !== certification);
     return this.update({ certifications: newCertifications }, this.version);
   }
 
   /**
    * Add compliance document
    */
-  addComplianceDocument(document: Omit<Material['complianceDocuments'][0], 'validFrom' | 'validTo'> & { validFrom: string; validTo: string }): MaterialModel {
+  addComplianceDocument(
+    document: Omit<Material['complianceDocuments'][0], 'validFrom' | 'validTo'> & {
+      validFrom: string;
+      validTo: string;
+    }
+  ): MaterialModel {
     const newDocument = {
       ...document,
       validFrom: document.validFrom,
-      validTo: document.validTo
+      validTo: document.validTo,
     };
 
     const newDocuments = [...this.complianceDocuments, newDocument];
@@ -499,7 +579,9 @@ export class MaterialModel implements Material {
    * Remove compliance document
    */
   removeComplianceDocument(documentNumber: string): MaterialModel {
-    const newDocuments = this.complianceDocuments.filter(doc => doc.documentNumber !== documentNumber);
+    const newDocuments = this.complianceDocuments.filter(
+      (doc) => doc.documentNumber !== documentNumber
+    );
     return this.update({ complianceDocuments: newDocuments }, this.version);
   }
 
@@ -507,17 +589,21 @@ export class MaterialModel implements Material {
    * Check if material is recyclable
    */
   isRecyclable(): boolean {
-    return this.recyclingClassification.recyclable &&
-           this.recyclingClassification.recyclingMethod !== 'none';
+    return (
+      this.recyclingClassification.recyclable &&
+      this.recyclingClassification.recyclingMethod !== 'none'
+    );
   }
 
   /**
    * Check if material is hazardous
    */
   isHazardous(): boolean {
-    return this.environmentalClassification.hazardLevel === 'high' ||
-           this.environmentalClassification.hazardLevel === 'extreme' ||
-           this.environmentalClassification.toxicity === 'high';
+    return (
+      this.environmentalClassification.hazardLevel === 'high' ||
+      this.environmentalClassification.hazardLevel === 'extreme' ||
+      this.environmentalClassification.toxicity === 'high'
+    );
   }
 
   /**
@@ -536,8 +622,10 @@ export class MaterialModel implements Material {
     }
 
     // Adjust based on contaminants
-    if (this.recyclingClassification.contaminants &&
-        this.recyclingClassification.contaminants.length > 0) {
+    if (
+      this.recyclingClassification.contaminants &&
+      this.recyclingClassification.contaminants.length > 0
+    ) {
       score *= 0.9; // 10% reduction per contaminant type
     }
 
@@ -548,9 +636,15 @@ export class MaterialModel implements Material {
    * Get environmental impact score
    */
   getEnvironmentalImpactScore(): number {
-    const hazardScore = { 'low': 1, 'medium': 2, 'high': 3, 'extreme': 4 }[this.environmentalClassification.hazardLevel];
-    const toxicityScore = { 'none': 0, 'low': 1, 'medium': 2, 'high': 3 }[this.environmentalClassification.toxicity];
-    const impactScore = { 'minimal': 1, 'moderate': 2, 'significant': 3, 'severe': 4 }[this.environmentalClassification.environmentalImpact];
+    const hazardScore = { low: 1, medium: 2, high: 3, extreme: 4 }[
+      this.environmentalClassification.hazardLevel
+    ];
+    const toxicityScore = { none: 0, low: 1, medium: 2, high: 3 }[
+      this.environmentalClassification.toxicity
+    ];
+    const impactScore = { minimal: 1, moderate: 2, significant: 3, severe: 4 }[
+      this.environmentalClassification.environmentalImpact
+    ];
 
     const totalScore = (hazardScore + toxicityScore + impactScore) / 3;
 
@@ -573,8 +667,10 @@ export class MaterialModel implements Material {
     let score = 100;
 
     // Reduce score based on contaminants
-    if (this.recyclingClassification.contaminants &&
-        this.recyclingClassification.contaminants.length > 0) {
+    if (
+      this.recyclingClassification.contaminants &&
+      this.recyclingClassification.contaminants.length > 0
+    ) {
       score -= this.recyclingClassification.contaminants.length * 10;
     }
 
@@ -600,10 +696,13 @@ export class MaterialModel implements Material {
   /**
    * Check if material meets quality standards
    */
-  meetsQualityStandards(testResults: Record<string, number>): { meetsStandards: boolean; issues: string[] } {
+  meetsQualityStandards(testResults: Record<string, number>): {
+    meetsStandards: boolean;
+    issues: string[];
+  } {
     const issues: string[] = [];
 
-    this.processingSpecifications.qualityStandards.forEach(standard => {
+    this.processingSpecifications.qualityStandards.forEach((standard) => {
       const result = testResults[standard.parameter];
 
       if (result === undefined) {
@@ -612,17 +711,21 @@ export class MaterialModel implements Material {
       }
 
       if (standard.minValue !== undefined && result < standard.minValue) {
-        issues.push(`${standard.parameter} (${result}${standard.unit}) below minimum (${standard.minValue}${standard.unit})`);
+        issues.push(
+          `${standard.parameter} (${result}${standard.unit}) below minimum (${standard.minValue}${standard.unit})`
+        );
       }
 
       if (standard.maxValue !== undefined && result > standard.maxValue) {
-        issues.push(`${standard.parameter} (${result}${standard.unit}) above maximum (${standard.maxValue}${standard.unit})`);
+        issues.push(
+          `${standard.parameter} (${result}${standard.unit}) above maximum (${standard.maxValue}${standard.unit})`
+        );
       }
     });
 
     return {
       meetsStandards: issues.length === 0,
-      issues
+      issues,
     };
   }
 
@@ -630,7 +733,9 @@ export class MaterialModel implements Material {
    * Get material summary for reporting
    */
   getSummary(): Record<string, any> {
-    const activeComplianceDocs = this.complianceDocuments.filter(doc => doc.status === 'active').length;
+    const activeComplianceDocs = this.complianceDocuments.filter(
+      (doc) => doc.status === 'active'
+    ).length;
 
     return {
       id: this.id,
@@ -655,7 +760,7 @@ export class MaterialModel implements Material {
       regulatoryCodesCount: this.regulatoryCodes.length,
       certificationsCount: this.certifications.length,
       activeComplianceDocuments: activeComplianceDocs,
-      carbonFootprint: this.environmentalClassification.carbonFootprint
+      carbonFootprint: this.environmentalClassification.carbonFootprint,
     };
   }
 
@@ -687,7 +792,7 @@ export class MaterialModel implements Material {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -709,7 +814,7 @@ export class MaterialModel implements Material {
       eventType,
       timestamp: new Date(),
       eventData: this.toEventData(),
-      version: 1
+      version: 1,
     };
   }
 
@@ -735,29 +840,40 @@ export class MaterialModel implements Material {
     }
 
     // Business rule: Materials with market value should have price history
-    if (this.marketValue.basePrice && this.marketValue.basePrice > 0 &&
-        (!this.marketValue.priceHistory || this.marketValue.priceHistory.length === 0)) {
+    if (
+      this.marketValue.basePrice &&
+      this.marketValue.basePrice > 0 &&
+      (!this.marketValue.priceHistory || this.marketValue.priceHistory.length === 0)
+    ) {
       errors.push('Materials with market value should have price history tracking');
     }
 
     // Business rule: Materials requiring special handling should have detailed requirements
-    if (this.isHazardous() &&
-        (this.handlingRequirements.storage.length === 0 ||
-         this.handlingRequirements.safetyPrecautions.length === 0)) {
+    if (
+      this.isHazardous() &&
+      (this.handlingRequirements.storage.length === 0 ||
+        this.handlingRequirements.safetyPrecautions.length === 0)
+    ) {
       errors.push('Hazardous materials must have detailed handling and safety requirements');
     }
 
     // Business rule: Materials with quality standards should have test methods
-    if (this.processingSpecifications.qualityStandards.length > 0 &&
-        this.processingSpecifications.qualityStandards.some(std => !std.testMethod)) {
+    if (
+      this.processingSpecifications.qualityStandards.length > 0 &&
+      this.processingSpecifications.qualityStandards.some((std) => !std.testMethod)
+    ) {
       errors.push('All quality standards must specify test methods');
     }
 
     // Business rule: High carbon footprint materials should be recyclable
-    if (this.environmentalClassification.carbonFootprint &&
-        this.environmentalClassification.carbonFootprint > 500 &&
-        !this.isRecyclable()) {
-      errors.push('High carbon footprint materials should be recyclable to reduce environmental impact');
+    if (
+      this.environmentalClassification.carbonFootprint &&
+      this.environmentalClassification.carbonFootprint > 500 &&
+      !this.isRecyclable()
+    ) {
+      errors.push(
+        'High carbon footprint materials should be recyclable to reduce environmental impact'
+      );
     }
 
     return errors;
@@ -774,14 +890,19 @@ export class MaterialFactory {
   static fromLegacyData(legacyData: Record<string, any>): MaterialModel {
     // Data archaeology: Handle various legacy field names and formats
     const mappedData: Partial<Material> = {
-      externalIds: [legacyData.material_id || legacyData.MATERIAL_ID || legacyData.code || legacyData.id],
+      externalIds: [
+        legacyData.material_id || legacyData.MATERIAL_ID || legacyData.code || legacyData.id,
+      ],
       name: legacyData.material_name || legacyData.MATERIAL_NAME || legacyData.name || 'Unknown',
       code: legacyData.material_code || legacyData.MATERIAL_CODE || legacyData.code,
       category: this.mapLegacyCategory(legacyData.category || legacyData.CATEGORY || 'waste'),
       subcategory: legacyData.subcategory || legacyData.SUBCATEGORY,
-      physicalState: this.mapLegacyPhysicalState(legacyData.physical_state || legacyData.state || 'solid'),
+      physicalState: this.mapLegacyPhysicalState(
+        legacyData.physical_state || legacyData.state || 'solid'
+      ),
       density: legacyData.density || legacyData.DENSITY,
-      moistureContent: legacyData.moisture_content || legacyData.MOISTURE_CONTENT || legacyData.moisture,
+      moistureContent:
+        legacyData.moisture_content || legacyData.MOISTURE_CONTENT || legacyData.moisture,
       particleSize: legacyData.particle_size || legacyData.PARTICLE_SIZE,
       color: legacyData.color || legacyData.COLOR,
       odor: legacyData.odor || legacyData.ODOR,
@@ -803,9 +924,9 @@ export class MaterialFactory {
           sourceRegion: legacyData.source_region,
           supplierId: legacyData.supplier_id,
           grade: legacyData.grade,
-          purity: legacyData.purity
-        }
-      }
+          purity: legacyData.purity,
+        },
+      },
     };
 
     return MaterialModel.create(mappedData as any);
@@ -816,16 +937,16 @@ export class MaterialFactory {
    */
   private static mapLegacyCategory(legacyCategory: string): Material['category'] {
     const categoryMap: Record<string, Material['category']> = {
-      'waste': 'waste',
-      'recyclable': 'recyclable',
-      'organic': 'organic',
-      'hazardous': 'hazardous',
-      'electronic': 'electronic',
-      'bulk': 'bulk',
-      'construction': 'construction',
-      'e_waste': 'electronic',
-      'bio_waste': 'organic',
-      'mixed_waste': 'waste'
+      waste: 'waste',
+      recyclable: 'recyclable',
+      organic: 'organic',
+      hazardous: 'hazardous',
+      electronic: 'electronic',
+      bulk: 'bulk',
+      construction: 'construction',
+      e_waste: 'electronic',
+      bio_waste: 'organic',
+      mixed_waste: 'waste',
     };
 
     return categoryMap[legacyCategory.toLowerCase()] || 'waste';
@@ -836,11 +957,11 @@ export class MaterialFactory {
    */
   private static mapLegacyPhysicalState(legacyState: string): Material['physicalState'] {
     const stateMap: Record<string, Material['physicalState']> = {
-      'solid': 'solid',
-      'liquid': 'liquid',
-      'gas': 'gas',
-      'sludge': 'sludge',
-      'powder': 'powder'
+      solid: 'solid',
+      liquid: 'liquid',
+      gas: 'gas',
+      sludge: 'sludge',
+      powder: 'powder',
     };
 
     return stateMap[legacyState.toLowerCase()] || 'solid';
@@ -849,27 +970,33 @@ export class MaterialFactory {
   /**
    * Map legacy recycling classification
    */
-  private static mapLegacyRecyclingClassification(legacyData: Record<string, any>): Material['recyclingClassification'] {
+  private static mapLegacyRecyclingClassification(
+    legacyData: Record<string, any>
+  ): Material['recyclingClassification'] {
     return {
       recyclable: legacyData.recyclable !== undefined ? legacyData.recyclable : true,
-      recyclingMethod: this.mapLegacyRecyclingMethod(legacyData.recycling_method || legacyData.method || 'mechanical'),
+      recyclingMethod: this.mapLegacyRecyclingMethod(
+        legacyData.recycling_method || legacyData.method || 'mechanical'
+      ),
       recyclingEfficiency: legacyData.recycling_efficiency || legacyData.efficiency || 75,
       contaminants: legacyData.contaminants || [],
-      processingRequirements: legacyData.processing_requirements || []
+      processingRequirements: legacyData.processing_requirements || [],
     };
   }
 
   /**
    * Map legacy recycling method
    */
-  private static mapLegacyRecyclingMethod(legacyMethod: string): Material['recyclingClassification']['recyclingMethod'] {
+  private static mapLegacyRecyclingMethod(
+    legacyMethod: string
+  ): Material['recyclingClassification']['recyclingMethod'] {
     const methodMap: Record<string, Material['recyclingClassification']['recyclingMethod']> = {
-      'mechanical': 'mechanical',
-      'chemical': 'chemical',
-      'biological': 'biological',
-      'thermal': 'thermal',
-      'manual': 'manual',
-      'none': 'none'
+      mechanical: 'mechanical',
+      chemical: 'chemical',
+      biological: 'biological',
+      thermal: 'thermal',
+      manual: 'manual',
+      none: 'none',
     };
 
     return methodMap[legacyMethod.toLowerCase()] || 'mechanical';
@@ -878,29 +1005,35 @@ export class MaterialFactory {
   /**
    * Map legacy environmental classification
    */
-  private static mapLegacyEnvironmentalClassification(legacyData: Record<string, any>): Material['environmentalClassification'] {
+  private static mapLegacyEnvironmentalClassification(
+    legacyData: Record<string, any>
+  ): Material['environmentalClassification'] {
     return {
       hazardLevel: this.mapLegacyHazardLevel(legacyData.hazard_level || legacyData.hazard || 'low'),
       toxicity: this.mapLegacyToxicity(legacyData.toxicity || 'none'),
       leachability: this.mapLegacyLeachability(legacyData.leachability || 'none'),
-      environmentalImpact: this.mapLegacyEnvironmentalImpact(legacyData.environmental_impact || legacyData.impact || 'moderate'),
-      carbonFootprint: legacyData.carbon_footprint || legacyData.CARBON_FOOTPRINT
+      environmentalImpact: this.mapLegacyEnvironmentalImpact(
+        legacyData.environmental_impact || legacyData.impact || 'moderate'
+      ),
+      carbonFootprint: legacyData.carbon_footprint || legacyData.CARBON_FOOTPRINT,
     };
   }
 
   /**
    * Map legacy hazard level
    */
-  private static mapLegacyHazardLevel(legacyHazard: string): Material['environmentalClassification']['hazardLevel'] {
+  private static mapLegacyHazardLevel(
+    legacyHazard: string
+  ): Material['environmentalClassification']['hazardLevel'] {
     const hazardMap: Record<string, Material['environmentalClassification']['hazardLevel']> = {
-      'low': 'low',
-      'medium': 'medium',
-      'high': 'high',
-      'extreme': 'extreme',
+      low: 'low',
+      medium: 'medium',
+      high: 'high',
+      extreme: 'extreme',
       '1': 'low',
       '2': 'medium',
       '3': 'high',
-      '4': 'extreme'
+      '4': 'extreme',
     };
 
     return hazardMap[legacyHazard.toLowerCase()] || 'low';
@@ -909,13 +1042,15 @@ export class MaterialFactory {
   /**
    * Map legacy toxicity
    */
-  private static mapLegacyToxicity(legacyToxicity: string): Material['environmentalClassification']['toxicity'] {
+  private static mapLegacyToxicity(
+    legacyToxicity: string
+  ): Material['environmentalClassification']['toxicity'] {
     const toxicityMap: Record<string, Material['environmentalClassification']['toxicity']> = {
-      'none': 'none',
-      'low': 'low',
-      'medium': 'medium',
-      'high': 'high',
-      'non_toxic': 'none'
+      none: 'none',
+      low: 'low',
+      medium: 'medium',
+      high: 'high',
+      non_toxic: 'none',
     };
 
     return toxicityMap[legacyToxicity.toLowerCase()] || 'none';
@@ -924,13 +1059,16 @@ export class MaterialFactory {
   /**
    * Map legacy leachability
    */
-  private static mapLegacyLeachability(legacyLeachability: string): Material['environmentalClassification']['leachability'] {
-    const leachabilityMap: Record<string, Material['environmentalClassification']['leachability']> = {
-      'none': 'none',
-      'low': 'low',
-      'medium': 'medium',
-      'high': 'high'
-    };
+  private static mapLegacyLeachability(
+    legacyLeachability: string
+  ): Material['environmentalClassification']['leachability'] {
+    const leachabilityMap: Record<string, Material['environmentalClassification']['leachability']> =
+      {
+        none: 'none',
+        low: 'low',
+        medium: 'medium',
+        high: 'high',
+      };
 
     return leachabilityMap[legacyLeachability.toLowerCase()] || 'none';
   }
@@ -938,14 +1076,19 @@ export class MaterialFactory {
   /**
    * Map legacy environmental impact
    */
-  private static mapLegacyEnvironmentalImpact(legacyImpact: string): Material['environmentalClassification']['environmentalImpact'] {
-    const impactMap: Record<string, Material['environmentalClassification']['environmentalImpact']> = {
-      'minimal': 'minimal',
-      'moderate': 'moderate',
-      'significant': 'significant',
-      'severe': 'severe',
-      'low': 'minimal',
-      'high': 'significant'
+  private static mapLegacyEnvironmentalImpact(
+    legacyImpact: string
+  ): Material['environmentalClassification']['environmentalImpact'] {
+    const impactMap: Record<
+      string,
+      Material['environmentalClassification']['environmentalImpact']
+    > = {
+      minimal: 'minimal',
+      moderate: 'moderate',
+      significant: 'significant',
+      severe: 'severe',
+      low: 'minimal',
+      high: 'significant',
     };
 
     return impactMap[legacyImpact.toLowerCase()] || 'moderate';
@@ -954,7 +1097,9 @@ export class MaterialFactory {
   /**
    * Map legacy regulatory codes
    */
-  private static mapLegacyRegulatoryCodes(legacyData: Record<string, any>): Material['regulatoryCodes'] {
+  private static mapLegacyRegulatoryCodes(
+    legacyData: Record<string, any>
+  ): Material['regulatoryCodes'] {
     if (!legacyData.regulatory_codes && !legacyData.codes) {
       return [];
     }
@@ -966,7 +1111,7 @@ export class MaterialFactory {
         system: code.system || code.regulatory_system || 'EPA',
         code: code.code || code.regulatory_code || 'Unknown',
         description: code.description || 'No description available',
-        restrictions: code.restrictions || []
+        restrictions: code.restrictions || [],
       }));
     }
 
@@ -976,13 +1121,15 @@ export class MaterialFactory {
   /**
    * Map legacy handling requirements
    */
-  private static mapLegacyHandlingRequirements(legacyData: Record<string, any>): Material['handlingRequirements'] {
+  private static mapLegacyHandlingRequirements(
+    legacyData: Record<string, any>
+  ): Material['handlingRequirements'] {
     return {
       storage: legacyData.storage_requirements || legacyData.storage || [],
       transportation: legacyData.transportation_requirements || legacyData.transportation || [],
       processing: legacyData.processing_requirements || legacyData.processing || [],
       disposal: legacyData.disposal_requirements || legacyData.disposal || [],
-      safetyPrecautions: legacyData.safety_precautions || legacyData.safety || []
+      safetyPrecautions: legacyData.safety_precautions || legacyData.safety || [],
     };
   }
 
@@ -993,21 +1140,27 @@ export class MaterialFactory {
     return {
       basePrice: legacyData.market_price || legacyData.price || legacyData.base_price,
       priceUnit: legacyData.price_unit || 'per_ton',
-      marketVolatility: this.mapLegacyMarketVolatility(legacyData.market_volatility || legacyData.volatility || 'medium'),
-      priceHistory: this.mapLegacyPriceHistory(legacyData.price_history || legacyData.history || [])
+      marketVolatility: this.mapLegacyMarketVolatility(
+        legacyData.market_volatility || legacyData.volatility || 'medium'
+      ),
+      priceHistory: this.mapLegacyPriceHistory(
+        legacyData.price_history || legacyData.history || []
+      ),
     };
   }
 
   /**
    * Map legacy market volatility
    */
-  private static mapLegacyMarketVolatility(legacyVolatility: string): Material['marketValue']['marketVolatility'] {
+  private static mapLegacyMarketVolatility(
+    legacyVolatility: string
+  ): Material['marketValue']['marketVolatility'] {
     const volatilityMap: Record<string, Material['marketValue']['marketVolatility']> = {
-      'low': 'low',
-      'medium': 'medium',
-      'high': 'high',
-      'stable': 'low',
-      'volatile': 'high'
+      low: 'low',
+      medium: 'medium',
+      high: 'high',
+      stable: 'low',
+      volatile: 'high',
     };
 
     return volatilityMap[legacyVolatility.toLowerCase()] || 'medium';
@@ -1016,33 +1169,43 @@ export class MaterialFactory {
   /**
    * Map legacy price history
    */
-  private static mapLegacyPriceHistory(priceHistory: any[]): Material['marketValue']['priceHistory'] {
+  private static mapLegacyPriceHistory(
+    priceHistory: any[]
+  ): Material['marketValue']['priceHistory'] {
     if (!Array.isArray(priceHistory)) return [];
 
     return priceHistory.map((entry: any) => ({
       date: entry.date || new Date().toISOString().split('T')[0],
       price: entry.price || 0,
-      source: entry.source || 'Legacy System'
+      source: entry.source || 'Legacy System',
     }));
   }
 
   /**
    * Map legacy processing specifications
    */
-  private static mapLegacyProcessingSpecifications(legacyData: Record<string, any>): Material['processingSpecifications'] {
+  private static mapLegacyProcessingSpecifications(
+    legacyData: Record<string, any>
+  ): Material['processingSpecifications'] {
     return {
       acceptedForms: legacyData.accepted_forms || legacyData.forms || ['raw'],
-      preprocessingRequirements: legacyData.preprocessing_requirements || legacyData.preprocessing || [],
-      compatibleProcessingMethods: legacyData.compatible_methods || legacyData.methods || ['mechanical'],
+      preprocessingRequirements:
+        legacyData.preprocessing_requirements || legacyData.preprocessing || [],
+      compatibleProcessingMethods: legacyData.compatible_methods ||
+        legacyData.methods || ['mechanical'],
       outputProducts: legacyData.output_products || legacyData.outputs || [],
-      qualityStandards: this.mapLegacyQualityStandards(legacyData.quality_standards || legacyData.standards || [])
+      qualityStandards: this.mapLegacyQualityStandards(
+        legacyData.quality_standards || legacyData.standards || []
+      ),
     };
   }
 
   /**
    * Map legacy quality standards
    */
-  private static mapLegacyQualityStandards(standards: any[]): Material['processingSpecifications']['qualityStandards'] {
+  private static mapLegacyQualityStandards(
+    standards: any[]
+  ): Material['processingSpecifications']['qualityStandards'] {
     if (!Array.isArray(standards)) return [];
 
     return standards.map((standard: any) => ({
@@ -1050,7 +1213,7 @@ export class MaterialFactory {
       minValue: standard.min_value || standard.minimum,
       maxValue: standard.max_value || standard.maximum,
       unit: standard.unit || 'units',
-      testMethod: standard.test_method || standard.method || 'Standard Test'
+      testMethod: standard.test_method || standard.method || 'Standard Test',
     }));
   }
 
@@ -1072,7 +1235,9 @@ export class MaterialFactory {
   /**
    * Map legacy compliance documents
    */
-  private static mapLegacyComplianceDocuments(legacyData: Record<string, any>): Material['complianceDocuments'] {
+  private static mapLegacyComplianceDocuments(
+    legacyData: Record<string, any>
+  ): Material['complianceDocuments'] {
     if (!legacyData.compliance_documents && !legacyData.documents) {
       return [];
     }
@@ -1085,8 +1250,11 @@ export class MaterialFactory {
         documentNumber: doc.number || doc.document_number || 'Unknown',
         issuingAuthority: doc.authority || doc.issuing_authority || 'Unknown',
         validFrom: doc.valid_from || doc.from || new Date().toISOString().split('T')[0],
-        validTo: doc.valid_to || doc.to || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        status: doc.status || 'active'
+        validTo:
+          doc.valid_to ||
+          doc.to ||
+          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        status: doc.status || 'active',
       }));
     }
 
@@ -1108,7 +1276,7 @@ export class MaterialValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -1132,7 +1300,9 @@ export class MaterialManager {
     const optimizedMaterials = [...materials];
 
     // Sort by recycling efficiency (highest first)
-    optimizedMaterials.sort((a, b) => b.getRecyclingEfficiencyScore() - a.getRecyclingEfficiencyScore());
+    optimizedMaterials.sort(
+      (a, b) => b.getRecyclingEfficiencyScore() - a.getRecyclingEfficiencyScore()
+    );
 
     return optimizedMaterials;
   }
@@ -1140,22 +1310,27 @@ export class MaterialManager {
   /**
    * Get materials by environmental impact
    */
-  static getMaterialsByEnvironmentalImpact(materials: MaterialModel[], impactLevel: 'low' | 'medium' | 'high' | 'extreme'): MaterialModel[] {
-    return materials.filter(material => material.environmentalClassification.hazardLevel === impactLevel);
+  static getMaterialsByEnvironmentalImpact(
+    materials: MaterialModel[],
+    impactLevel: 'low' | 'medium' | 'high' | 'extreme'
+  ): MaterialModel[] {
+    return materials.filter(
+      (material) => material.environmentalClassification.hazardLevel === impactLevel
+    );
   }
 
   /**
    * Get recyclable materials
    */
   static getRecyclableMaterials(materials: MaterialModel[]): MaterialModel[] {
-    return materials.filter(material => material.isRecyclable());
+    return materials.filter((material) => material.isRecyclable());
   }
 
   /**
    * Get hazardous materials
    */
   static getHazardousMaterials(materials: MaterialModel[]): MaterialModel[] {
-    return materials.filter(material => material.isHazardous());
+    return materials.filter((material) => material.isHazardous());
   }
 
   /**
@@ -1165,27 +1340,37 @@ export class MaterialManager {
     const recyclableMaterials = this.getRecyclableMaterials(materials);
     const hazardousMaterials = this.getHazardousMaterials(materials);
 
-    const averageRecyclingEfficiency = materials.reduce((sum, material) =>
-      sum + material.getRecyclingEfficiencyScore(), 0) / materials.length;
+    const averageRecyclingEfficiency =
+      materials.reduce((sum, material) => sum + material.getRecyclingEfficiencyScore(), 0) /
+      materials.length;
 
-    const averageEnvironmentalImpact = materials.reduce((sum, material) =>
-      sum + material.getEnvironmentalImpactScore(), 0) / materials.length;
+    const averageEnvironmentalImpact =
+      materials.reduce((sum, material) => sum + material.getEnvironmentalImpactScore(), 0) /
+      materials.length;
 
-    const averageQualityScore = materials.reduce((sum, material) =>
-      sum + material.getQualityScore(), 0) / materials.length;
+    const averageQualityScore =
+      materials.reduce((sum, material) => sum + material.getQualityScore(), 0) / materials.length;
 
-    const materialsByCategory = materials.reduce((acc, material) => {
-      acc[material.category] = (acc[material.category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const materialsByCategory = materials.reduce(
+      (acc, material) => {
+        acc[material.category] = (acc[material.category] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const materialsByPhysicalState = materials.reduce((acc, material) => {
-      acc[material.physicalState] = (acc[material.physicalState] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const materialsByPhysicalState = materials.reduce(
+      (acc, material) => {
+        acc[material.physicalState] = (acc[material.physicalState] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const totalMarketValue = materials.reduce((sum, material) =>
-      sum + (material.marketValue.basePrice || 0), 0);
+    const totalMarketValue = materials.reduce(
+      (sum, material) => sum + (material.marketValue.basePrice || 0),
+      0
+    );
 
     return {
       totalMaterials: materials.length,
@@ -1197,8 +1382,9 @@ export class MaterialManager {
       totalMarketValue: Math.round(totalMarketValue * 100) / 100,
       materialsByCategory,
       materialsByPhysicalState,
-      highImpactMaterials: this.getMaterialsByEnvironmentalImpact(materials, 'high').length +
-                           this.getMaterialsByEnvironmentalImpact(materials, 'extreme').length
+      highImpactMaterials:
+        this.getMaterialsByEnvironmentalImpact(materials, 'high').length +
+        this.getMaterialsByEnvironmentalImpact(materials, 'extreme').length,
     };
   }
 
@@ -1208,17 +1394,21 @@ export class MaterialManager {
   static checkMaterialConflicts(materials: MaterialModel[]): string[] {
     const conflicts: string[] = [];
 
-    materials.forEach(material => {
+    materials.forEach((material) => {
       if (material.isRecyclable() && material.getRecyclingEfficiencyScore() < 50) {
         conflicts.push(`Material ${material.name} (${material.code}) has low recycling efficiency`);
       }
 
       if (material.isHazardous() && material.regulatoryCodes.length === 0) {
-        conflicts.push(`Hazardous material ${material.name} (${material.code}) missing regulatory codes`);
+        conflicts.push(
+          `Hazardous material ${material.name} (${material.code}) missing regulatory codes`
+        );
       }
 
       const businessRuleErrors = material.validateBusinessRules();
-      conflicts.push(...businessRuleErrors.map(error => `${material.name} (${material.code}): ${error}`));
+      conflicts.push(
+        ...businessRuleErrors.map((error) => `${material.name} (${material.code}): ${error}`)
+      );
     });
 
     return conflicts;
@@ -1227,15 +1417,21 @@ export class MaterialManager {
   /**
    * Get materials requiring attention
    */
-  static getMaterialsRequiringAttention(materials: MaterialModel[]): Array<{ material: MaterialModel; reason: string; priority: 'low' | 'medium' | 'high' }> {
-    const requiringAttention: Array<{ material: MaterialModel; reason: string; priority: 'low' | 'medium' | 'high' }> = [];
+  static getMaterialsRequiringAttention(
+    materials: MaterialModel[]
+  ): Array<{ material: MaterialModel; reason: string; priority: 'low' | 'medium' | 'high' }> {
+    const requiringAttention: Array<{
+      material: MaterialModel;
+      reason: string;
+      priority: 'low' | 'medium' | 'high';
+    }> = [];
 
-    materials.forEach(material => {
+    materials.forEach((material) => {
       if (material.isHazardous()) {
         requiringAttention.push({
           material,
           reason: 'Hazardous material requires special handling',
-          priority: 'high'
+          priority: 'high',
         });
       }
 
@@ -1243,7 +1439,7 @@ export class MaterialManager {
         requiringAttention.push({
           material,
           reason: 'Material quality score is below acceptable threshold',
-          priority: 'medium'
+          priority: 'medium',
         });
       }
 
@@ -1251,23 +1447,25 @@ export class MaterialManager {
         requiringAttention.push({
           material,
           reason: 'Material has high environmental impact',
-          priority: 'medium'
+          priority: 'medium',
         });
       }
 
-      if (material.marketValue.basePrice &&
-          material.marketValue.basePrice > 100 &&
-          material.marketValue.marketVolatility === 'high') {
+      if (
+        material.marketValue.basePrice &&
+        material.marketValue.basePrice > 100 &&
+        material.marketValue.marketVolatility === 'high'
+      ) {
         requiringAttention.push({
           material,
           reason: 'High-value volatile material requires monitoring',
-          priority: 'low'
+          priority: 'low',
         });
       }
     });
 
     return requiringAttention.sort((a, b) => {
-      const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
       return priorityOrder[b.priority] - priorityOrder[a.priority];
     });
   }

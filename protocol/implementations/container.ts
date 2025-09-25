@@ -46,16 +46,34 @@ export class ContainerModel extends BaseEntityModel implements Container {
   }
 
   private static readonly VALID_CONTAINER_TYPES: Container['type'][] = [
-    'cart', 'dumpster', 'bin', 'rolloff', 'compactor'
+    'cart',
+    'dumpster',
+    'bin',
+    'rolloff',
+    'compactor',
   ];
 
   private static readonly VALID_MATERIALS = [
-    'plastic', 'metal', 'steel', 'aluminum', 'composite', 'fiberglass'
+    'plastic',
+    'metal',
+    'steel',
+    'aluminum',
+    'composite',
+    'fiberglass',
   ];
 
   private static readonly COMMON_SIZES = [
-    '32_gallon', '64_gallon', '96_gallon', '2_yard', '3_yard', '4_yard',
-    '6_yard', '8_yard', '20_yard', '30_yard', '40_yard'
+    '32_gallon',
+    '64_gallon',
+    '96_gallon',
+    '2_yard',
+    '3_yard',
+    '4_yard',
+    '6_yard',
+    '8_yard',
+    '20_yard',
+    '30_yard',
+    '40_yard',
   ];
 
   constructor(data: Partial<Container>) {
@@ -65,7 +83,9 @@ export class ContainerModel extends BaseEntityModel implements Container {
   /**
    * Create a new container with validation
    */
-  static create(data: Omit<Container, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): ContainerModel {
+  static create(
+    data: Omit<Container, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>
+  ): ContainerModel {
     const now = new Date();
     const containerData: Partial<Container> = {
       id: uuidv4(),
@@ -76,8 +96,8 @@ export class ContainerModel extends BaseEntityModel implements Container {
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'container_system'
-      }
+        source: 'container_system',
+      },
     };
 
     return new ContainerModel(containerData);
@@ -86,7 +106,10 @@ export class ContainerModel extends BaseEntityModel implements Container {
   /**
    * Update container with optimistic locking
    */
-  update(updates: Partial<Omit<Container, keyof BaseEntity>>, expectedVersion: number): ContainerModel {
+  update(
+    updates: Partial<Omit<Container, keyof BaseEntity>>,
+    expectedVersion: number
+  ): ContainerModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -100,8 +123,8 @@ export class ContainerModel extends BaseEntityModel implements Container {
         ...this.metadata,
         ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new ContainerModel(updatedData);
@@ -113,7 +136,9 @@ export class ContainerModel extends BaseEntityModel implements Container {
   private validateAndAssign(data: Partial<Container>): void {
     // Required fields validation
     if (!data.type || !ContainerModel.VALID_CONTAINER_TYPES.includes(data.type)) {
-      throw new Error(`Container type must be one of: ${ContainerModel.VALID_CONTAINER_TYPES.join(', ')}`);
+      throw new Error(
+        `Container type must be one of: ${ContainerModel.VALID_CONTAINER_TYPES.join(', ')}`
+      );
     }
 
     if (!data.size || typeof data.size !== 'string') {
@@ -121,7 +146,9 @@ export class ContainerModel extends BaseEntityModel implements Container {
     }
 
     if (!data.material || !ContainerModel.VALID_MATERIALS.includes(data.material)) {
-      throw new Error(`Container material must be one of: ${ContainerModel.VALID_MATERIALS.join(', ')}`);
+      throw new Error(
+        `Container material must be one of: ${ContainerModel.VALID_MATERIALS.join(', ')}`
+      );
     }
 
     if (!Array.isArray(data.maintenanceRecords)) {
@@ -143,11 +170,17 @@ export class ContainerModel extends BaseEntityModel implements Container {
     }
 
     // Validate capacity values
-    if (data.capacityGallons && (typeof data.capacityGallons !== 'number' || data.capacityGallons <= 0)) {
+    if (
+      data.capacityGallons &&
+      (typeof data.capacityGallons !== 'number' || data.capacityGallons <= 0)
+    ) {
       throw new Error('Capacity in gallons must be a positive number');
     }
 
-    if (data.capacityCubicYards && (typeof data.capacityCubicYards !== 'number' || data.capacityCubicYards <= 0)) {
+    if (
+      data.capacityCubicYards &&
+      (typeof data.capacityCubicYards !== 'number' || data.capacityCubicYards <= 0)
+    ) {
       throw new Error('Capacity in cubic yards must be a positive number');
     }
 
@@ -212,7 +245,7 @@ export class ContainerModel extends BaseEntityModel implements Container {
   updateLocation(location: Address, timestamp?: Date): ContainerModel {
     const updateData: Partial<Container> = {
       currentLocation: location,
-      lastGpsUpdate: timestamp || new Date()
+      lastGpsUpdate: timestamp || new Date(),
     };
 
     return this.update(updateData, this.version);
@@ -265,7 +298,7 @@ export class ContainerModel extends BaseEntityModel implements Container {
 
     const newRecord: MaintenanceRecord = {
       id: uuidv4(),
-      ...record
+      ...record,
     };
 
     const newRecords = [...this.maintenanceRecords, newRecord];
@@ -276,7 +309,7 @@ export class ContainerModel extends BaseEntityModel implements Container {
    * Remove maintenance record
    */
   removeMaintenanceRecord(recordId: string): ContainerModel {
-    const newRecords = this.maintenanceRecords.filter(record => record.id !== recordId);
+    const newRecords = this.maintenanceRecords.filter((record) => record.id !== recordId);
     return this.update({ maintenanceRecords: newRecords }, this.version);
   }
 
@@ -297,8 +330,9 @@ export class ContainerModel extends BaseEntityModel implements Container {
   getLastMaintenanceDate(): MaintenanceRecord | null {
     if (this.maintenanceRecords.length === 0) return null;
 
-    return this.maintenanceRecords
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    return this.maintenanceRecords.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )[0];
   }
 
   /**
@@ -326,7 +360,7 @@ export class ContainerModel extends BaseEntityModel implements Container {
    */
   getMaintenanceCostForPeriod(startDate: string, endDate: string): number {
     return this.maintenanceRecords
-      .filter(record => record.date >= startDate && record.date <= endDate)
+      .filter((record) => record.date >= startDate && record.date <= endDate)
       .reduce((total, record) => total + record.cost, 0);
   }
 
@@ -348,7 +382,7 @@ export class ContainerModel extends BaseEntityModel implements Container {
   calculateDepreciationValue(originalValue: number, usefulLifeYears: number): number {
     const ageInYears = this.getAgeInDays() / 365;
     const depreciationRate = originalValue / usefulLifeYears;
-    const currentValue = Math.max(0, originalValue - (depreciationRate * ageInYears));
+    const currentValue = Math.max(0, originalValue - depreciationRate * ageInYears);
     return Math.round(currentValue * 100) / 100;
   }
 
@@ -432,7 +466,7 @@ export class ContainerModel extends BaseEntityModel implements Container {
       totalMaintenanceCost: Math.round(totalMaintenanceCost * 100) / 100,
       capacityGallons: this.capacityGallons,
       capacityCubicYards: this.capacityCubicYards,
-      lastGpsUpdate: this.lastGpsUpdate?.toISOString() || null
+      lastGpsUpdate: this.lastGpsUpdate?.toISOString() || null,
     };
   }
 
@@ -461,7 +495,7 @@ export class ContainerModel extends BaseEntityModel implements Container {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -483,7 +517,7 @@ export class ContainerModel extends BaseEntityModel implements Container {
       eventType,
       timestamp: new Date(),
       eventData: this.toEventData(),
-      version: 1
+      version: 1,
     };
   }
 
@@ -500,7 +534,8 @@ export class ContainerModel extends BaseEntityModel implements Container {
 
     // Business rule: Containers over 5 years old should be inspected
     const ageInDays = this.getAgeInDays();
-    if (ageInDays > 1825 && this.isActive) { // 5 years
+    if (ageInDays > 1825 && this.isActive) {
+      // 5 years
       errors.push('Container is over 5 years old and should be inspected for replacement');
     }
 
@@ -538,23 +573,23 @@ export class ContainerModel extends BaseEntityModel implements Container {
    */
   private estimateContainerValue(): number {
     const baseValues: Record<Container['type'], number> = {
-      'cart': 150,
-      'dumpster': 800,
-      'bin': 400,
-      'rolloff': 2500,
-      'compactor': 5000
+      cart: 150,
+      dumpster: 800,
+      bin: 400,
+      rolloff: 2500,
+      compactor: 5000,
     };
 
     let value = baseValues[this.type];
 
     // Adjust based on material
     const materialMultipliers: Record<string, number> = {
-      'plastic': 0.8,
-      'metal': 1.2,
-      'steel': 1.3,
-      'aluminum': 1.1,
-      'composite': 1.0,
-      'fiberglass': 0.9
+      plastic: 0.8,
+      metal: 1.2,
+      steel: 1.3,
+      aluminum: 1.1,
+      composite: 1.0,
+      fiberglass: 0.9,
     };
 
     value *= materialMultipliers[this.material] || 1.0;
@@ -579,7 +614,9 @@ export class ContainerFactory {
   static fromLegacyData(legacyData: Record<string, any>): ContainerModel {
     // Data archaeology: Handle various legacy field names and formats
     const mappedData: Partial<Container> = {
-      externalIds: [legacyData.container_id || legacyData.CONTAINER_ID || legacyData.asset_id || legacyData.id],
+      externalIds: [
+        legacyData.container_id || legacyData.CONTAINER_ID || legacyData.asset_id || legacyData.id,
+      ],
       type: this.mapLegacyContainerType(legacyData.container_type || legacyData.type || 'dumpster'),
       size: legacyData.size || legacyData.SIZE || '4_yard',
       material: this.mapLegacyMaterial(legacyData.material || legacyData.MATERIAL || 'steel'),
@@ -589,10 +626,12 @@ export class ContainerFactory {
       currentLocation: this.mapLegacyLocation(legacyData),
       specifications: this.mapLegacySpecifications(legacyData),
       maintenanceRecords: this.mapLegacyMaintenanceRecords(legacyData),
-      capacityGallons: legacyData.capacity_gallons || legacyData.CAPACITY_GALLONS || legacyData.capacity,
+      capacityGallons:
+        legacyData.capacity_gallons || legacyData.CAPACITY_GALLONS || legacyData.capacity,
       capacityCubicYards: legacyData.capacity_yards || legacyData.CAPACITY_YARDS,
       isActive: this.mapLegacyStatus(legacyData.status || legacyData.STATUS || 'active'),
-      purchaseDate: legacyData.purchase_date || legacyData.PURCHASE_DATE || legacyData.acquired_date,
+      purchaseDate:
+        legacyData.purchase_date || legacyData.PURCHASE_DATE || legacyData.acquired_date,
       warrantyExpiry: legacyData.warranty_expiry || legacyData.WARRANTY_EXPIRY,
       metadata: {
         legacySystemId: legacyData.system_id || 'legacy',
@@ -604,9 +643,9 @@ export class ContainerFactory {
           department: legacyData.department || 'operations',
           condition: legacyData.condition || 'good',
           lastInspection: legacyData.last_inspection,
-          nextInspection: legacyData.next_inspection
-        }
-      }
+          nextInspection: legacyData.next_inspection,
+        },
+      },
     };
 
     return ContainerModel.create(mappedData as any);
@@ -617,14 +656,14 @@ export class ContainerFactory {
    */
   private static mapLegacyContainerType(legacyType: string): Container['type'] {
     const typeMap: Record<string, Container['type']> = {
-      'cart': 'cart',
-      'bin': 'bin',
-      'dumpster': 'dumpster',
-      'rolloff': 'rolloff',
-      'roll_off': 'rolloff',
-      'compactor': 'compactor',
-      'container': 'bin',
-      'tote': 'cart'
+      cart: 'cart',
+      bin: 'bin',
+      dumpster: 'dumpster',
+      rolloff: 'rolloff',
+      roll_off: 'rolloff',
+      compactor: 'compactor',
+      container: 'bin',
+      tote: 'cart',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'dumpster';
@@ -635,15 +674,15 @@ export class ContainerFactory {
    */
   private static mapLegacyMaterial(legacyMaterial: string): Container['material'] {
     const materialMap: Record<string, Container['material']> = {
-      'plastic': 'plastic',
-      'metal': 'metal',
-      'steel': 'steel',
-      'aluminum': 'aluminum',
-      'composite': 'composite',
-      'fiberglass': 'fiberglass',
-      'aluminium': 'aluminum',
-      'steel': 'steel',
-      'hdpe': 'plastic'
+      plastic: 'plastic',
+      metal: 'metal',
+      steel: 'steel',
+      aluminum: 'aluminum',
+      composite: 'composite',
+      fiberglass: 'fiberglass',
+      aluminium: 'aluminum',
+      steel: 'steel',
+      hdpe: 'plastic',
     };
 
     return materialMap[legacyMaterial.toLowerCase()] || 'steel';
@@ -678,7 +717,7 @@ export class ContainerFactory {
           city: 'GPS Tracked',
           state: 'N/A',
           zipCode: '00000',
-          country: 'US'
+          country: 'US',
         };
       }
     }
@@ -725,20 +764,25 @@ export class ContainerFactory {
         cost: record.cost || record.amount || 0,
         performedBy: record.performed_by || record.vendor || 'Unknown',
         description: record.description || record.notes,
-        nextServiceDue: record.next_service || record.next_due
+        nextServiceDue: record.next_service || record.next_due,
       }));
     }
 
     // Handle single maintenance record
-    return [{
-      id: uuidv4(),
-      maintenanceType: maintenanceData.type || maintenanceData.maintenance_type || 'general',
-      date: maintenanceData.date || maintenanceData.service_date || new Date().toISOString().split('T')[0],
-      cost: maintenanceData.cost || maintenanceData.amount || 0,
-      performedBy: maintenanceData.performed_by || maintenanceData.vendor || 'Unknown',
-      description: maintenanceData.description || maintenanceData.notes,
-      nextServiceDue: maintenanceData.next_service || maintenanceData.next_due
-    }];
+    return [
+      {
+        id: uuidv4(),
+        maintenanceType: maintenanceData.type || maintenanceData.maintenance_type || 'general',
+        date:
+          maintenanceData.date ||
+          maintenanceData.service_date ||
+          new Date().toISOString().split('T')[0],
+        cost: maintenanceData.cost || maintenanceData.amount || 0,
+        performedBy: maintenanceData.performed_by || maintenanceData.vendor || 'Unknown',
+        description: maintenanceData.description || maintenanceData.notes,
+        nextServiceDue: maintenanceData.next_service || maintenanceData.next_due,
+      },
+    ];
   }
 }
 
@@ -756,7 +800,7 @@ export class ContainerValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -776,9 +820,14 @@ export class ContainerManager {
   /**
    * Optimize container distribution across sites
    */
-  static optimizeContainerDistribution(containers: ContainerModel[], sites: any[]): ContainerModel[] {
-    const availableContainers = containers.filter(container => container.isAvailable());
-    const sitesNeedingContainers = sites.filter(site => site.containers.length < site.getSiteCapacity());
+  static optimizeContainerDistribution(
+    containers: ContainerModel[],
+    sites: any[]
+  ): ContainerModel[] {
+    const availableContainers = containers.filter((container) => container.isAvailable());
+    const sitesNeedingContainers = sites.filter(
+      (site) => site.containers.length < site.getSiteCapacity()
+    );
 
     // Simple optimization - assign available containers to sites with capacity
     availableContainers.forEach((container, index) => {
@@ -797,27 +846,30 @@ export class ContainerManager {
    * Get containers requiring maintenance
    */
   static getContainersRequiringMaintenance(containers: ContainerModel[]): ContainerModel[] {
-    return containers.filter(container => container.requiresMaintenance());
+    return containers.filter((container) => container.requiresMaintenance());
   }
 
   /**
    * Get container utilization report
    */
   static getUtilizationReport(containers: ContainerModel[]): Record<string, any> {
-    const activeContainers = containers.filter(container => container.isActive);
-    const inUseContainers = containers.filter(container => container.isInUse());
-    const availableContainers = containers.filter(container => container.isAvailable);
+    const activeContainers = containers.filter((container) => container.isActive);
+    const inUseContainers = containers.filter((container) => container.isInUse());
+    const availableContainers = containers.filter((container) => container.isAvailable);
 
-    const totalCapacityGallons = containers.reduce((sum, container) =>
-      sum + (container.capacityGallons || 0), 0
+    const totalCapacityGallons = containers.reduce(
+      (sum, container) => sum + (container.capacityGallons || 0),
+      0
     );
 
-    const totalCapacityCubicYards = containers.reduce((sum, container) =>
-      sum + (container.capacityCubicYards || 0), 0
+    const totalCapacityCubicYards = containers.reduce(
+      (sum, container) => sum + (container.capacityCubicYards || 0),
+      0
     );
 
-    const totalMaintenanceCost = containers.reduce((sum, container) =>
-      sum + container.getTotalMaintenanceCost(), 0
+    const totalMaintenanceCost = containers.reduce(
+      (sum, container) => sum + container.getTotalMaintenanceCost(),
+      0
     );
 
     return {
@@ -825,14 +877,17 @@ export class ContainerManager {
       activeContainers: activeContainers.length,
       inUseContainers: inUseContainers.length,
       availableContainers: availableContainers.length,
-      utilizationRate: containers.length > 0 ? (inUseContainers.length / containers.length) * 100 : 0,
+      utilizationRate:
+        containers.length > 0 ? (inUseContainers.length / containers.length) * 100 : 0,
       containersRequiringMaintenance: this.getContainersRequiringMaintenance(containers).length,
       totalCapacityGallons: Math.round(totalCapacityGallons),
       totalCapacityCubicYards: Math.round(totalCapacityCubicYards * 100) / 100,
-      averageAgeInDays: containers.reduce((sum, container) => sum + container.getAgeInDays(), 0) / containers.length,
+      averageAgeInDays:
+        containers.reduce((sum, container) => sum + container.getAgeInDays(), 0) /
+        containers.length,
       totalMaintenanceCost: Math.round(totalMaintenanceCost * 100) / 100,
-      containersWithRfid: containers.filter(container => container.rfidTag).length,
-      containersWithGps: containers.filter(container => container.currentLocation).length
+      containersWithRfid: containers.filter((container) => container.rfidTag).length,
+      containersWithGps: containers.filter((container) => container.currentLocation).length,
     };
   }
 
@@ -842,17 +897,21 @@ export class ContainerManager {
   static checkContainerConflicts(containers: ContainerModel[]): string[] {
     const conflicts: string[] = [];
 
-    containers.forEach(container => {
+    containers.forEach((container) => {
       if (container.isActive && container.requiresMaintenance()) {
-        conflicts.push(`Container ${container.type} ${container.size} (${container.id}) requires maintenance`);
+        conflicts.push(
+          `Container ${container.type} ${container.size} (${container.id}) requires maintenance`
+        );
       }
 
       if (container.isInUse() && !container.rfidTag) {
-        conflicts.push(`In-use container ${container.type} ${container.size} (${container.id}) missing RFID tag`);
+        conflicts.push(
+          `In-use container ${container.type} ${container.size} (${container.id}) missing RFID tag`
+        );
       }
 
       const businessRuleErrors = container.validateBusinessRules();
-      conflicts.push(...businessRuleErrors.map(error => `${container.id}: ${error}`));
+      conflicts.push(...businessRuleErrors.map((error) => `${container.id}: ${error}`));
     });
 
     return conflicts;
@@ -861,37 +920,45 @@ export class ContainerManager {
   /**
    * Get container replacement recommendations
    */
-  static getReplacementRecommendations(containers: ContainerModel[]): Array<{ container: ContainerModel; reason: string; priority: 'low' | 'medium' | 'high' }> {
-    const recommendations: Array<{ container: ContainerModel; reason: string; priority: 'low' | 'medium' | 'high' }> = [];
+  static getReplacementRecommendations(
+    containers: ContainerModel[]
+  ): Array<{ container: ContainerModel; reason: string; priority: 'low' | 'medium' | 'high' }> {
+    const recommendations: Array<{
+      container: ContainerModel;
+      reason: string;
+      priority: 'low' | 'medium' | 'high';
+    }> = [];
 
-    containers.forEach(container => {
+    containers.forEach((container) => {
       const ageInDays = container.getAgeInDays();
       const efficiency = container.getEfficiencyScore();
       const estimatedValue = container.estimateContainerValue();
 
-      if (ageInDays > 3650) { // 10 years
+      if (ageInDays > 3650) {
+        // 10 years
         recommendations.push({
           container,
           reason: 'Container has exceeded typical useful life (10+ years)',
-          priority: 'high'
+          priority: 'high',
         });
-      } else if (ageInDays > 2555 && efficiency < 60) { // 7 years
+      } else if (ageInDays > 2555 && efficiency < 60) {
+        // 7 years
         recommendations.push({
           container,
           reason: 'Container is aging and has low efficiency',
-          priority: 'medium'
+          priority: 'medium',
         });
       } else if (efficiency < 40) {
         recommendations.push({
           container,
           reason: 'Container has very low efficiency score',
-          priority: 'high'
+          priority: 'high',
         });
       } else if (estimatedValue > 2000 && !container.warrantyExpiry) {
         recommendations.push({
           container,
           reason: 'High-value container should have warranty tracking',
-          priority: 'low'
+          priority: 'low',
         });
       }
     });

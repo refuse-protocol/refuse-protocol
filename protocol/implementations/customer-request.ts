@@ -13,7 +13,7 @@ import {
   AuditUtils,
   MetadataUtils,
   ConcurrencyError,
-  ValidationError
+  ValidationError,
 } from './common';
 
 /**
@@ -42,8 +42,19 @@ export class CustomerRequestModel implements CustomerRequest {
   relatedServices?: string[];
 
   // Use constants from common utilities
-  private static readonly VALID_TYPES = ['new_service', 'change_service', 'one_time', 'inquiry'] as const;
-  private static readonly VALID_STATUSES = ['pending', 'in_review', 'approved', 'rejected', 'completed'] as const;
+  private static readonly VALID_TYPES = [
+    'new_service',
+    'change_service',
+    'one_time',
+    'inquiry',
+  ] as const;
+  private static readonly VALID_STATUSES = [
+    'pending',
+    'in_review',
+    'approved',
+    'rejected',
+    'completed',
+  ] as const;
 
   constructor(data: Partial<CustomerRequest>) {
     this.validateAndAssign(data);
@@ -82,7 +93,9 @@ export class CustomerRequestModel implements CustomerRequest {
     if (!data.status) {
       errors.push('Request status is required');
     } else if (!CustomerRequestModel.VALID_STATUSES.includes(data.status)) {
-      errors.push(`Request status must be one of: ${CustomerRequestModel.VALID_STATUSES.join(', ')}`);
+      errors.push(
+        `Request status must be one of: ${CustomerRequestModel.VALID_STATUSES.join(', ')}`
+      );
     } else {
       this.status = data.status;
     }
@@ -113,28 +126,40 @@ export class CustomerRequestModel implements CustomerRequest {
 
     // Throw validation error if any errors exist
     if (errors.length > 0) {
-      throw new ValidationError(`CustomerRequest validation failed: ${errors.join(', ')}`, 'customer_request', 'multiple');
+      throw new ValidationError(
+        `CustomerRequest validation failed: ${errors.join(', ')}`,
+        'customer_request',
+        'multiple'
+      );
     }
   }
 
   /**
    * Create a new CustomerRequest
    */
-  static create(data: Omit<CustomerRequest, keyof import('../specifications/entities').BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): CustomerRequestModel {
+  static create(
+    data: Omit<
+      CustomerRequest,
+      keyof import('../specifications/entities').BaseEntity | 'createdAt' | 'updatedAt' | 'version'
+    >
+  ): CustomerRequestModel {
     const now = new Date();
     return new CustomerRequestModel({
       ...data,
       id: DataUtils.generateId(),
       createdAt: now,
       updatedAt: now,
-      version: 1
+      version: 1,
     });
   }
 
   /**
    * Update the CustomerRequest
    */
-  update(updates: Partial<Omit<CustomerRequest, 'id' | 'createdAt' | 'updatedAt' | 'version'>>, expectedVersion: number): CustomerRequestModel {
+  update(
+    updates: Partial<Omit<CustomerRequest, 'id' | 'createdAt' | 'updatedAt' | 'version'>>,
+    expectedVersion: number
+  ): CustomerRequestModel {
     if (this.version !== expectedVersion) {
       throw new ConcurrencyError('customer_request', this.id, expectedVersion, this.version);
     }
@@ -143,7 +168,7 @@ export class CustomerRequestModel implements CustomerRequest {
       ...this,
       ...updates,
       version: this.version + 1,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     return new CustomerRequestModel(updatedData);
@@ -157,7 +182,7 @@ export class CustomerRequestModel implements CustomerRequest {
       ...this,
       createdAt: new Date(this.createdAt),
       updatedAt: new Date(this.updatedAt),
-      requestedDate: new Date(this.requestedDate)
+      requestedDate: new Date(this.requestedDate),
     };
   }
 
@@ -171,7 +196,7 @@ export class CustomerRequestModel implements CustomerRequest {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown error']
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
       };
     }
   }
@@ -186,7 +211,7 @@ export class CustomerRequestModel implements CustomerRequest {
     return {
       totalSteps,
       lastStep,
-      status: this.status
+      status: this.status,
     };
   }
 
@@ -200,8 +225,8 @@ export class CustomerRequestModel implements CustomerRequest {
         step,
         timestamp: new Date(),
         userId,
-        notes
-      }
+        notes,
+      },
     ];
 
     return this.update({ approvalHistory: newHistory }, this.version);
@@ -210,11 +235,18 @@ export class CustomerRequestModel implements CustomerRequest {
   /**
    * Update status with approval step
    */
-  updateStatus(newStatus: typeof this.status, userId: string, notes?: string): CustomerRequestModel {
+  updateStatus(
+    newStatus: typeof this.status,
+    userId: string,
+    notes?: string
+  ): CustomerRequestModel {
     if (!CustomerRequestModel.VALID_STATUSES.includes(newStatus)) {
       throw new ValidationError(`Invalid status: ${newStatus}`, 'customer_request', 'status');
     }
 
-    return this.addApprovalStep(newStatus, userId, notes).update({ status: newStatus }, this.version);
+    return this.addApprovalStep(newStatus, userId, notes).update(
+      { status: newStatus },
+      this.version
+    );
   }
 }

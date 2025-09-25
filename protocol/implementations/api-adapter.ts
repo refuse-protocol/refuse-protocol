@@ -4,7 +4,14 @@
  * @version 1.0.0
  */
 
-import { Event, Customer, Service, Route, Facility, MaterialTicket } from '../specifications/entities';
+import {
+  Event,
+  Customer,
+  Service,
+  Route,
+  Facility,
+  MaterialTicket,
+} from '../specifications/entities';
 import express, { Request, Response, NextFunction } from 'express';
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
@@ -92,7 +99,7 @@ export class WasteManagementAPIAdapter {
       uptime: process.uptime(),
       port: this.port,
       endpoints: Array.from(this.endpoints.keys()),
-      middleware: this.middleware.map(m => m.name)
+      middleware: this.middleware.map((m) => m.name),
     };
   }
 
@@ -104,7 +111,10 @@ export class WasteManagementAPIAdapter {
     this.app.use((req, res, next) => {
       res.header('Access-Control-Allow-Origin', '*');
       res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+      res.header(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+      );
 
       if (req.method === 'OPTIONS') {
         res.sendStatus(200);
@@ -138,7 +148,7 @@ export class WasteManagementAPIAdapter {
       handler: this.healthCheckHandler.bind(this),
       description: 'Health check endpoint',
       requiresAuth: false,
-      rateLimit: 100
+      rateLimit: 100,
     });
 
     // Customer endpoints
@@ -154,9 +164,9 @@ export class WasteManagementAPIAdapter {
           page: { type: 'number', required: false, description: 'Page number' },
           limit: { type: 'number', required: false, description: 'Items per page' },
           status: { type: 'string', required: false, description: 'Customer status filter' },
-          type: { type: 'string', required: false, description: 'Customer type filter' }
-        }
-      }
+          type: { type: 'string', required: false, description: 'Customer type filter' },
+        },
+      },
     });
 
     this.registerEndpoint('/customers/:id', {
@@ -168,9 +178,9 @@ export class WasteManagementAPIAdapter {
       rateLimit: 50,
       parameters: {
         path: {
-          id: { type: 'string', required: true, description: 'Customer ID' }
-        }
-      }
+          id: { type: 'string', required: true, description: 'Customer ID' },
+        },
+      },
     });
 
     // Service endpoints
@@ -180,7 +190,7 @@ export class WasteManagementAPIAdapter {
       handler: this.getServicesHandler.bind(this),
       description: 'Get all services',
       requiresAuth: true,
-      rateLimit: 50
+      rateLimit: 50,
     });
 
     this.registerEndpoint('/services/:id', {
@@ -189,7 +199,7 @@ export class WasteManagementAPIAdapter {
       handler: this.getServiceHandler.bind(this),
       description: 'Get service by ID',
       requiresAuth: true,
-      rateLimit: 50
+      rateLimit: 50,
     });
 
     // Route endpoints
@@ -199,7 +209,7 @@ export class WasteManagementAPIAdapter {
       handler: this.getRoutesHandler.bind(this),
       description: 'Get all routes',
       requiresAuth: true,
-      rateLimit: 50
+      rateLimit: 50,
     });
 
     this.registerEndpoint('/routes/:id', {
@@ -208,7 +218,7 @@ export class WasteManagementAPIAdapter {
       handler: this.getRouteHandler.bind(this),
       description: 'Get route by ID',
       requiresAuth: true,
-      rateLimit: 50
+      rateLimit: 50,
     });
 
     // Material ticket endpoints
@@ -218,7 +228,7 @@ export class WasteManagementAPIAdapter {
       handler: this.getMaterialTicketsHandler.bind(this),
       description: 'Get all material tickets',
       requiresAuth: true,
-      rateLimit: 100
+      rateLimit: 100,
     });
 
     this.registerEndpoint('/material-tickets/:id', {
@@ -227,7 +237,7 @@ export class WasteManagementAPIAdapter {
       handler: this.getMaterialTicketHandler.bind(this),
       description: 'Get material ticket by ID',
       requiresAuth: true,
-      rateLimit: 50
+      rateLimit: 50,
     });
 
     // Event streaming endpoint
@@ -238,7 +248,7 @@ export class WasteManagementAPIAdapter {
       description: 'Get events with Server-Sent Events',
       requiresAuth: true,
       rateLimit: 25,
-      streaming: true
+      streaming: true,
     });
 
     // Webhook endpoints for external systems
@@ -248,7 +258,7 @@ export class WasteManagementAPIAdapter {
       handler: this.customerWebhookHandler.bind(this),
       description: 'Customer webhook endpoint',
       requiresAuth: false,
-      webhook: true
+      webhook: true,
     });
 
     this.registerEndpoint('/webhooks/route', {
@@ -257,7 +267,7 @@ export class WasteManagementAPIAdapter {
       handler: this.routeWebhookHandler.bind(this),
       description: 'Route webhook endpoint',
       requiresAuth: false,
-      webhook: true
+      webhook: true,
     });
 
     this.registerEndpoint('/webhooks/facility', {
@@ -266,7 +276,7 @@ export class WasteManagementAPIAdapter {
       handler: this.facilityWebhookHandler.bind(this),
       description: 'Facility webhook endpoint',
       requiresAuth: false,
-      webhook: true
+      webhook: true,
     });
   }
 
@@ -283,21 +293,20 @@ export class WasteManagementAPIAdapter {
           res.writeHead(200, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-            'Access-Control-Allow-Origin': '*'
+            Connection: 'keep-alive',
+            'Access-Control-Allow-Origin': '*',
           });
 
           if (result && typeof result === 'object' && 'stream' in result) {
             result.stream.pipe(res);
           }
         }
-
       } catch (error) {
         console.error(`Error handling ${endpoint.method} ${path}:`, error);
         if (!res.headersSent) {
           res.status(500).json({
             error: 'Internal Server Error',
-            message: error instanceof Error ? error.message : String(error)
+            message: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -337,18 +346,20 @@ export class WasteManagementAPIAdapter {
       res.status(404).json({
         error: 'Not Found',
         message: `Route ${req.method} ${req.originalUrl} not found`,
-        availableEndpoints: Array.from(this.endpoints.keys())
+        availableEndpoints: Array.from(this.endpoints.keys()),
       });
     });
 
     // Global error handler
-    this.app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-      console.error('Unhandled error:', error);
-      res.status(500).json({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred'
-      });
-    });
+    this.app.use(
+      (error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+        console.error('Unhandled error:', error);
+        res.status(500).json({
+          error: 'Internal Server Error',
+          message: 'An unexpected error occurred',
+        });
+      }
+    );
   }
 
   // Endpoint handlers
@@ -358,7 +369,7 @@ export class WasteManagementAPIAdapter {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       version: '1.0.0',
-      stats
+      stats,
     });
   }
 
@@ -370,7 +381,7 @@ export class WasteManagementAPIAdapter {
       page: Number(page),
       limit: Number(limit),
       status: status as string,
-      type: type as string
+      type: type as string,
     });
 
     res.json({
@@ -379,8 +390,8 @@ export class WasteManagementAPIAdapter {
         page: Number(page),
         limit: Number(limit),
         total: customers.length,
-        hasMore: false // Would calculate from actual data
-      }
+        hasMore: false, // Would calculate from actual data
+      },
     });
   }
 
@@ -433,12 +444,18 @@ export class WasteManagementAPIAdapter {
     res.json({ route });
   }
 
-  private async getMaterialTicketsHandler(req: express.Request, res: express.Response): Promise<void> {
+  private async getMaterialTicketsHandler(
+    req: express.Request,
+    res: express.Response
+  ): Promise<void> {
     const tickets = await this.fetchMaterialTicketsFromLegacy();
     res.json({ materialTickets: tickets });
   }
 
-  private async getMaterialTicketHandler(req: express.Request, res: express.Response): Promise<void> {
+  private async getMaterialTicketHandler(
+    req: express.Request,
+    res: express.Response
+  ): Promise<void> {
     const { id } = req.params;
 
     const ticket = await this.fetchMaterialTicketFromLegacy(id);
@@ -464,14 +481,14 @@ export class WasteManagementAPIAdapter {
     sendEvent({
       type: 'connection',
       message: 'Connected to event stream',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // Simulate periodic events
     const interval = setInterval(() => {
       sendEvent({
         type: 'heartbeat',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }, 5000);
 
@@ -481,7 +498,7 @@ export class WasteManagementAPIAdapter {
     });
 
     return {
-      stream: eventStream
+      stream: eventStream,
     };
   }
 
@@ -499,7 +516,7 @@ export class WasteManagementAPIAdapter {
       eventType: 'webhook_received',
       timestamp: new Date(),
       eventData: req.body,
-      source: 'external_webhook'
+      source: 'external_webhook',
     };
 
     // Emit event for processing
@@ -520,7 +537,7 @@ export class WasteManagementAPIAdapter {
       eventType: 'webhook_received',
       timestamp: new Date(),
       eventData: req.body,
-      source: 'external_webhook'
+      source: 'external_webhook',
     };
 
     this.emit('webhookReceived', event);
@@ -540,7 +557,7 @@ export class WasteManagementAPIAdapter {
       eventType: 'webhook_received',
       timestamp: new Date(),
       eventData: req.body,
-      source: 'external_webhook'
+      source: 'external_webhook',
     };
 
     this.emit('webhookReceived', event);
@@ -565,14 +582,14 @@ export class WasteManagementAPIAdapter {
             street: '123 Business St',
             city: 'Business City',
             state: 'BC',
-            zipCode: '12345'
-          }
+            zipCode: '12345',
+          },
         },
         serviceArea: 'Area 1',
         createdAt: new Date('2023-01-15'),
         updatedAt: new Date('2024-01-15'),
-        version: 1
-      }
+        version: 1,
+      },
     ];
   }
 
@@ -590,13 +607,13 @@ export class WasteManagementAPIAdapter {
           street: '123 Business St',
           city: 'Business City',
           state: 'BC',
-          zipCode: '12345'
-        }
+          zipCode: '12345',
+        },
       },
       serviceArea: 'Area 1',
       createdAt: new Date('2023-01-15'),
       updatedAt: new Date('2024-01-15'),
-      version: 1
+      version: 1,
     };
   }
 
@@ -610,18 +627,18 @@ export class WasteManagementAPIAdapter {
         status: 'active',
         frequency: 'weekly',
         pricing: {
-          baseRate: 150.00,
+          baseRate: 150.0,
           rateUnit: 'month',
-          additionalCharges: 25.00
+          additionalCharges: 25.0,
         },
         requirements: {
           containerTypes: ['dumpster'],
-          specialHandling: null
+          specialHandling: null,
         },
         createdAt: new Date('2023-01-15'),
         updatedAt: new Date('2024-01-15'),
-        version: 1
-      }
+        version: 1,
+      },
     ];
   }
 
@@ -634,17 +651,17 @@ export class WasteManagementAPIAdapter {
       status: 'active',
       frequency: 'weekly',
       pricing: {
-        baseRate: 150.00,
+        baseRate: 150.0,
         rateUnit: 'month',
-        additionalCharges: 25.00
+        additionalCharges: 25.0,
       },
       requirements: {
         containerTypes: ['dumpster'],
-        specialHandling: null
+        specialHandling: null,
       },
       createdAt: new Date('2023-01-15'),
       updatedAt: new Date('2024-01-15'),
-      version: 1
+      version: 1,
     };
   }
 
@@ -661,14 +678,14 @@ export class WasteManagementAPIAdapter {
             customerId: 'CUST001',
             address: '123 Business St, Business City, BC 12345',
             scheduledTime: '08:00',
-            serviceType: 'waste_collection'
-          }
+            serviceType: 'waste_collection',
+          },
         ],
         status: 'active',
         createdAt: new Date('2023-01-15'),
         updatedAt: new Date('2024-01-15'),
-        version: 1
-      }
+        version: 1,
+      },
     ];
   }
 
@@ -684,13 +701,13 @@ export class WasteManagementAPIAdapter {
           customerId: 'CUST001',
           address: '123 Business St, Business City, BC 12345',
           scheduledTime: '08:00',
-          serviceType: 'waste_collection'
-        }
+          serviceType: 'waste_collection',
+        },
       ],
       status: 'active',
       createdAt: new Date('2023-01-15'),
       updatedAt: new Date('2024-01-15'),
-      version: 1
+      version: 1,
     };
   }
 
@@ -705,24 +722,24 @@ export class WasteManagementAPIAdapter {
           id: 'MAT001',
           name: 'Mixed Waste',
           type: 'mixed_waste',
-          classification: 'non_recyclable'
+          classification: 'non_recyclable',
         },
         weight: {
           gross: 2500,
           tare: 500,
-          net: 2000
+          net: 2000,
         },
         pricing: {
-          rate: 75.00,
+          rate: 75.0,
           rateUnit: 'ton',
-          totalAmount: 150.00
+          totalAmount: 150.0,
         },
         timestamp: new Date('2024-01-15T10:00:00Z'),
         status: 'processed',
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date('2024-01-15'),
-        version: 1
-      }
+        version: 1,
+      },
     ];
   }
 
@@ -736,23 +753,23 @@ export class WasteManagementAPIAdapter {
         id: 'MAT001',
         name: 'Mixed Waste',
         type: 'mixed_waste',
-        classification: 'non_recyclable'
+        classification: 'non_recyclable',
       },
       weight: {
         gross: 2500,
         tare: 500,
-        net: 2000
+        net: 2000,
       },
       pricing: {
-        rate: 75.00,
+        rate: 75.0,
         rateUnit: 'ton',
-        totalAmount: 150.00
+        totalAmount: 150.0,
       },
       timestamp: new Date('2024-01-15T10:00:00Z'),
       status: 'processed',
       createdAt: new Date('2024-01-15'),
       updatedAt: new Date('2024-01-15'),
-      version: 1
+      version: 1,
     };
   }
 
@@ -828,7 +845,7 @@ export class APIAuthentication {
 
     res.status(401).json({
       error: 'Unauthorized',
-      message: 'Valid authentication required'
+      message: 'Valid authentication required',
     });
   };
 
@@ -857,14 +874,14 @@ export class RateLimiter {
     const clientRequests = this.requests.get(clientId)!;
 
     // Remove old requests outside the window
-    const validRequests = clientRequests.filter(timestamp => now - timestamp < this.windowMs);
+    const validRequests = clientRequests.filter((timestamp) => now - timestamp < this.windowMs);
     this.requests.set(clientId, validRequests);
 
     if (validRequests.length >= this.maxRequests) {
       res.status(429).json({
         error: 'Too Many Requests',
         message: 'Rate limit exceeded',
-        retryAfter: Math.ceil(this.windowMs / 1000)
+        retryAfter: Math.ceil(this.windowMs / 1000),
       });
       return;
     }
@@ -873,7 +890,10 @@ export class RateLimiter {
     next();
   };
 
-  createRateLimitedHandler(handler: express.RequestHandler, maxRequests: number): express.RequestHandler {
+  createRateLimitedHandler(
+    handler: express.RequestHandler,
+    maxRequests: number
+  ): express.RequestHandler {
     return (req, res, next) => {
       const clientId = this.getClientId(req);
       const now = Date.now();
@@ -883,13 +903,13 @@ export class RateLimiter {
       }
 
       const clientRequests = this.requests.get(clientId)!;
-      const validRequests = clientRequests.filter(timestamp => now - timestamp < this.windowMs);
+      const validRequests = clientRequests.filter((timestamp) => now - timestamp < this.windowMs);
 
       if (validRequests.length >= maxRequests) {
         res.status(429).json({
           error: 'Too Many Requests',
           message: 'Rate limit exceeded for this endpoint',
-          retryAfter: Math.ceil(this.windowMs / 1000)
+          retryAfter: Math.ceil(this.windowMs / 1000),
         });
         return;
       }
@@ -943,8 +963,4 @@ export function createWasteManagementAPIAdapter(port?: number): WasteManagementA
 }
 
 // Export types
-export type {
-  APIEndpoint,
-  ParameterDefinition,
-  APIMiddleware
-};
+export type { APIEndpoint, ParameterDefinition, APIMiddleware };

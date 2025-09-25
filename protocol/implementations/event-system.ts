@@ -46,7 +46,7 @@ export class EventStreamingSystem extends EventEmitter {
       priority: options.priority || 'normal',
       guaranteed: options.guaranteed !== false,
       retryCount: 0,
-      metadata: options.metadata || {}
+      metadata: options.metadata || {},
     };
 
     // Add to appropriate queue
@@ -68,7 +68,7 @@ export class EventStreamingSystem extends EventEmitter {
     return {
       eventId,
       status: 'queued',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -102,14 +102,14 @@ export class EventStreamingSystem extends EventEmitter {
    */
   getEventStatus(eventId: string): EventStatus | null {
     for (const [queueKey, queue] of this.eventQueue.entries()) {
-      const event = queue.find(e => e.id === eventId);
+      const event = queue.find((e) => e.id === eventId);
       if (event) {
         return {
           eventId,
           status: event.delivered ? 'delivered' : 'pending',
           timestamp: event.timestamp,
           retryCount: event.retryCount,
-          lastError: event.lastError
+          lastError: event.lastError,
         };
       }
     }
@@ -126,8 +126,8 @@ export class EventStreamingSystem extends EventEmitter {
 
     for (const [queueKey, queue] of this.eventQueue.entries()) {
       totalQueued += queue.length;
-      totalDelivered += queue.filter(e => e.delivered).length;
-      totalFailed += queue.filter(e => e.status === 'failed').length;
+      totalDelivered += queue.filter((e) => e.delivered).length;
+      totalFailed += queue.filter((e) => e.status === 'failed').length;
     }
 
     return {
@@ -137,9 +137,9 @@ export class EventStreamingSystem extends EventEmitter {
       throughput: this.calculateThroughput(),
       queueSizes: Array.from(this.eventQueue.entries()).map(([key, queue]) => ({
         queue: key,
-        size: queue.length
+        size: queue.length,
       })),
-      memoryUsage: process.memoryUsage().heapUsed
+      memoryUsage: process.memoryUsage().heapUsed,
     };
   }
 
@@ -160,16 +160,15 @@ export class EventStreamingSystem extends EventEmitter {
       this.emit('eventDelivered', {
         eventId: queuedEvent.id,
         event: queuedEvent.event,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       });
 
       return {
         eventId: queuedEvent.id,
         status: 'delivered',
         timestamp: new Date(),
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
-
     } catch (error) {
       queuedEvent.retryCount++;
       queuedEvent.lastError = error instanceof Error ? error.message : String(error);
@@ -177,15 +176,18 @@ export class EventStreamingSystem extends EventEmitter {
 
       if (queuedEvent.guaranteed && queuedEvent.retryCount < this.maxRetries) {
         // Schedule retry
-        setTimeout(() => {
-          this.processEvent(queuedEvent);
-        }, this.retryDelay * Math.pow(2, queuedEvent.retryCount - 1)); // Exponential backoff
+        setTimeout(
+          () => {
+            this.processEvent(queuedEvent);
+          },
+          this.retryDelay * Math.pow(2, queuedEvent.retryCount - 1)
+        ); // Exponential backoff
 
         return {
           eventId: queuedEvent.id,
           status: 'retrying',
           timestamp: new Date(),
-          retryCount: queuedEvent.retryCount
+          retryCount: queuedEvent.retryCount,
         };
       } else {
         // Mark as failed
@@ -195,7 +197,7 @@ export class EventStreamingSystem extends EventEmitter {
           eventId: queuedEvent.id,
           event: queuedEvent.event,
           error: queuedEvent.lastError,
-          retryCount: queuedEvent.retryCount
+          retryCount: queuedEvent.retryCount,
         });
 
         return {
@@ -203,7 +205,7 @@ export class EventStreamingSystem extends EventEmitter {
           status: 'failed',
           timestamp: new Date(),
           error: queuedEvent.lastError!,
-          retryCount: queuedEvent.retryCount
+          retryCount: queuedEvent.retryCount,
         };
       }
     }
@@ -220,7 +222,7 @@ export class EventStreamingSystem extends EventEmitter {
     const results: EventDeliveryResult[] = [];
 
     // Process batch concurrently
-    const batchPromises = batch.map(event => this.processEvent(event));
+    const batchPromises = batch.map((event) => this.processEvent(event));
     const batchResults = await Promise.allSettled(batchPromises);
 
     for (let i = 0; i < batch.length; i++) {
@@ -230,12 +232,13 @@ export class EventStreamingSystem extends EventEmitter {
       } else {
         // Handle processing error
         batch[i].status = 'failed';
-        batch[i].lastError = result.reason instanceof Error ? result.reason.message : String(result.reason);
+        batch[i].lastError =
+          result.reason instanceof Error ? result.reason.message : String(result.reason);
         results.push({
           eventId: batch[i].id,
           status: 'failed',
           timestamp: new Date(),
-          error: batch[i].lastError!
+          error: batch[i].lastError!,
         });
       }
     }
@@ -244,7 +247,7 @@ export class EventStreamingSystem extends EventEmitter {
       queue: queueKey,
       batchSize: batch.length,
       results,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -329,7 +332,7 @@ export class EventStreamingSystem extends EventEmitter {
     // This is a simplified calculation - in production would track over time windows
     let totalDelivered = 0;
     for (const [queueKey, queue] of this.eventQueue.entries()) {
-      totalDelivered += queue.filter(e => e.delivered).length;
+      totalDelivered += queue.filter((e) => e.delivered).length;
     }
     return totalDelivered / Math.max(1, this.flushInterval / 1000);
   }
@@ -342,15 +345,15 @@ export class EventStreamingSystem extends EventEmitter {
 
     for (const [queueKey, queue] of this.eventQueue.entries()) {
       const initialLength = queue.length;
-      const filteredQueue = queue.filter(event =>
-        event.delivered ||
-        event.status === 'failed' ||
-        event.timestamp > cutoffTime
+      const filteredQueue = queue.filter(
+        (event) => event.delivered || event.status === 'failed' || event.timestamp > cutoffTime
       );
 
       if (filteredQueue.length < initialLength) {
         this.eventQueue.set(queueKey, filteredQueue);
-        console.log(`Cleaned up ${initialLength - filteredQueue.length} old events from ${queueKey} queue`);
+        console.log(
+          `Cleaned up ${initialLength - filteredQueue.length} old events from ${queueKey} queue`
+        );
       }
     }
   }
@@ -384,7 +387,7 @@ export class EventCorrelationTracker {
         events: [],
         startTime: new Date(event.timestamp),
         entityType: event.entityType,
-        entityId: this.extractEntityId(event)
+        entityId: this.extractEntityId(event),
       };
       this.correlationMap.set(correlationKey, correlationGroup);
     }
@@ -412,9 +415,7 @@ export class EventCorrelationTracker {
     if (!correlationGroup) return [];
 
     const cutoffTime = new Date(Date.now() - timeWindow);
-    return correlationGroup.events.filter(event =>
-      new Date(event.timestamp) >= cutoffTime
-    );
+    return correlationGroup.events.filter((event) => new Date(event.timestamp) >= cutoffTime);
   }
 
   /**
@@ -425,7 +426,7 @@ export class EventCorrelationTracker {
       totalGroups: this.correlationMap.size,
       totalEvents: this.eventHistory.length,
       patterns: [],
-      insights: []
+      insights: [],
     };
 
     // Analyze patterns
@@ -472,14 +473,14 @@ export class EventCorrelationTracker {
     // - Error patterns (multiple failures)
     // - Performance patterns (slow operations)
 
-    const eventTypes = group.events.map(e => e.eventType);
+    const eventTypes = group.events.map((e) => e.eventType);
     const uniqueTypes = [...new Set(eventTypes)];
 
     if (uniqueTypes.length >= 3) {
       group.patterns.push({
         type: 'complex_workflow',
         description: `Multi-step workflow detected: ${uniqueTypes.join(' -> ')}`,
-        confidence: 0.8
+        confidence: 0.8,
       });
     }
   }
@@ -499,8 +500,8 @@ export class EventCorrelationTracker {
       eventCount: group.events.length,
       timeSpan,
       frequency: eventFrequency,
-      eventTypes: [...new Set(group.events.map(e => e.eventType))],
-      patterns: group.patterns
+      eventTypes: [...new Set(group.events.map((e) => e.eventType))],
+      patterns: group.patterns,
     };
   }
 
@@ -511,13 +512,13 @@ export class EventCorrelationTracker {
     const insights: string[] = [];
 
     if (report.patterns.length > 0) {
-      const highActivityEntities = report.patterns.filter(p => p.eventCount > 10);
+      const highActivityEntities = report.patterns.filter((p) => p.eventCount > 10);
       if (highActivityEntities.length > 0) {
         insights.push(`${highActivityEntities.length} entities show high activity patterns`);
       }
 
-      const workflowEntities = report.patterns.filter(p =>
-        p.patterns.some(pattern => pattern.type === 'complex_workflow')
+      const workflowEntities = report.patterns.filter((p) =>
+        p.patterns.some((pattern) => pattern.type === 'complex_workflow')
       );
       if (workflowEntities.length > 0) {
         insights.push(`${workflowEntities.length} entities have complex workflow patterns`);
@@ -572,14 +573,14 @@ export class EventRouter {
             routeId: route.id,
             success: deliveryResult.success,
             destination: route.destination,
-            error: deliveryResult.error
+            error: deliveryResult.error,
           });
         } else {
           results.push({
             routeId: route.id,
             success: false,
             destination: route.destination,
-            error: 'Event filtered out'
+            error: 'Event filtered out',
           });
         }
       } catch (error) {
@@ -587,7 +588,7 @@ export class EventRouter {
           routeId: route.id,
           success: false,
           destination: route.destination,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -668,7 +669,10 @@ export class EventRouter {
   /**
    * Deliver event to destination
    */
-  private async deliverToDestination(event: Event, destination: string): Promise<{ success: boolean; error?: string }> {
+  private async deliverToDestination(
+    event: Event,
+    destination: string
+  ): Promise<{ success: boolean; error?: string }> {
     // This would integrate with various destination types:
     // - Webhooks
     // - Message queues
@@ -680,7 +684,7 @@ export class EventRouter {
 
     // Simulate delivery
     return {
-      success: true
+      success: true,
     };
   }
 }
@@ -719,7 +723,7 @@ export class EventSourcingSystem {
    * Rebuild entity state from events
    */
   rebuildEntityState(entityType: string, entityId: string): any {
-    const entityEvents = this.eventStore.filter(event => {
+    const entityEvents = this.eventStore.filter((event) => {
       if (typeof event.eventData === 'object' && event.eventData !== null) {
         return event.entityType === entityType && event.eventData.id === entityId;
       }
@@ -739,7 +743,7 @@ export class EventSourcingSystem {
    * Get events for entity
    */
   getEntityEvents(entityType: string, entityId: string, since?: Date): Event[] {
-    return this.eventStore.filter(event => {
+    return this.eventStore.filter((event) => {
       if (typeof event.eventData === 'object' && event.eventData !== null) {
         const matchesEntity = event.entityType === entityType && event.eventData.id === entityId;
         if (!since) return matchesEntity;
@@ -764,17 +768,21 @@ export class EventSourcingSystem {
       snapshots,
       totalEvents: events.length,
       firstEvent: events.length > 0 ? events[0] : null,
-      lastEvent: events.length > 0 ? events[events.length - 1] : null
+      lastEvent: events.length > 0 ? events[events.length - 1] : null,
     };
   }
 
   /**
    * Create projection
    */
-  createProjection(name: string, initialState: any, eventHandler: (state: any, event: Event) => any): void {
+  createProjection(
+    name: string,
+    initialState: any,
+    eventHandler: (state: any, event: Event) => any
+  ): void {
     this.projections.set(name, {
       state: initialState,
-      handler: eventHandler
+      handler: eventHandler,
     });
   }
 
@@ -796,8 +804,8 @@ export class EventSourcingSystem {
       lastEvent: this.eventStore.length > 0 ? this.eventStore[this.eventStore.length - 1] : null,
       projectionStates: Array.from(this.projections.entries()).map(([name, proj]) => ({
         name,
-        state: proj.state
-      }))
+        state: proj.state,
+      })),
     };
 
     this.snapshots.set(`system-${Date.now()}`, snapshot);
@@ -816,7 +824,7 @@ export class EventSourcingSystem {
           entitySnapshots.push({
             snapshotId,
             timestamp: new Date(parseInt(timestamp)),
-            state: snapshot
+            state: snapshot,
           });
         }
       }
@@ -1059,5 +1067,5 @@ export type {
   CorrelationReport,
   EventRoute,
   RoutingResult,
-  AuditTrail
+  AuditTrail,
 };

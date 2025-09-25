@@ -20,18 +20,20 @@ describe('CustomerRequest Entity Schema Validation', () => {
         city: 'Dallas',
         state: 'TX',
         zipCode: '75201',
-        country: 'US'
+        country: 'US',
       },
       requestedDate: new Date('2024-10-15T09:00:00Z'),
-      approvalHistory: [{
-        step: 'initial_submission',
-        timestamp: new Date(),
-        userId: '123e4567-e89b-12d3-a456-426614174001',
-        notes: 'Initial submission approved'
-      }],
+      approvalHistory: [
+        {
+          step: 'initial_submission',
+          timestamp: new Date(),
+          userId: '123e4567-e89b-12d3-a456-426614174001',
+          notes: 'Initial submission approved',
+        },
+      ],
       createdAt: new Date(),
       updatedAt: new Date(),
-      version: 1
+      version: 1,
     };
 
     // Test that valid data can be used to create a CustomerRequestModel
@@ -51,9 +53,9 @@ describe('CustomerRequest Entity Schema Validation', () => {
         city: '', // Invalid: empty city
         state: 'X', // Invalid: too short
         zipCode: 'invalid', // Invalid: not valid zip
-        country: 'USA' // Invalid: too long
+        country: 'USA', // Invalid: too long
       },
-      requestedDate: new Date('invalid-date') // Invalid: not valid date-time
+      requestedDate: new Date('invalid-date'), // Invalid: not valid date-time
       // Missing required id, createdAt, updatedAt, version
     };
 

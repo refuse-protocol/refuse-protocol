@@ -26,14 +26,17 @@ export class AdvancedDataArchaeologyEngine {
   /**
    * Perform comprehensive legacy system analysis
    */
-  async analyzeLegacySystem(sourcePath: string, options: AnalysisOptions = {}): Promise<LegacySystemAnalysis> {
+  async analyzeLegacySystem(
+    sourcePath: string,
+    options: AnalysisOptions = {}
+  ): Promise<LegacySystemAnalysis> {
     const analysis = await this.archaeologist.analyzeLegacySystem({
       sourcePath,
       analysisType: 'comprehensive',
       includeMetadata: true,
       detectPatterns: true,
       analyzeDependencies: true,
-      ...options
+      ...options,
     });
 
     // Store the analysis result
@@ -61,7 +64,7 @@ export class AdvancedDataArchaeologyEngine {
       totalComplexity: 0,
       riskLevel: 'medium',
       estimatedDuration: 0,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     // Analyze each data entity
@@ -109,15 +112,20 @@ export class AdvancedDataArchaeologyEngine {
   /**
    * Analyze entity pattern
    */
-  private async analyzeEntityPattern(entity: EntityInfo, analysis: LegacySystemAnalysis): Promise<DataPattern | null> {
+  private async analyzeEntityPattern(
+    entity: EntityInfo,
+    analysis: LegacySystemAnalysis
+  ): Promise<DataPattern | null> {
     // Detect common patterns like:
     // - Customer-Service relationships
     // - Route-Stop hierarchies
     // - Material-Classification patterns
     // - Time-based data patterns
 
-    if (entity.name.toLowerCase().includes('customer') &&
-        analysis.entities.some(e => e.name.toLowerCase().includes('service'))) {
+    if (
+      entity.name.toLowerCase().includes('customer') &&
+      analysis.entities.some((e) => e.name.toLowerCase().includes('service'))
+    ) {
       return {
         id: `pattern-${Date.now()}-${entity.name}`,
         type: 'entity_relationship',
@@ -130,13 +138,15 @@ export class AdvancedDataArchaeologyEngine {
         examples: [],
         metadata: {
           relationshipType: 'one-to-many',
-          typicalRatio: '1:5'
-        }
+          typicalRatio: '1:5',
+        },
       };
     }
 
-    if (entity.name.toLowerCase().includes('route') &&
-        entity.properties.some(p => p.name.toLowerCase().includes('stop'))) {
+    if (
+      entity.name.toLowerCase().includes('route') &&
+      entity.properties.some((p) => p.name.toLowerCase().includes('stop'))
+    ) {
       return {
         id: `pattern-${Date.now()}-${entity.name}`,
         type: 'hierarchical',
@@ -149,8 +159,8 @@ export class AdvancedDataArchaeologyEngine {
         examples: [],
         metadata: {
           hierarchyLevel: 2,
-          estimatedStopsPerRoute: 15
-        }
+          estimatedStopsPerRoute: 15,
+        },
       };
     }
 
@@ -164,8 +174,8 @@ export class AdvancedDataArchaeologyEngine {
     const patterns: DataPattern[] = [];
 
     // Check for missing data
-    const entitiesWithMissingData = analysis.entities.filter(entity =>
-      entity.properties.some(prop => !prop.required && prop.nullable)
+    const entitiesWithMissingData = analysis.entities.filter((entity) =>
+      entity.properties.some((prop) => !prop.required && prop.nullable)
     );
 
     if (entitiesWithMissingData.length > 0) {
@@ -174,15 +184,15 @@ export class AdvancedDataArchaeologyEngine {
         type: 'data_quality',
         name: 'Missing Data Pattern',
         description: `${entitiesWithMissingData.length} entities have optional nullable fields`,
-        entities: entitiesWithMissingData.map(e => e.name),
+        entities: entitiesWithMissingData.map((e) => e.name),
         confidence: 0.7,
         complexity: 'low',
         migrationPriority: 'medium',
         examples: [],
         metadata: {
           issueType: 'missing_data',
-          affectedEntities: entitiesWithMissingData.length
-        }
+          affectedEntities: entitiesWithMissingData.length,
+        },
       });
     }
 
@@ -201,8 +211,8 @@ export class AdvancedDataArchaeologyEngine {
         examples: [],
         metadata: {
           issueType: 'naming_convention',
-          patterns: ['camelCase', 'snake_case', 'PascalCase']
-        }
+          patterns: ['camelCase', 'snake_case', 'PascalCase'],
+        },
       });
     }
 
@@ -216,11 +226,12 @@ export class AdvancedDataArchaeologyEngine {
     const patterns: DataPattern[] = [];
 
     // Detect array/JSON fields
-    const jsonFields = analysis.entities.flatMap(entity =>
-      entity.properties.filter(prop =>
-        prop.dataType === 'object' ||
-        prop.dataType === 'array' ||
-        prop.name.toLowerCase().includes('json')
+    const jsonFields = analysis.entities.flatMap((entity) =>
+      entity.properties.filter(
+        (prop) =>
+          prop.dataType === 'object' ||
+          prop.dataType === 'array' ||
+          prop.name.toLowerCase().includes('json')
       )
     );
 
@@ -230,15 +241,15 @@ export class AdvancedDataArchaeologyEngine {
         type: 'structural',
         name: 'JSON/Array Fields Pattern',
         description: `${jsonFields.length} entities contain JSON or array fields`,
-        entities: [...new Set(jsonFields.map(f => f.entityName))],
+        entities: [...new Set(jsonFields.map((f) => f.entityName))],
         confidence: 0.9,
         complexity: 'high',
         migrationPriority: 'medium',
         examples: [],
         metadata: {
           fieldCount: jsonFields.length,
-          fieldTypes: ['object', 'array', 'json']
-        }
+          fieldTypes: ['object', 'array', 'json'],
+        },
       });
     }
 
@@ -271,7 +282,10 @@ export class AdvancedDataArchaeologyEngine {
   /**
    * Create migration phase for entity
    */
-  private async createMigrationPhase(entity: EntityInfo, analysis: LegacySystemAnalysis): Promise<MigrationPhase> {
+  private async createMigrationPhase(
+    entity: EntityInfo,
+    analysis: LegacySystemAnalysis
+  ): Promise<MigrationPhase> {
     const complexity = this.calculateEntityComplexity(entity);
     const dependencies = this.findEntityDependencies(entity, analysis);
 
@@ -288,10 +302,10 @@ export class AdvancedDataArchaeologyEngine {
         'Map fields to REFUSE Protocol schema',
         'Transform data types',
         'Validate data integrity',
-        'Create migration scripts'
+        'Create migration scripts',
       ],
       riskFactors: this.identifyRiskFactors(entity),
-      status: 'planned'
+      status: 'planned',
     };
   }
 
@@ -300,8 +314,8 @@ export class AdvancedDataArchaeologyEngine {
    */
   private calculateEntityComplexity(entity: EntityInfo): 'low' | 'medium' | 'high' {
     const factorCount = entity.properties.length;
-    const hasComplexFields = entity.properties.some(p =>
-      p.dataType === 'object' || p.dataType === 'array' || p.dataType === 'json'
+    const hasComplexFields = entity.properties.some(
+      (p) => p.dataType === 'object' || p.dataType === 'array' || p.dataType === 'json'
     );
     const hasRelationships = entity.relationships && entity.relationships.length > 0;
 
@@ -338,7 +352,7 @@ export class AdvancedDataArchaeologyEngine {
     const baseHours = {
       low: 4,
       medium: 8,
-      high: 16
+      high: 16,
     };
 
     return baseHours[complexity];
@@ -354,15 +368,15 @@ export class AdvancedDataArchaeologyEngine {
       risks.push('High number of properties');
     }
 
-    const complexFields = entity.properties.filter(p =>
-      p.dataType === 'object' || p.dataType === 'array'
+    const complexFields = entity.properties.filter(
+      (p) => p.dataType === 'object' || p.dataType === 'array'
     );
 
     if (complexFields.length > 0) {
       risks.push('Complex field types requiring transformation');
     }
 
-    if (!entity.properties.some(p => p.name.toLowerCase().includes('id'))) {
+    if (!entity.properties.some((p) => p.name.toLowerCase().includes('id'))) {
       risks.push('Missing primary identifier');
     }
 
@@ -396,7 +410,7 @@ export class AdvancedDataArchaeologyEngine {
       dataFlows: [],
       transformations: [],
       dependencies: [],
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
 
     // Analyze data flows
@@ -407,7 +421,7 @@ export class AdvancedDataArchaeologyEngine {
             source: relationship.sourceEntity,
             target: relationship.targetEntity,
             relationship: relationship.type,
-            description: `${relationship.sourceEntity} ${relationship.type} ${relationship.targetEntity}`
+            description: `${relationship.sourceEntity} ${relationship.type} ${relationship.targetEntity}`,
           });
         }
       }
@@ -435,7 +449,7 @@ export class AdvancedDataArchaeologyEngine {
           field: property.name,
           type: 'truncate',
           description: `Truncate ${property.name} to 255 characters`,
-          parameters: { maxLength: 255 }
+          parameters: { maxLength: 255 },
         });
       }
 
@@ -445,7 +459,7 @@ export class AdvancedDataArchaeologyEngine {
           field: property.name,
           type: 'flatten',
           description: `Flatten ${property.name} object structure`,
-          parameters: { flattenNested: true }
+          parameters: { flattenNested: true },
         });
       }
 
@@ -457,8 +471,8 @@ export class AdvancedDataArchaeologyEngine {
           description: `Standardize field naming for ${property.name}`,
           parameters: {
             from: property.name,
-            to: property.name.toLowerCase().replace(/_/g, '')
-          }
+            to: property.name.toLowerCase().replace(/_/g, ''),
+          },
         });
       }
     }
@@ -483,7 +497,7 @@ export class AdvancedDataArchaeologyEngine {
       migrationStrategy: strategy,
       dataLineage: lineage,
       recommendations: this.generateRecommendations(analysis, patterns),
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
   }
 
@@ -504,7 +518,7 @@ export class AdvancedDataArchaeologyEngine {
       totalFiles,
       complexityScore: this.calculateComplexityScore(analysis),
       dataQuality: this.assessDataQuality(analysis),
-      migrationFeasibility: this.assessMigrationFeasibility(analysis)
+      migrationFeasibility: this.assessMigrationFeasibility(analysis),
     };
   }
 
@@ -517,18 +531,24 @@ export class AdvancedDataArchaeologyEngine {
     const relationshipComplexity = analysis.relationships.length * 3;
     const fileComplexity = analysis.fileStructure.totalFiles;
 
-    return Math.min(100, (entityComplexity + propertyComplexity + relationshipComplexity + fileComplexity) / 10);
+    return Math.min(
+      100,
+      (entityComplexity + propertyComplexity + relationshipComplexity + fileComplexity) / 10
+    );
   }
 
   /**
    * Assess data quality
    */
-  private assessDataQuality(analysis: LegacySystemAnalysis): 'excellent' | 'good' | 'fair' | 'poor' {
-    const missingDataEntities = analysis.entities.filter(e =>
-      e.properties.some(p => !p.required && p.nullable)
+  private assessDataQuality(
+    analysis: LegacySystemAnalysis
+  ): 'excellent' | 'good' | 'fair' | 'poor' {
+    const missingDataEntities = analysis.entities.filter((e) =>
+      e.properties.some((p) => !p.required && p.nullable)
     ).length;
 
-    const qualityScore = (analysis.entities.length - missingDataEntities) / analysis.entities.length;
+    const qualityScore =
+      (analysis.entities.length - missingDataEntities) / analysis.entities.length;
 
     if (qualityScore >= 0.9) return 'excellent';
     if (qualityScore >= 0.7) return 'good';
@@ -551,15 +571,20 @@ export class AdvancedDataArchaeologyEngine {
   /**
    * Generate recommendations
    */
-  private generateRecommendations(analysis: LegacySystemAnalysis, patterns: DataPattern[]): string[] {
+  private generateRecommendations(
+    analysis: LegacySystemAnalysis,
+    patterns: DataPattern[]
+  ): string[] {
     const recommendations: string[] = [];
 
     const qualityScore = this.assessDataQuality(analysis);
     if (qualityScore === 'poor' || qualityScore === 'fair') {
-      recommendations.push('Improve data quality before migration - clean up missing and inconsistent data');
+      recommendations.push(
+        'Improve data quality before migration - clean up missing and inconsistent data'
+      );
     }
 
-    const complexPatterns = patterns.filter(p => p.complexity === 'high');
+    const complexPatterns = patterns.filter((p) => p.complexity === 'high');
     if (complexPatterns.length > 0) {
       recommendations.push('Break down complex entities into smaller, manageable pieces');
     }
@@ -570,7 +595,9 @@ export class AdvancedDataArchaeologyEngine {
     }
 
     if (analysis.entities.length > 20) {
-      recommendations.push('Large number of entities detected - consider prioritizing core entities first');
+      recommendations.push(
+        'Large number of entities detected - consider prioritizing core entities first'
+      );
     }
 
     return recommendations;
@@ -716,5 +743,5 @@ export type {
   DataFlow,
   DataTransformation,
   AnalysisSummary,
-  ArchaeologyReport
+  ArchaeologyReport,
 };

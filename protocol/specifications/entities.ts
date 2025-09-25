@@ -147,7 +147,15 @@ export interface Route extends BaseEntity {
 export interface Facility extends BaseEntity {
   name: string;
   code: string;
-  type: 'landfill' | 'mrf' | 'transfer' | 'composter' | 'export' | 'cad' | 'incinerator' | 'recycling_center';
+  type:
+    | 'landfill'
+    | 'mrf'
+    | 'transfer'
+    | 'composter'
+    | 'export'
+    | 'cad'
+    | 'incinerator'
+    | 'recycling_center';
   status: 'operational' | 'maintenance' | 'closed' | 'planned' | 'limited';
   address: Address;
   contactInformation?: Contact;
@@ -384,7 +392,13 @@ export interface MaterialTicket extends BaseEntity {
 // Payment entity
 export interface Payment extends BaseEntity {
   paymentNumber: string;
-  type: 'invoice_payment' | 'advance_payment' | 'refund' | 'adjustment' | 'deposit' | 'final_payment';
+  type:
+    | 'invoice_payment'
+    | 'advance_payment'
+    | 'refund'
+    | 'adjustment'
+    | 'deposit'
+    | 'final_payment';
   customerId: string;
   customerName: string;
   invoiceIds: string[];
@@ -395,8 +409,23 @@ export interface Payment extends BaseEntity {
   paymentDate: string;
   dueDate: string;
   processedDate?: string;
-  paymentMethod: 'check' | 'wire' | 'ach' | 'credit_card' | 'cash' | 'bank_transfer' | 'digital_wallet';
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'disputed' | 'refunded' | 'partial';
+  paymentMethod:
+    | 'check'
+    | 'wire'
+    | 'ach'
+    | 'credit_card'
+    | 'cash'
+    | 'bank_transfer'
+    | 'digital_wallet';
+  status:
+    | 'pending'
+    | 'processing'
+    | 'completed'
+    | 'failed'
+    | 'cancelled'
+    | 'disputed'
+    | 'refunded'
+    | 'partial';
 
   // Transaction Details
   transactionReference?: string;
@@ -431,7 +460,12 @@ export interface Payment extends BaseEntity {
   }>;
 
   // Reconciliation Information
-  reconciliationStatus: 'unreconciled' | 'matched' | 'partially_matched' | 'disputed' | 'reconciled';
+  reconciliationStatus:
+    | 'unreconciled'
+    | 'matched'
+    | 'partially_matched'
+    | 'disputed'
+    | 'reconciled';
   reconciledAmount?: number;
   reconciliationDate?: string;
   reconciledBy?: string;
@@ -567,7 +601,16 @@ export interface Allocation extends BaseEntity {
 
 // Event entity
 export interface Event extends BaseEntity {
-  entityType: 'customer' | 'service' | 'route' | 'facility' | 'customer_request' | 'material_ticket' | 'contract' | 'payment' | 'container';
+  entityType:
+    | 'customer'
+    | 'service'
+    | 'route'
+    | 'facility'
+    | 'customer_request'
+    | 'material_ticket'
+    | 'contract'
+    | 'payment'
+    | 'container';
   eventType: 'created' | 'updated' | 'completed' | 'cancelled' | 'webhook_received';
   timestamp: Date;
   eventData: Record<string, any>;

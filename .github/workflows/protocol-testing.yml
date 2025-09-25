@@ -34,13 +34,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Run unit tests
+    - name: Run comprehensive unit tests
       run: |
-        npm run test:protocol
-
-    - name: Run implementation tests
-      run: |
-        jest tests/unit/ --coverage --coverageDirectory=coverage
+        jest tests/unit/ tests/protocol/ tests/schemas/ --coverage --coverageDirectory=coverage
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3

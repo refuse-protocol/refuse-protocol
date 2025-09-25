@@ -20,7 +20,15 @@ export class FacilityModel implements Facility {
 
   name!: string;
   code!: string;
-  type!: 'landfill' | 'mrf' | 'transfer' | 'composter' | 'export' | 'cad' | 'incinerator' | 'recycling_center';
+  type!:
+    | 'landfill'
+    | 'mrf'
+    | 'transfer'
+    | 'composter'
+    | 'export'
+    | 'cad'
+    | 'incinerator'
+    | 'recycling_center';
   status!: 'operational' | 'maintenance' | 'closed' | 'planned' | 'limited';
   address!: Address;
   contactInformation?: Contact;

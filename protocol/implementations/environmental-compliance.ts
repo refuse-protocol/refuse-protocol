@@ -10,7 +10,10 @@ import { BaseEntityModel } from './base-entity';
 /**
  * Environmental Compliance implementation with LEED tracking and validation
  */
-export class EnvironmentalComplianceModel extends BaseEntityModel implements EnvironmentalCompliance {
+export class EnvironmentalComplianceModel
+  extends BaseEntityModel
+  implements EnvironmentalCompliance
+{
   customerId: string;
   siteId: string;
   complianceType: 'environmental' | 'safety' | 'health' | 'leed' | 'regulatory';
@@ -49,7 +52,7 @@ export class EnvironmentalComplianceModel extends BaseEntityModel implements Env
       complianceType: this.complianceType,
       leedPoints: this.leedPoints,
       carbonCredits: this.carbonCredits,
-      settlementStatus: this.settlementStatus
+      settlementStatus: this.settlementStatus,
     };
   }
 
@@ -65,7 +68,14 @@ export class EnvironmentalComplianceModel extends BaseEntityModel implements Env
 
   private initializeEnvironmentalCompliance(data: Partial<EnvironmentalCompliance>): void {
     // Validate required fields
-    this.validateRequiredFields(data, ['customerId', 'siteId', 'complianceType', 'environmentalBenefit', 'verificationStatus', 'settlementStatus']);
+    this.validateRequiredFields(data, [
+      'customerId',
+      'siteId',
+      'complianceType',
+      'environmentalBenefit',
+      'verificationStatus',
+      'settlementStatus',
+    ]);
 
     // Assign data
     Object.assign(this, data);
@@ -86,7 +96,7 @@ export class EnvironmentalComplianceModel extends BaseEntityModel implements Env
       carbonReduction: 0,
       wasteDiversion: 0,
       energySavings: 0,
-      waterConservation: 0
+      waterConservation: 0,
     };
 
     if (this.carbonCredits) {
@@ -129,7 +139,12 @@ export class EnvironmentalComplianceModel extends BaseEntityModel implements Env
  * Environmental Compliance Factory
  */
 export class EnvironmentalComplianceFactory {
-  static create(data: Omit<EnvironmentalComplianceModel, keyof import('./base-entity').BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): EnvironmentalComplianceModel {
+  static create(
+    data: Omit<
+      EnvironmentalComplianceModel,
+      keyof import('./base-entity').BaseEntity | 'createdAt' | 'updatedAt' | 'version'
+    >
+  ): EnvironmentalComplianceModel {
     return new EnvironmentalComplianceModel(data);
   }
 
@@ -143,15 +158,15 @@ export class EnvironmentalComplianceFactory {
         type: reportData.benefitType || 'carbon_reduction',
         amount: reportData.benefitAmount || 0,
         unit: reportData.benefitUnit || 'tons',
-        description: reportData.description || 'Regulatory compliance benefit'
+        description: reportData.description || 'Regulatory compliance benefit',
       },
       verificationStatus: 'pending',
       settlementStatus: 'pending',
       metadata: {
         source: 'regulatory_report',
         reportId: reportData.reportId,
-        reportingPeriod: reportData.reportingPeriod
-      }
+        reportingPeriod: reportData.reportingPeriod,
+      },
     };
 
     return EnvironmentalComplianceFactory.create(complianceData);
@@ -162,14 +177,17 @@ export class EnvironmentalComplianceFactory {
  * Environmental Compliance Validator
  */
 export class EnvironmentalComplianceValidator {
-  static validate(data: Partial<EnvironmentalComplianceModel>): { isValid: boolean; errors: string[] } {
+  static validate(data: Partial<EnvironmentalComplianceModel>): {
+    isValid: boolean;
+    errors: string[];
+  } {
     try {
       new EnvironmentalComplianceModel(data);
       return { isValid: true, errors: [] };
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }

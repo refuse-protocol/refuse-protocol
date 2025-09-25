@@ -13,7 +13,7 @@ import {
   AuditUtils,
   MetadataUtils,
   ConcurrencyError,
-  ValidationError
+  ValidationError,
 } from './common';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -37,7 +37,13 @@ export class EventModel implements Event {
   sourceSystem?: string;
 
   // Use constants from common utilities
-  private static readonly VALID_ENTITY_TYPES = ['customer', 'service', 'route', 'facility', 'customer_request'];
+  private static readonly VALID_ENTITY_TYPES = [
+    'customer',
+    'service',
+    'route',
+    'facility',
+    'customer_request',
+  ];
   private static readonly VALID_EVENT_TYPES = ['created', 'updated', 'completed', 'cancelled'];
 
   constructor(data: Partial<Event>) {
@@ -58,8 +64,8 @@ export class EventModel implements Event {
       metadata: {
         ...(data as any).metadata,
         createdBy: 'system',
-        source: (data as any).sourceSystem || 'api'
-      }
+        source: (data as any).sourceSystem || 'api',
+      },
     };
 
     return new EventModel(eventData);
@@ -77,7 +83,10 @@ export class EventModel implements Event {
     updatedData.version = this.version + 1;
     updatedData.updatedAt = new Date();
     if (this.metadata) {
-      updatedData.metadata = MetadataUtils.updateMetadata(this.metadata, (updates as any).metadata || {});
+      updatedData.metadata = MetadataUtils.updateMetadata(
+        this.metadata,
+        (updates as any).metadata || {}
+      );
     }
 
     return new EventModel(updatedData);
@@ -88,18 +97,31 @@ export class EventModel implements Event {
    */
   private validateAndAssign(data: Partial<Event>): void {
     // Validate required fields
-    const requiredErrors = ValidationUtils.validateRequired(data, ['entityType', 'eventType', 'timestamp', 'eventData']);
+    const requiredErrors = ValidationUtils.validateRequired(data, [
+      'entityType',
+      'eventType',
+      'timestamp',
+      'eventData',
+    ]);
     if (requiredErrors.length > 0) {
       throw new ValidationError(requiredErrors[0], 'event', 'multiple');
     }
 
     // Validate enum values
-    const entityTypeErrors = ValidationUtils.validateEnum(data.entityType, EventModel.VALID_ENTITY_TYPES, 'Entity type');
+    const entityTypeErrors = ValidationUtils.validateEnum(
+      data.entityType,
+      EventModel.VALID_ENTITY_TYPES,
+      'Entity type'
+    );
     if (entityTypeErrors.length > 0) {
       throw new ValidationError(entityTypeErrors[0], 'event', 'entityType');
     }
 
-    const eventTypeErrors = ValidationUtils.validateEnum(data.eventType, EventModel.VALID_EVENT_TYPES, 'Event type');
+    const eventTypeErrors = ValidationUtils.validateEnum(
+      data.eventType,
+      EventModel.VALID_EVENT_TYPES,
+      'Event type'
+    );
     if (eventTypeErrors.length > 0) {
       throw new ValidationError(eventTypeErrors[0], 'event', 'eventType');
     }

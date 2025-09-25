@@ -22,12 +22,12 @@ describe('Facility Entity Schema Validation', () => {
         city: 'North County',
         state: 'CA',
         zipCode: '95000',
-        country: 'US'
+        country: 'US',
       },
       acceptedMaterials: ['waste', 'recycling'],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      version: 1
+      version: 1,
     };
 
     const result = validateFacility.validate(validFacility);
@@ -43,7 +43,7 @@ describe('Facility Entity Schema Validation', () => {
       name: '', // Invalid: empty name
       code: '', // Invalid: empty code
       type: 'invalid_type', // Invalid: not in enum
-      status: 'invalid_status' // Invalid: not in enum
+      status: 'invalid_status', // Invalid: not in enum
       // Missing required id, address, createdAt, updatedAt, version
     };
 

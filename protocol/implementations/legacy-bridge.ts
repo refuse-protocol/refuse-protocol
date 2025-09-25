@@ -4,7 +4,14 @@
  * @version 1.0.0
  */
 
-import { Event, Customer, Service, Route, Facility, MaterialTicket } from '../specifications/entities';
+import {
+  Event,
+  Customer,
+  Service,
+  Route,
+  Facility,
+  MaterialTicket,
+} from '../specifications/entities';
 import { DataTransformer } from '../tools/data-transformer';
 
 /**
@@ -44,17 +51,16 @@ export class LegacySystemBridge {
         transformedAt: new Date(),
         metadata: {
           transformationRules: transformer.getTransformationRules(),
-          fieldMappings: this.getFieldMappings(legacySystem)
-        }
+          fieldMappings: this.getFieldMappings(legacySystem),
+        },
       };
-
     } catch (error) {
       return {
         success: false,
         originalData: legacyData,
         error: error instanceof Error ? error.message : String(error),
         transformer: legacySystem,
-        transformedAt: new Date()
+        transformedAt: new Date(),
       };
     }
   }
@@ -62,7 +68,10 @@ export class LegacySystemBridge {
   /**
    * Connect to legacy system
    */
-  async connectToLegacySystem(systemName: string, connectionOptions: ConnectionOptions): Promise<ConnectionResult> {
+  async connectToLegacySystem(
+    systemName: string,
+    connectionOptions: ConnectionOptions
+  ): Promise<ConnectionResult> {
     const connector = this.connectors.get(systemName);
     if (!connector) {
       throw new Error(`No connector found for legacy system: ${systemName}`);
@@ -75,15 +84,14 @@ export class LegacySystemBridge {
         systemName,
         connectionId: connection.connectionId,
         connectedAt: new Date(),
-        capabilities: connection.capabilities
+        capabilities: connection.capabilities,
       };
-
     } catch (error) {
       return {
         success: false,
         systemName,
         error: error instanceof Error ? error.message : String(error),
-        connectedAt: new Date()
+        connectedAt: new Date(),
       };
     }
   }
@@ -91,7 +99,10 @@ export class LegacySystemBridge {
   /**
    * Sync data from legacy system
    */
-  async syncFromLegacySystem(systemName: string, syncOptions: SyncOptions = {}): Promise<SyncResult> {
+  async syncFromLegacySystem(
+    systemName: string,
+    syncOptions: SyncOptions = {}
+  ): Promise<SyncResult> {
     const connector = this.connectors.get(systemName);
     if (!connector) {
       throw new Error(`No connector found for legacy system: ${systemName}`);
@@ -112,37 +123,38 @@ export class LegacySystemBridge {
           operation: 'transform',
           success: true,
           recordCount: this.countRecords(transformationResult.transformedData),
-          duration: Date.now() - startTime
+          duration: Date.now() - startTime,
         });
       } else {
         syncResults.push({
           operation: 'transform',
           success: false,
           error: transformationResult.error,
-          duration: Date.now() - startTime
+          duration: Date.now() - startTime,
         });
       }
 
       return {
-        success: syncResults.every(r => r.success),
+        success: syncResults.every((r) => r.success),
         systemName,
         syncResults,
         totalDuration: Date.now() - startTime,
-        syncedAt: new Date()
+        syncedAt: new Date(),
       };
-
     } catch (error) {
       return {
         success: false,
         systemName,
-        syncResults: [{
-          operation: 'sync',
-          success: false,
-          error: error instanceof Error ? error.message : String(error),
-          duration: Date.now() - startTime
-        }],
+        syncResults: [
+          {
+            operation: 'sync',
+            success: false,
+            error: error instanceof Error ? error.message : String(error),
+            duration: Date.now() - startTime,
+          },
+        ],
         totalDuration: Date.now() - startTime,
-        syncedAt: new Date()
+        syncedAt: new Date(),
       };
     }
   }
@@ -180,7 +192,7 @@ export class LegacySystemBridge {
       return {
         valid: false,
         errors: [`No transformer found for system: ${systemName}`],
-        warnings: []
+        warnings: [],
       };
     }
 
@@ -226,12 +238,12 @@ export class LegacySystemBridge {
                 street: customer.ADDRESS_STREET,
                 city: customer.ADDRESS_CITY,
                 state: customer.ADDRESS_STATE,
-                zipCode: customer.ADDRESS_ZIP
-              }
+                zipCode: customer.ADDRESS_ZIP,
+              },
             },
             serviceArea: customer.SERVICE_AREA,
             createdAt: new Date(customer.CREATED_DATE),
-            updatedAt: new Date(customer.UPDATED_DATE)
+            updatedAt: new Date(customer.UPDATED_DATE),
           }));
         }
 
@@ -245,12 +257,12 @@ export class LegacySystemBridge {
             pricing: {
               baseRate: service.BASE_RATE,
               rateUnit: this.mapRateUnit(service.RATE_UNIT),
-              additionalCharges: service.ADDITIONAL_CHARGES
+              additionalCharges: service.ADDITIONAL_CHARGES,
             },
             requirements: {
               containerTypes: service.CONTAINER_TYPES,
-              specialHandling: service.SPECIAL_HANDLING
-            }
+              specialHandling: service.SPECIAL_HANDLING,
+            },
           }));
         }
 
@@ -281,15 +293,15 @@ export class LegacySystemBridge {
           CUSTOMER_ID: 'id',
           CUSTOMER_NAME: 'name',
           CUSTOMER_TYPE: 'type',
-          STATUS: 'status'
+          STATUS: 'status',
         },
         serviceMapping: {
           SERVICE_ID: 'id',
           SERVICE_NAME: 'name',
           SERVICE_TYPE: 'type',
-          FREQUENCY: 'frequency'
-        }
-      })
+          FREQUENCY: 'frequency',
+        },
+      }),
     });
 
     // TrashFlow transformer
@@ -312,11 +324,11 @@ export class LegacySystemBridge {
               customerId: stop.CUSTOMER_ID,
               address: stop.ADDRESS,
               scheduledTime: stop.SCHEDULED_TIME,
-              serviceType: stop.SERVICE_TYPE
+              serviceType: stop.SERVICE_TYPE,
             })),
             status: this.mapRouteStatus(route.STATUS),
             createdAt: new Date(route.CREATED_DATE),
-            updatedAt: new Date(route.UPDATED_DATE)
+            updatedAt: new Date(route.UPDATED_DATE),
           }));
         }
 
@@ -340,9 +352,9 @@ export class LegacySystemBridge {
           ROUTE_NAME: 'name',
           DRIVER_NAME: 'driver',
           VEHICLE_ID: 'vehicle',
-          STATUS: 'status'
-        }
-      })
+          STATUS: 'status',
+        },
+      }),
     });
   }
 
@@ -360,7 +372,7 @@ export class LegacySystemBridge {
 
         return {
           connectionId: `wasteworks-${Date.now()}`,
-          capabilities: ['customers', 'services', 'invoices']
+          capabilities: ['customers', 'services', 'invoices'],
         };
       },
 
@@ -383,8 +395,8 @@ export class LegacySystemBridge {
               ADDRESS_ZIP: '12345',
               SERVICE_AREA: 'Area 1',
               CREATED_DATE: '2023-01-15T10:00:00Z',
-              UPDATED_DATE: '2024-01-15T10:00:00Z'
-            }
+              UPDATED_DATE: '2024-01-15T10:00:00Z',
+            },
           ],
           services: [
             {
@@ -392,15 +404,15 @@ export class LegacySystemBridge {
               SERVICE_NAME: 'Weekly Waste Collection',
               SERVICE_TYPE: 'WASTE_COLLECTION',
               FREQUENCY: 'WEEKLY',
-              BASE_RATE: 150.00,
+              BASE_RATE: 150.0,
               RATE_UNIT: 'MONTHLY',
-              ADDITIONAL_CHARGES: 25.00,
+              ADDITIONAL_CHARGES: 25.0,
               CONTAINER_TYPES: ['DUMPSTER'],
-              SPECIAL_HANDLING: null
-            }
-          ]
+              SPECIAL_HANDLING: null,
+            },
+          ],
         };
-      }
+      },
     });
 
     this.connectors.set('trashflow', {
@@ -413,7 +425,7 @@ export class LegacySystemBridge {
 
         return {
           connectionId: `trashflow-${Date.now()}`,
-          capabilities: ['routes', 'schedules', 'optimization']
+          capabilities: ['routes', 'schedules', 'optimization'],
         };
       },
 
@@ -434,21 +446,21 @@ export class LegacySystemBridge {
                   CUSTOMER_ID: 'CUST001',
                   ADDRESS: '123 Business St, Business City, BC 12345',
                   SCHEDULED_TIME: '08:00',
-                  SERVICE_TYPE: 'WASTE_COLLECTION'
+                  SERVICE_TYPE: 'WASTE_COLLECTION',
                 },
                 {
                   CUSTOMER_ID: 'CUST002',
                   ADDRESS: '456 Commerce Ave, Business City, BC 12346',
                   SCHEDULED_TIME: '09:30',
-                  SERVICE_TYPE: 'RECYCLING'
-                }
+                  SERVICE_TYPE: 'RECYCLING',
+                },
               ],
               CREATED_DATE: '2023-01-15T10:00:00Z',
-              UPDATED_DATE: '2024-01-15T10:00:00Z'
-            }
-          ]
+              UPDATED_DATE: '2024-01-15T10:00:00Z',
+            },
+          ],
         };
-      }
+      },
     });
   }
 
@@ -462,14 +474,14 @@ export class LegacySystemBridge {
         refuseField: 'id',
         dataType: 'string',
         required: true,
-        transformation: 'direct'
+        transformation: 'direct',
       },
       {
         legacyField: 'CUSTOMER_NAME',
         refuseField: 'name',
         dataType: 'string',
         required: true,
-        transformation: 'direct'
+        transformation: 'direct',
       },
       {
         legacyField: 'CUSTOMER_TYPE',
@@ -478,11 +490,11 @@ export class LegacySystemBridge {
         required: true,
         transformation: 'map',
         mapping: {
-          'COMMERCIAL': 'commercial',
-          'RESIDENTIAL': 'residential',
-          'INDUSTRIAL': 'industrial'
-        }
-      }
+          COMMERCIAL: 'commercial',
+          RESIDENTIAL: 'residential',
+          INDUSTRIAL: 'industrial',
+        },
+      },
     ]);
 
     this.fieldMappings.set('trashflow', [
@@ -491,14 +503,14 @@ export class LegacySystemBridge {
         refuseField: 'id',
         dataType: 'string',
         required: true,
-        transformation: 'direct'
+        transformation: 'direct',
       },
       {
         legacyField: 'DRIVER_NAME',
         refuseField: 'driver',
         dataType: 'string',
         required: false,
-        transformation: 'direct'
+        transformation: 'direct',
       },
       {
         legacyField: 'STATUS',
@@ -507,11 +519,11 @@ export class LegacySystemBridge {
         required: true,
         transformation: 'map',
         mapping: {
-          'ACTIVE': 'active',
-          'INACTIVE': 'inactive',
-          'COMPLETED': 'completed'
-        }
-      }
+          ACTIVE: 'active',
+          INACTIVE: 'inactive',
+          COMPLETED: 'completed',
+        },
+      },
     ]);
   }
 
@@ -527,8 +539,8 @@ export class LegacySystemBridge {
       configuration: {
         apiEndpoint: '/api/v1',
         authType: 'basic',
-        rateLimit: 100
-      }
+        rateLimit: 100,
+      },
     });
 
     this.systemAdapters.set('trashflow', {
@@ -539,8 +551,8 @@ export class LegacySystemBridge {
       configuration: {
         apiEndpoint: '/api/v2',
         authType: 'oauth2',
-        rateLimit: 200
-      }
+        rateLimit: 200,
+      },
     });
   }
 
@@ -549,10 +561,10 @@ export class LegacySystemBridge {
    */
   private mapCustomerType(legacyType: string): string {
     const mapping: Record<string, string> = {
-      'COMMERCIAL': 'commercial',
-      'RESIDENTIAL': 'residential',
-      'INDUSTRIAL': 'industrial',
-      'GOVERNMENT': 'government'
+      COMMERCIAL: 'commercial',
+      RESIDENTIAL: 'residential',
+      INDUSTRIAL: 'industrial',
+      GOVERNMENT: 'government',
     };
     return mapping[legacyType] || 'commercial';
   }
@@ -562,10 +574,10 @@ export class LegacySystemBridge {
    */
   private mapCustomerStatus(legacyStatus: string): string {
     const mapping: Record<string, string> = {
-      'ACTIVE': 'active',
-      'INACTIVE': 'inactive',
-      'SUSPENDED': 'suspended',
-      'CLOSED': 'closed'
+      ACTIVE: 'active',
+      INACTIVE: 'inactive',
+      SUSPENDED: 'suspended',
+      CLOSED: 'closed',
     };
     return mapping[legacyStatus] || 'active';
   }
@@ -575,10 +587,10 @@ export class LegacySystemBridge {
    */
   private mapServiceType(legacyType: string): string {
     const mapping: Record<string, string> = {
-      'WASTE_COLLECTION': 'waste_collection',
-      'RECYCLING': 'recycling',
-      'HAZARDOUS_WASTE': 'hazardous_waste',
-      'BULK_WASTE': 'bulk_waste'
+      WASTE_COLLECTION: 'waste_collection',
+      RECYCLING: 'recycling',
+      HAZARDOUS_WASTE: 'hazardous_waste',
+      BULK_WASTE: 'bulk_waste',
     };
     return mapping[legacyType] || 'waste_collection';
   }
@@ -588,10 +600,10 @@ export class LegacySystemBridge {
    */
   private mapRateUnit(legacyUnit: string): string {
     const mapping: Record<string, string> = {
-      'MONTHLY': 'month',
-      'QUARTERLY': 'quarter',
-      'ANNUALLY': 'year',
-      'PER_PICKUP': 'pickup'
+      MONTHLY: 'month',
+      QUARTERLY: 'quarter',
+      ANNUALLY: 'year',
+      PER_PICKUP: 'pickup',
     };
     return mapping[legacyUnit] || 'month';
   }
@@ -601,10 +613,10 @@ export class LegacySystemBridge {
    */
   private mapRouteStatus(legacyStatus: string): string {
     const mapping: Record<string, string> = {
-      'ACTIVE': 'active',
-      'INACTIVE': 'inactive',
-      'COMPLETED': 'completed',
-      'CANCELLED': 'cancelled'
+      ACTIVE: 'active',
+      INACTIVE: 'inactive',
+      COMPLETED: 'completed',
+      CANCELLED: 'cancelled',
     };
     return mapping[legacyStatus] || 'active';
   }
@@ -794,5 +806,5 @@ export type {
   AdapterConfiguration,
   AdapterConfig,
   ValidationResult,
-  TransformationRules
+  TransformationRules,
 };

@@ -4,12 +4,19 @@
  * @version 1.0.0
  */
 
-import { Event, Customer, Service, Route, Facility, MaterialTicket } from '../specifications/entities';
+import {
+  Event,
+  Customer,
+  Service,
+  Route,
+  Facility,
+  MaterialTicket,
+} from '../specifications/entities';
 import { ComplianceValidator } from './compliance-validator';
 import { ConformanceChecker } from './conformance-checker';
 import { EventStreamingSystem } from '../implementations/event-system';
-import * as fs from 'fs';
-import * as path from 'path';
+// REMOVED UNUSED IMPORT: // REMOVED UNUSED: import * as fs from 'fs';
+// REMOVED UNUSED IMPORT: // REMOVED UNUSED: import * as path from 'path';
 
 /**
  * Interactive API Documentation Generator
@@ -36,7 +43,7 @@ export class InteractiveAPIDocsGenerator {
    * Generate complete API documentation
    */
   async generateAPIDocs(options: DocsOptions = {}): Promise<GenerationResult> {
-    console.log('Generating interactive API documentation...');
+    // CONSOLE:     console.log('Generating interactive API documentation...');
 
     const result: GenerationResult = {
       success: true,
@@ -46,8 +53,8 @@ export class InteractiveAPIDocsGenerator {
       metadata: {
         version: '1.0.0',
         protocolVersion: 'REFUSE-v1.0',
-        generationOptions: options
-      }
+        generationOptions: options,
+      },
     };
 
     try {
@@ -85,13 +92,12 @@ export class InteractiveAPIDocsGenerator {
       // Generate navigation
       await this.generateNavigation(result.sections);
 
-      console.log('✅ API documentation generated successfully');
+      // CONSOLE:       console.log('✅ API documentation generated successfully');
       return result;
-
     } catch (error) {
       result.success = false;
       result.error = error instanceof Error ? error.message : String(error);
-      console.error('❌ API documentation generation failed:', error);
+      // CONSOLE:       console.error('❌ API documentation generation failed:', error);
       return result;
     }
   }
@@ -112,7 +118,7 @@ export class InteractiveAPIDocsGenerator {
         'Real-time event streaming',
         'Comprehensive validation',
         'Regulatory compliance',
-        'Legacy system integration'
+        'Legacy system integration',
       ],
       gettingStarted: `
 ## Getting Started
@@ -128,7 +134,7 @@ export class InteractiveAPIDocsGenerator {
 - **Events**: Real-time data change notifications
 - **Validation**: Schema and business rule validation
 - **Conformance**: Protocol compliance checking
-`
+`,
     });
 
     this.writeFile('index.html', content);
@@ -148,21 +154,21 @@ export class InteractiveAPIDocsGenerator {
           name: 'API Key',
           description: 'Simple API key authentication',
           example: 'X-API-Key: your-api-key-here',
-          useCase: 'Development and testing'
+          useCase: 'Development and testing',
         },
         {
           name: 'Bearer Token',
           description: 'JWT-based authentication',
           example: 'Authorization: Bearer eyJhbGciOiJIUzI1NiIs...',
-          useCase: 'Production applications'
+          useCase: 'Production applications',
         },
         {
           name: 'Basic Auth',
           description: 'HTTP Basic authentication',
           example: 'Authorization: Basic dXNlcjpwYXNzd29yZA==',
-          useCase: 'Legacy system integration'
-        }
-      ]
+          useCase: 'Legacy system integration',
+        },
+      ],
     });
 
     this.writeFile('authentication.html', content);
@@ -178,7 +184,7 @@ export class InteractiveAPIDocsGenerator {
     const content = this.populateTemplate(entities, {
       entities: entityData,
       totalEntities: entityData.length,
-      entityList: entityData.map(e => `- [${e.name}](#${e.name.toLowerCase()})`).join('\n')
+      entityList: entityData.map((e) => `- [${e.name}](#${e.name.toLowerCase()})`).join('\n'),
     });
 
     this.writeFile('entities.html', content);
@@ -200,7 +206,7 @@ export class InteractiveAPIDocsGenerator {
       eventTypes,
       totalEventTypes: eventTypes.length,
       streamingExample: this.getEventStreamingExample(),
-      webhookExample: this.getWebhookExample()
+      webhookExample: this.getWebhookExample(),
     });
 
     this.writeFile('events.html', content);
@@ -216,7 +222,7 @@ export class InteractiveAPIDocsGenerator {
     const content = this.populateTemplate(validation, {
       validationRules,
       validationTypes: ['Schema Validation', 'Business Rules', 'Data Quality', 'Compliance'],
-      exampleRequest: this.getValidationExample()
+      exampleRequest: this.getValidationExample(),
     });
 
     this.writeFile('validation.html', content);
@@ -232,7 +238,7 @@ export class InteractiveAPIDocsGenerator {
     const content = this.populateTemplate(conformance, {
       standards,
       conformanceLevels: ['Basic', 'Standard', 'Premium'],
-      checkExample: this.getConformanceCheckExample()
+      checkExample: this.getConformanceCheckExample(),
     });
 
     this.writeFile('conformance.html', content);
@@ -250,10 +256,10 @@ export class InteractiveAPIDocsGenerator {
         'Schema Validator',
         'Conformance Checker',
         'Performance Benchmarks',
-        'Load Testing Suite'
+        'Load Testing Suite',
       ],
       testScenarios: this.getTestScenarios(),
-      cliCommands: this.getCLICommandExamples()
+      cliCommands: this.getCLICommandExamples(),
     });
 
     this.writeFile('testing.html', content);
@@ -272,8 +278,8 @@ export class InteractiveAPIDocsGenerator {
       installationCommands: {
         npm: 'npm install @refuse-protocol/sdk',
         yarn: 'yarn add @refuse-protocol/sdk',
-        pip: 'pip install refuse-protocol-sdk'
-      }
+        pip: 'pip install refuse-protocol-sdk',
+      },
     });
 
     this.writeFile('sdk.html', content);
@@ -289,7 +295,7 @@ export class InteractiveAPIDocsGenerator {
       apiEndpoint: options.baseUrl || 'https://api.refuse-protocol.org',
       defaultEntity: 'customer',
       sampleRequests: this.getSampleRequests(),
-      responseExamples: this.getResponseExamples()
+      responseExamples: this.getResponseExamples(),
     });
 
     this.writeFile('playground.html', content);
@@ -305,7 +311,7 @@ export class InteractiveAPIDocsGenerator {
       description: entity.description,
       properties: entity.properties,
       endpoints: entity.endpoints,
-      examples: entity.examples
+      examples: entity.examples,
     });
 
     this.writeFile(`entities/${entity.name.toLowerCase()}.html`, content);
@@ -317,9 +323,9 @@ export class InteractiveAPIDocsGenerator {
   private async generateSearchIndex(sections: string[]): Promise<void> {
     const searchIndex = {
       sections,
-      entities: this.getEntityDocumentation().map(e => e.name),
+      entities: this.getEntityDocumentation().map((e) => e.name),
       endpoints: this.getAllEndpoints(),
-      searchableContent: this.generateSearchableContent()
+      searchableContent: this.generateSearchableContent(),
     };
 
     this.writeFile('search-index.json', JSON.stringify(searchIndex, null, 2));
@@ -332,7 +338,7 @@ export class InteractiveAPIDocsGenerator {
     const navigation = this.templates.get('navigation') || this.getNavigationTemplate();
     const content = this.populateTemplate(navigation, {
       sections,
-      currentSection: 'overview'
+      currentSection: 'overview',
     });
 
     this.writeFile('navigation.html', content);
@@ -362,7 +368,7 @@ export class InteractiveAPIDocsGenerator {
   private writeFile(filename: string, content: string): void {
     const filepath = path.join(this.outputDir, filename);
     fs.writeFileSync(filepath, content, 'utf8');
-    console.log(`Generated: ${filepath}`);
+    // CONSOLE:     console.log(`Generated: ${filepath}`);
   }
 
   /**
@@ -855,36 +861,45 @@ function sendRequest() {
           { name: 'id', type: 'string', required: true, description: 'Unique identifier' },
           { name: 'name', type: 'string', required: true, description: 'Customer name' },
           { name: 'type', type: 'string', required: true, description: 'Customer type' },
-          { name: 'contactInfo', type: 'object', required: true, description: 'Contact information' },
-          { name: 'serviceArea', type: 'string', required: false, description: 'Service area' }
+          {
+            name: 'contactInfo',
+            type: 'object',
+            required: true,
+            description: 'Contact information',
+          },
+          { name: 'serviceArea', type: 'string', required: false, description: 'Service area' },
         ],
         endpoints: [
           { method: 'GET', path: '/customers', description: 'List all customers' },
           { method: 'POST', path: '/customers', description: 'Create a customer' },
           { method: 'GET', path: '/customers/{id}', description: 'Get customer by ID' },
           { method: 'PUT', path: '/customers/{id}', description: 'Update customer' },
-          { method: 'DELETE', path: '/customers/{id}', description: 'Delete customer' }
+          { method: 'DELETE', path: '/customers/{id}', description: 'Delete customer' },
         ],
         examples: [
           {
             title: 'Create Customer',
-            code: JSON.stringify({
-              name: 'Acme Corporation',
-              type: 'commercial',
-              contactInfo: {
-                primaryPhone: '555-0100',
-                email: 'contact@acme.com',
-                address: {
-                  street: '123 Business St',
-                  city: 'Business City',
-                  state: 'BC',
-                  zipCode: '12345'
-                }
-              }
-            }, null, 2)
-          }
-        ]
-      }
+            code: JSON.stringify(
+              {
+                name: 'Acme Corporation',
+                type: 'commercial',
+                contactInfo: {
+                  primaryPhone: '555-0100',
+                  email: 'contact@acme.com',
+                  address: {
+                    street: '123 Business St',
+                    city: 'Business City',
+                    state: 'BC',
+                    zipCode: '12345',
+                  },
+                },
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      },
     ];
   }
 
@@ -893,7 +908,7 @@ function sendRequest() {
       { name: 'created', description: 'Entity was created' },
       { name: 'updated', description: 'Entity was updated' },
       { name: 'deleted', description: 'Entity was deleted' },
-      { name: 'status_changed', description: 'Entity status changed' }
+      { name: 'status_changed', description: 'Entity status changed' },
     ];
   }
 
@@ -901,7 +916,7 @@ function sendRequest() {
     return [
       { name: 'Required Fields', type: 'schema', severity: 'error' },
       { name: 'Data Types', type: 'schema', severity: 'error' },
-      { name: 'Business Constraints', type: 'business', severity: 'warning' }
+      { name: 'Business Constraints', type: 'business', severity: 'warning' },
     ];
   }
 
@@ -909,7 +924,7 @@ function sendRequest() {
     return [
       { name: 'Basic Conformance', level: 'basic', description: 'Core protocol features' },
       { name: 'Standard Conformance', level: 'standard', description: 'Recommended features' },
-      { name: 'Premium Conformance', level: 'premium', description: 'Advanced features' }
+      { name: 'Premium Conformance', level: 'premium', description: 'Advanced features' },
     ];
   }
 
@@ -917,15 +932,21 @@ function sendRequest() {
     return [
       { name: 'Customer Creation', description: 'Test customer entity creation' },
       { name: 'Event Streaming', description: 'Test real-time event functionality' },
-      { name: 'Data Validation', description: 'Test schema and business rule validation' }
+      { name: 'Data Validation', description: 'Test schema and business rule validation' },
     ];
   }
 
   private getCLICommandExamples(): CLICommand[] {
     return [
-      { command: 'refuse-protocol validate compliance data.json', description: 'Validate data compliance' },
-      { command: 'refuse-protocol conformance check ./src', description: 'Check implementation conformance' },
-      { command: 'refuse-protocol benchmark run -d 60', description: 'Run performance benchmarks' }
+      {
+        command: 'refuse-protocol validate compliance data.json',
+        description: 'Validate data compliance',
+      },
+      {
+        command: 'refuse-protocol conformance check ./src',
+        description: 'Check implementation conformance',
+      },
+      { command: 'refuse-protocol benchmark run -d 60', description: 'Run performance benchmarks' },
     ];
   }
 
@@ -943,8 +964,8 @@ const sdk = new RefuseProtocolSDK({
 const customer = await sdk.createClient('customer').create({
   name: 'Acme Corp',
   type: 'commercial'
-});`
-      }
+});`,
+      },
     ];
   }
 
@@ -992,7 +1013,7 @@ const customer = await sdk.createClient('customer').create({
 const subscriptionId = sdk.subscribeToEvents(
   { entityType: 'customer' },
   (event) => {
-    console.log('Customer event:', event);
+// CONSOLE:     console.log('Customer event:', event);
   }
 );
 
@@ -1037,7 +1058,7 @@ const validationResult = await sdk.validateCompliance({
 });
 
 if (!validationResult.compliant) {
-  console.log('Validation errors:', validationResult.violations);
+// CONSOLE:   console.log('Validation errors:', validationResult.violations);
 }`;
   }
 
@@ -1049,8 +1070,8 @@ const conformanceResult = await sdk.checkConformance({
   standard: 'refuse-protocol-v1'
 });
 
-console.log('Conformance Score:', conformanceResult.score);
-console.log('Issues:', conformanceResult.issues);`;
+// CONSOLE: console.log('Conformance Score:', conformanceResult.score);
+// CONSOLE: console.log('Issues:', conformanceResult.issues);`;
   }
 
   private getAllEndpoints(): string[] {
@@ -1064,7 +1085,7 @@ console.log('Issues:', conformanceResult.issues);`;
       'POST /services',
       'GET /services/{id}',
       'PUT /services/{id}',
-      'DELETE /services/{id}'
+      'DELETE /services/{id}',
     ];
   }
 
@@ -1072,12 +1093,31 @@ console.log('Issues:', conformanceResult.issues);`;
     return {
       entities: this.getEntityDocumentation(),
       endpoints: this.getAllEndpoints(),
-      sections: ['Overview', 'Authentication', 'Entities', 'Events', 'Validation', 'Conformance', 'Testing', 'SDK'],
+      sections: [
+        'Overview',
+        'Authentication',
+        'Entities',
+        'Events',
+        'Validation',
+        'Conformance',
+        'Testing',
+        'SDK',
+      ],
       searchableTerms: [
-        'customer', 'service', 'route', 'facility', 'event',
-        'validation', 'conformance', 'authentication', 'SDK',
-        'REST API', 'JSON Schema', 'webhook', 'streaming'
-      ]
+        'customer',
+        'service',
+        'route',
+        'facility',
+        'event',
+        'validation',
+        'conformance',
+        'authentication',
+        'SDK',
+        'REST API',
+        'JSON Schema',
+        'webhook',
+        'streaming',
+      ],
     };
   }
 }
@@ -1230,5 +1270,5 @@ export type {
   TestScenario,
   CLICommand,
   SDKExample,
-  SearchableContent
+  SearchableContent,
 };

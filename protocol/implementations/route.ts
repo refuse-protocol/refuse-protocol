@@ -38,10 +38,20 @@ export class RouteModel implements Route {
   };
 
   private static readonly VALID_FREQUENCIES: Route['schedule']['frequency'][] = [
-    'weekly', 'bi_weekly', 'monthly', 'on_call', 'one_time'
+    'weekly',
+    'bi_weekly',
+    'monthly',
+    'on_call',
+    'one_time',
   ];
   private static readonly DAYS_OF_WEEK = [
-    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday',
   ];
 
   constructor(data: Partial<Route>) {
@@ -51,7 +61,11 @@ export class RouteModel implements Route {
   /**
    * Create a new route with validation
    */
-  static create(data: Omit<Route, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version' | 'metadata'> & { metadata?: Record<string, any> }): RouteModel {
+  static create(
+    data: Omit<Route, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version' | 'metadata'> & {
+      metadata?: Record<string, any>;
+    }
+  ): RouteModel {
     const now = new Date();
     const routeData: Partial<Route> = {
       id: uuidv4(),
@@ -63,8 +77,8 @@ export class RouteModel implements Route {
       metadata: {
         createdBy: 'system',
         source: 'api',
-        ...(data.metadata || {})
-      }
+        ...(data.metadata || {}),
+      },
     };
 
     return new RouteModel(routeData);
@@ -73,7 +87,10 @@ export class RouteModel implements Route {
   /**
    * Update route with optimistic locking
    */
-  update(updates: Partial<Omit<Route, keyof BaseEntity>> & { metadata?: Record<string, any> }, expectedVersion: number): RouteModel {
+  update(
+    updates: Partial<Omit<Route, keyof BaseEntity>> & { metadata?: Record<string, any> },
+    expectedVersion: number
+  ): RouteModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -87,8 +104,8 @@ export class RouteModel implements Route {
         lastModifiedBy: 'system',
         previousVersion: this.version,
         ...(this.metadata || {}),
-        ...(updates.metadata || {})
-      }
+        ...(updates.metadata || {}),
+      },
     };
 
     return new RouteModel(updatedData);
@@ -107,11 +124,19 @@ export class RouteModel implements Route {
       throw new Error('Schedule is required');
     }
 
-    if (!data.schedule.frequency || !RouteModel.VALID_FREQUENCIES.includes(data.schedule.frequency)) {
-      throw new Error(`Schedule frequency must be one of: ${RouteModel.VALID_FREQUENCIES.join(', ')}`);
+    if (
+      !data.schedule.frequency ||
+      !RouteModel.VALID_FREQUENCIES.includes(data.schedule.frequency)
+    ) {
+      throw new Error(
+        `Schedule frequency must be one of: ${RouteModel.VALID_FREQUENCIES.join(', ')}`
+      );
     }
 
-    if (!data.schedule.dayOfWeek || !RouteModel.DAYS_OF_WEEK.includes(data.schedule.dayOfWeek.toLowerCase())) {
+    if (
+      !data.schedule.dayOfWeek ||
+      !RouteModel.DAYS_OF_WEEK.includes(data.schedule.dayOfWeek.toLowerCase())
+    ) {
       throw new Error(`Schedule day of week must be one of: ${RouteModel.DAYS_OF_WEEK.join(', ')}`);
     }
 
@@ -255,16 +280,22 @@ export class RouteModel implements Route {
   /**
    * Calculate distance between two coordinates using Haversine formula
    */
-  private calculateDistance(coord1: { lat: number; lng: number }, coord2: { lat: number; lng: number }): number {
+  private calculateDistance(
+    coord1: { lat: number; lng: number },
+    coord2: { lat: number; lng: number }
+  ): number {
     const R = 3959; // Earth's radius in miles
     const dLat = this.toRadians(coord2.lat - coord1.lat);
     const dLng = this.toRadians(coord2.lng - coord1.lng);
 
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(this.toRadians(coord1.lat)) * Math.cos(this.toRadians(coord2.lat)) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(coord1.lat)) *
+        Math.cos(this.toRadians(coord2.lat)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
 
@@ -326,7 +357,7 @@ export class RouteModel implements Route {
    * Recalculate route efficiency based on performance
    */
   private recalculateEfficiency(): void {
-    let efficiencyFactors = [this.efficiency];
+    const efficiencyFactors = [this.efficiency];
 
     if (this.performanceMetrics?.onTimePercentage !== undefined) {
       efficiencyFactors.push(this.performanceMetrics.onTimePercentage);
@@ -339,7 +370,7 @@ export class RouteModel implements Route {
     // Weight current efficiency more heavily (70%) vs new metrics (30%)
     const weightedEfficiency = efficiencyFactors.reduce((sum, factor, index) => {
       const weight = index === 0 ? 0.7 : 0.3 / (efficiencyFactors.length - 1);
-      return sum + (factor * weight);
+      return sum + factor * weight;
     }, 0);
 
     this.efficiency = Math.max(0, Math.min(100, weightedEfficiency));
@@ -358,7 +389,7 @@ export class RouteModel implements Route {
       efficiency: this.getEfficiencyScore(),
       isActive: this.isActive(),
       schedule: `${this.schedule.dayOfWeek} ${this.schedule.startTime}-${this.schedule.endTime}`,
-      performanceMetrics: this.performanceMetrics
+      performanceMetrics: this.performanceMetrics,
     };
   }
 
@@ -378,7 +409,7 @@ export class RouteModel implements Route {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -404,11 +435,11 @@ export class RouteModel implements Route {
       metadata: {
         source: 'route-model',
         eventType,
-        entityId: this.id
+        entityId: this.id,
       },
       createdAt: now,
       updatedAt: now,
-      version: 1
+      version: 1,
     };
   }
 
@@ -430,7 +461,10 @@ export class RouteModel implements Route {
     }
 
     // Business rule: High efficiency routes should have good performance metrics
-    if (this.efficiency > 90 && (!this.performanceMetrics?.onTimePercentage || this.performanceMetrics.onTimePercentage < 85)) {
+    if (
+      this.efficiency > 90 &&
+      (!this.performanceMetrics?.onTimePercentage || this.performanceMetrics.onTimePercentage < 85)
+    ) {
       errors.push('High efficiency routes should maintain on-time performance above 85%');
     }
 
@@ -460,8 +494,8 @@ export class RouteFactory {
         originalFieldNames: Object.keys(legacyData),
         transformationNotes: 'Migrated from legacy waste management system',
         syncStatus: 'migrated',
-        lastSyncDate: new Date().toISOString()
-      }
+        lastSyncDate: new Date().toISOString(),
+      },
     };
 
     return RouteModel.create(mappedData as any);
@@ -473,10 +507,12 @@ export class RouteFactory {
   private static mapLegacySchedule(legacyData: Record<string, any>): Route['schedule'] {
     return {
       frequency: this.mapLegacyFrequency(legacyData.frequency || legacyData.FREQUENCY),
-      dayOfWeek: this.mapLegacyDayOfWeek(legacyData.day_of_week || legacyData.DAY_OF_WEEK || legacyData.day),
+      dayOfWeek: this.mapLegacyDayOfWeek(
+        legacyData.day_of_week || legacyData.DAY_OF_WEEK || legacyData.day
+      ),
       startTime: legacyData.start_time || legacyData.START_TIME || '06:00',
       endTime: legacyData.end_time || legacyData.END_TIME || '15:00',
-      holidays: legacyData.holidays || legacyData.HOLIDAYS
+      holidays: legacyData.holidays || legacyData.HOLIDAYS,
     };
   }
 
@@ -485,16 +521,16 @@ export class RouteFactory {
    */
   private static mapLegacyFrequency(legacyFrequency: string): Route['schedule']['frequency'] {
     const freqMap: Record<string, Route['schedule']['frequency']> = {
-      'weekly': 'weekly',
-      'week': 'weekly',
-      'bi_weekly': 'bi_weekly',
-      'biweekly': 'bi_weekly',
-      'monthly': 'monthly',
-      'month': 'monthly',
-      'on_call': 'on_call',
-      'oncall': 'on_call',
-      'one_time': 'one_time',
-      'onetime': 'one_time'
+      weekly: 'weekly',
+      week: 'weekly',
+      bi_weekly: 'bi_weekly',
+      biweekly: 'bi_weekly',
+      monthly: 'monthly',
+      month: 'monthly',
+      on_call: 'on_call',
+      oncall: 'on_call',
+      one_time: 'one_time',
+      onetime: 'one_time',
     };
 
     return freqMap[legacyFrequency.toLowerCase()] || 'weekly';
@@ -505,13 +541,22 @@ export class RouteFactory {
    */
   private static mapLegacyDayOfWeek(legacyDay: string): string {
     const dayMap: Record<string, string> = {
-      'monday': 'monday', 'mon': 'monday',
-      'tuesday': 'tuesday', 'tue': 'tuesday', 'tues': 'tuesday',
-      'wednesday': 'wednesday', 'wed': 'wednesday',
-      'thursday': 'thursday', 'thu': 'thursday', 'thurs': 'thursday',
-      'friday': 'friday', 'fri': 'friday',
-      'saturday': 'saturday', 'sat': 'saturday',
-      'sunday': 'sunday', 'sun': 'sunday'
+      monday: 'monday',
+      mon: 'monday',
+      tuesday: 'tuesday',
+      tue: 'tuesday',
+      tues: 'tuesday',
+      wednesday: 'wednesday',
+      wed: 'wednesday',
+      thursday: 'thursday',
+      thu: 'thursday',
+      thurs: 'thursday',
+      friday: 'friday',
+      fri: 'friday',
+      saturday: 'saturday',
+      sat: 'saturday',
+      sunday: 'sunday',
+      sun: 'sunday',
     };
 
     return dayMap[legacyDay.toLowerCase()] || 'monday';
@@ -520,12 +565,14 @@ export class RouteFactory {
   /**
    * Map legacy performance metrics
    */
-  private static mapLegacyPerformanceMetrics(legacyData: Record<string, any>): Route['performanceMetrics'] {
+  private static mapLegacyPerformanceMetrics(
+    legacyData: Record<string, any>
+  ): Route['performanceMetrics'] {
     return {
       averageServiceTime: legacyData.avg_service_time || legacyData.AVG_SERVICE_TIME,
       totalDistance: legacyData.total_distance || legacyData.TOTAL_DISTANCE,
       fuelEfficiency: legacyData.fuel_efficiency || legacyData.FUEL_EFFICIENCY,
-      onTimePercentage: legacyData.on_time_percentage || legacyData.ON_TIME_PERCENTAGE
+      onTimePercentage: legacyData.on_time_percentage || legacyData.ON_TIME_PERCENTAGE,
     };
   }
 }
@@ -544,7 +591,7 @@ export class RouteValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -566,7 +613,9 @@ export class RouteOptimizer {
    */
   static optimizeMultipleRoutes(routes: RouteModel[]): RouteModel[] {
     // Sort routes by efficiency (most efficient first)
-    const sortedRoutes = [...routes].sort((a, b) => b.getEfficiencyScore() - a.getEfficiencyScore());
+    const sortedRoutes = [...routes].sort(
+      (a, b) => b.getEfficiencyScore() - a.getEfficiencyScore()
+    );
 
     // Rebalance sites between routes for better distribution
     return this.rebalanceRouteDistribution(sortedRoutes);
@@ -580,7 +629,7 @@ export class RouteOptimizer {
     const averageSitesPerRoute = totalSites / routes.length;
 
     // Redistribute sites to balance workload
-    const rebalancedRoutes = routes.map(route => {
+    const rebalancedRoutes = routes.map((route) => {
       if (Math.abs(route.assignedSites.length - averageSitesPerRoute) <= 1) {
         return route; // Route is already well-balanced
       }
@@ -592,7 +641,7 @@ export class RouteOptimizer {
       return new RouteModel({
         ...route,
         assignedSites: newSites,
-        efficiency: Math.max(0, route.efficiency - 5) // Slightly reduce efficiency for rebalancing
+        efficiency: Math.max(0, route.efficiency - 5), // Slightly reduce efficiency for rebalancing
       });
     });
 

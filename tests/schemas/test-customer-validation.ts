@@ -21,11 +21,11 @@ describe('Customer Entity Schema Validation', () => {
         city: 'Anytown',
         state: 'CA',
         zipCode: '12345',
-        country: 'US'
+        country: 'US',
       },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      version: 1
+      version: 1,
     };
 
     const result = validateCustomer.validate(validCustomer);
@@ -50,21 +50,21 @@ describe('Customer Entity Schema Validation', () => {
         title: 'Operations Manager',
         email: 'john.smith@example.com',
         phone: '+15550123',
-        mobile: '+15550456'
+        mobile: '+15550456',
       },
       billingContact: {
         name: 'Jane Doe',
         title: 'Accounts Payable',
         email: 'jane.doe@example.com',
-        phone: '+15550789'
+        phone: '+15550789',
       },
       serviceContacts: [
         {
           name: 'Mike Johnson',
           title: 'Site Manager',
           email: 'mike.johnson@example.com',
-          phone: '+15550321'
-        }
+          phone: '+15550321',
+        },
       ],
       serviceAddress: {
         street1: '100 Industrial Blvd',
@@ -75,15 +75,15 @@ describe('Customer Entity Schema Validation', () => {
         country: 'US',
         coordinates: {
           latitude: 32.7767,
-          longitude: -96.7970
-        }
+          longitude: -96.797,
+        },
       },
       billingAddress: {
         street1: '200 Commerce Street',
         city: 'Business District',
         state: 'TX',
         zipCode: '75002',
-        country: 'US'
+        country: 'US',
       },
       serviceTypes: ['waste', 'recycling', 'organics'],
       specialInstructions: 'Handle with care - hazardous materials present',
@@ -94,11 +94,11 @@ describe('Customer Entity Schema Validation', () => {
         syncStatus: 'synced',
         lastSyncDate: new Date().toISOString(),
         originalFieldNames: ['customer_number', 'customer_name'],
-        transformationNotes: 'Migrated from legacy system'
+        transformationNotes: 'Migrated from legacy system',
       },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      version: 1
+      version: 1,
     };
 
     const result = validateCustomer.validate(fullCustomer);
@@ -121,9 +121,9 @@ describe('Customer Entity Schema Validation', () => {
         city: 'Anytown',
         state: 'CA',
         zipCode: '12345',
-        country: 'US'
+        country: 'US',
         // Missing required street1
-      }
+      },
       // Missing required id, createdAt, updatedAt, version
     };
 
@@ -137,7 +137,7 @@ describe('Customer Entity Schema Validation', () => {
   test('should validate customer type enum values', () => {
     const enumValues = ['residential', 'commercial', 'industrial', 'municipal'];
 
-    enumValues.forEach(type => {
+    enumValues.forEach((type) => {
       const customer = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         name: 'Test Customer',
@@ -148,11 +148,11 @@ describe('Customer Entity Schema Validation', () => {
           city: 'Test City',
           state: 'CA',
           zipCode: '12345',
-          country: 'US'
+          country: 'US',
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        version: 1
+        version: 1,
       };
 
       const result = validateCustomer.validate(customer);
@@ -163,7 +163,7 @@ describe('Customer Entity Schema Validation', () => {
   test('should validate customer status enum values', () => {
     const statusValues = ['active', 'inactive', 'suspended', 'pending'];
 
-    statusValues.forEach(status => {
+    statusValues.forEach((status) => {
       const customer = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         name: 'Test Customer',
@@ -174,11 +174,11 @@ describe('Customer Entity Schema Validation', () => {
           city: 'Test City',
           state: 'CA',
           zipCode: '12345',
-          country: 'US'
+          country: 'US',
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        version: 1
+        version: 1,
       };
 
       const result = validateCustomer.validate(customer);

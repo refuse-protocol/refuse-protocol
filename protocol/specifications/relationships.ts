@@ -23,7 +23,7 @@ import {
   Allocation,
   Event,
   EntityRelationships,
-  BaseEntity
+  BaseEntity,
 } from './entities';
 
 /**
@@ -33,7 +33,10 @@ export class EntityRelationshipValidator {
   /**
    * Validate foreign key relationships between entities
    */
-  static validateForeignKey(entity: any, entityType: keyof EntityRelationships): { isValid: boolean; errors: string[] } {
+  static validateForeignKey(
+    entity: any,
+    entityType: keyof EntityRelationships
+  ): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     switch (entityType) {
@@ -67,7 +70,7 @@ export class EntityRelationshipValidator {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -78,8 +81,10 @@ export class EntityRelationshipValidator {
     const errors: string[] = [];
 
     // Customer should have at least one service contact if it's commercial/industrial
-    if ((customer.type === 'commercial' || customer.type === 'industrial') &&
-        (!customer.serviceContacts || customer.serviceContacts.length === 0)) {
+    if (
+      (customer.type === 'commercial' || customer.type === 'industrial') &&
+      (!customer.serviceContacts || customer.serviceContacts.length === 0)
+    ) {
       errors.push('Commercial and industrial customers must have at least one service contact');
     }
 
@@ -163,18 +168,24 @@ export class EntityRelationshipValidator {
 
     // Facility should have permits for accepted materials
     if (facility.acceptedMaterials.includes('hazardous')) {
-      const hasHazardousPermit = facility.permits?.some(permit =>
-        permit.permitType.toLowerCase().includes('hazardous') &&
-        new Date(permit.validTo) > new Date()
+      const hasHazardousPermit = facility.permits?.some(
+        (permit) =>
+          permit.permitType.toLowerCase().includes('hazardous') &&
+          new Date(permit.validTo) > new Date()
       );
 
       if (!hasHazardousPermit) {
-        errors.push('Facilities accepting hazardous materials must have valid hazardous waste permits');
+        errors.push(
+          'Facilities accepting hazardous materials must have valid hazardous waste permits'
+        );
       }
     }
 
     // Facility should have environmental controls if it's a landfill
-    if (facility.type === 'landfill' && (!facility.environmentalControls || facility.environmentalControls.length === 0)) {
+    if (
+      facility.type === 'landfill' &&
+      (!facility.environmentalControls || facility.environmentalControls.length === 0)
+    ) {
       errors.push('Landfills must have environmental controls');
     }
 
@@ -217,7 +228,10 @@ export class EntityRelationshipValidator {
     }
 
     // Contract should have special terms for complex agreements
-    if (contract.pricing.baseRate > 10000 && (!contract.specialTerms || contract.specialTerms.length === 0)) {
+    if (
+      contract.pricing.baseRate > 10000 &&
+      (!contract.specialTerms || contract.specialTerms.length === 0)
+    ) {
       errors.push('High-value contracts should have special terms documented');
     }
 
@@ -236,7 +250,10 @@ export class EntityRelationshipValidator {
     }
 
     // Completed requests should have related services
-    if (request.status === 'completed' && (!request.relatedServices || request.relatedServices.length === 0)) {
+    if (
+      request.status === 'completed' &&
+      (!request.relatedServices || request.relatedServices.length === 0)
+    ) {
       errors.push('Completed requests must have associated services');
     }
 
@@ -256,7 +273,10 @@ export class EntityRelationshipValidator {
     const errors: string[] = [];
 
     // Ticket should have material breakdown with 100% total
-    const totalPercentage = ticket.materials.reduce((sum, material) => sum + material.percentage, 0);
+    const totalPercentage = ticket.materials.reduce(
+      (sum, material) => sum + material.percentage,
+      0
+    );
     if (Math.abs(totalPercentage - 100) > 0.01) {
       errors.push('Material percentages must total 100%');
     }
@@ -282,7 +302,11 @@ export class EntityRelationshipManager {
   /**
    * Get entities that reference a specific entity
    */
-  static getReferencingEntities(targetEntityId: string, entityType: string, allEntities: Record<string, any[]>): string[] {
+  static getReferencingEntities(
+    targetEntityId: string,
+    entityType: string,
+    allEntities: Record<string, any[]>
+  ): string[] {
     const referencingEntities: string[] = [];
 
     // This would be expanded to check all entity relationships
@@ -291,9 +315,10 @@ export class EntityRelationshipManager {
       case 'customer':
         // Check services, contracts, payments, requests that reference this customer
         if (allEntities.services) {
-          referencingEntities.push(...allEntities.services
-            .filter((service: Service) => service.customerId === targetEntityId)
-            .map(service => `service:${service.id}`)
+          referencingEntities.push(
+            ...allEntities.services
+              .filter((service: Service) => service.customerId === targetEntityId)
+              .map((service) => `service:${service.id}`)
           );
         }
         break;
@@ -301,9 +326,12 @@ export class EntityRelationshipManager {
       case 'facility':
         // Check routes and material tickets that reference this facility
         if (allEntities.routes) {
-          referencingEntities.push(...allEntities.routes
-            .filter((route: Route) => route.assignedSites.some(siteId => siteId.startsWith(targetEntityId)))
-            .map(route => `route:${route.id}`)
+          referencingEntities.push(
+            ...allEntities.routes
+              .filter((route: Route) =>
+                route.assignedSites.some((siteId) => siteId.startsWith(targetEntityId))
+              )
+              .map((route) => `route:${route.id}`)
           );
         }
         break;
@@ -311,9 +339,10 @@ export class EntityRelationshipManager {
       case 'route':
         // Check services that reference this route
         if (allEntities.services) {
-          referencingEntities.push(...allEntities.services
-            .filter((service: Service) => service.routeId === targetEntityId)
-            .map(service => `service:${service.id}`)
+          referencingEntities.push(
+            ...allEntities.services
+              .filter((service: Service) => service.routeId === targetEntityId)
+              .map((service) => `service:${service.id}`)
           );
         }
         break;
@@ -325,9 +354,13 @@ export class EntityRelationshipManager {
   /**
    * Validate entity deletion (check for dependent entities)
    */
-  static canDeleteEntity(entityId: string, entityType: string, allEntities: Record<string, any[]>): { canDelete: boolean; blockingEntities: string[] } {
+  static canDeleteEntity(
+    entityId: string,
+    entityType: string,
+    allEntities: Record<string, any[]>
+  ): { canDelete: boolean; blockingEntities: string[] } {
     const referencingEntities = this.getReferencingEntities(entityId, entityType, allEntities);
-    const blockingEntities = referencingEntities.filter(ref => {
+    const blockingEntities = referencingEntities.filter((ref) => {
       // Define which references should block deletion
       const [refType, refId] = ref.split(':');
       switch (refType) {
@@ -342,7 +375,7 @@ export class EntityRelationshipManager {
 
     return {
       canDelete: blockingEntities.length === 0,
-      blockingEntities
+      blockingEntities,
     };
   }
 
@@ -353,7 +386,7 @@ export class EntityRelationshipManager {
     const dependencyGraph: Record<string, string[]> = {};
 
     // Build dependency relationships
-    Object.keys(entities).forEach(entityType => {
+    Object.keys(entities).forEach((entityType) => {
       dependencyGraph[entityType] = [];
 
       entities[entityType].forEach((entity: any) => {
@@ -420,7 +453,7 @@ export class EntityIntegrityChecker {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -432,19 +465,21 @@ export class EntityIntegrityChecker {
     const entityIds = new Map<string, Set<string>>();
 
     // Build ID maps for all entities
-    Object.keys(entities).forEach(entityType => {
-      entityIds.set(entityType, new Set(entities[entityType].map(entity => entity.id)));
+    Object.keys(entities).forEach((entityType) => {
+      entityIds.set(entityType, new Set(entities[entityType].map((entity) => entity.id)));
     });
 
     // Check for orphaned references
-    Object.keys(entities).forEach(entityType => {
+    Object.keys(entities).forEach((entityType) => {
       entities[entityType].forEach((entity: any) => {
         Object.entries(entity).forEach(([key, value]: [string, any]) => {
           if (typeof value === 'string' && value.includes('-') && value.length > 10) {
             const referencedType = EntityRelationshipManager['inferEntityTypeFromId'](value);
             if (referencedType && entityIds.has(referencedType)) {
               if (!entityIds.get(referencedType)!.has(value)) {
-                errors.push(`${entityType}:${entity.id} references non-existent ${referencedType}:${value}`);
+                errors.push(
+                  `${entityType}:${entity.id} references non-existent ${referencedType}:${value}`
+                );
               }
             }
           }
@@ -464,7 +499,7 @@ export class EntityIntegrityChecker {
 
     // Simplified circular dependency detection
     // In production this would use a proper graph algorithm
-    Object.keys(dependencyGraph).forEach(entityType => {
+    Object.keys(dependencyGraph).forEach((entityType) => {
       if (dependencyGraph[entityType].includes(entityType)) {
         errors.push(`Circular dependency detected in ${entityType}`);
       }
@@ -480,8 +515,8 @@ export class EntityIntegrityChecker {
     const errors: string[] = [];
 
     // Check for duplicate IDs
-    Object.keys(entities).forEach(entityType => {
-      const ids = entities[entityType].map(entity => entity.id);
+    Object.keys(entities).forEach((entityType) => {
+      const ids = entities[entityType].map((entity) => entity.id);
       const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
 
       if (duplicates.length > 0) {
@@ -500,16 +535,24 @@ export class EntityRelationshipUtils {
   /**
    * Get entity hierarchy for a given entity
    */
-  static getEntityHierarchy(entityId: string, entityType: string, entities: Record<string, any[]>): Record<string, any[]> {
+  static getEntityHierarchy(
+    entityId: string,
+    entityType: string,
+    entities: Record<string, any[]>
+  ): Record<string, any[]> {
     const hierarchy: Record<string, any[]> = {};
 
     // Get direct references
-    const referencingEntities = EntityRelationshipManager.getReferencingEntities(entityId, entityType, entities);
+    const referencingEntities = EntityRelationshipManager.getReferencingEntities(
+      entityId,
+      entityType,
+      entities
+    );
 
     hierarchy[`${entityType}_references`] = referencingEntities;
 
     // Get entities that this entity references
-    const entity = entities[entityType]?.find(e => e.id === entityId);
+    const entity = entities[entityType]?.find((e) => e.id === entityId);
     if (entity) {
       const referencedEntities: string[] = [];
 
@@ -531,9 +574,16 @@ export class EntityRelationshipUtils {
   /**
    * Validate entity relationships before save
    */
-  static validateBeforeSave(entity: any, entityType: string, entities: Record<string, any[]>): { isValid: boolean; errors: string[] } {
+  static validateBeforeSave(
+    entity: any,
+    entityType: string,
+    entities: Record<string, any[]>
+  ): { isValid: boolean; errors: string[] } {
     // Use the entity relationship validator
-    return EntityRelationshipValidator.validateForeignKey(entity, entityType as keyof EntityRelationships);
+    return EntityRelationshipValidator.validateForeignKey(
+      entity,
+      entityType as keyof EntityRelationships
+    );
   }
 
   /**
@@ -544,22 +594,22 @@ export class EntityRelationshipUtils {
       totalEntities: 0,
       relationshipCounts: {},
       orphanedReferences: 0,
-      circularDependencies: 0
+      circularDependencies: 0,
     };
 
     // Count total entities
-    Object.keys(entities).forEach(entityType => {
+    Object.keys(entities).forEach((entityType) => {
       summary.totalEntities += entities[entityType].length;
     });
 
     // Get integrity check results
     const integrityCheck = EntityIntegrityChecker.checkIntegrity(entities);
 
-    summary.orphanedReferences = integrityCheck.errors.filter(error =>
+    summary.orphanedReferences = integrityCheck.errors.filter((error) =>
       error.includes('references non-existent')
     ).length;
 
-    summary.circularDependencies = integrityCheck.errors.filter(error =>
+    summary.circularDependencies = integrityCheck.errors.filter((error) =>
       error.includes('Circular dependency')
     ).length;
 
