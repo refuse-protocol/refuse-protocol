@@ -12,19 +12,19 @@ import { Event } from '../specifications/entities';
  * MaterialTicket implementation with comprehensive scale calculations and compliance tracking
  */
 export class MaterialTicketModel implements MaterialTicket {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  ticketNumber: string;
-  sourceType: 'route' | 'order' | 'direct_dump';
-  grossWeight: number;
-  tareWeight: number;
-  netWeight: number;
-  materials: MaterialBreakdown[];
+  ticketNumber!: string;
+  sourceType!: 'route' | 'order' | 'direct_dump';
+  grossWeight!: number;
+  tareWeight!: number;
+  netWeight!: number;
+  materials!: MaterialBreakdown[];
   leedAllocations?: LeedAllocation[];
   facilityId?: string;
   routeId?: string;
@@ -50,7 +50,7 @@ export class MaterialTicketModel implements MaterialTicket {
   /**
    * Create a new material ticket with validation
    */
-  static create(data: Omit<MaterialTicket, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version' | 'ticketNumber'>): MaterialTicketModel {
+  static create(data: Omit<MaterialTicket, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version' | 'ticketNumber'> & { metadata?: Record<string, any> }): MaterialTicketModel {
     const now = new Date();
     const ticketNumber = this.generateTicketNumber();
     const materialTicketData: Partial<MaterialTicket> = {
@@ -89,7 +89,7 @@ export class MaterialTicketModel implements MaterialTicket {
   /**
    * Update material ticket with optimistic locking
    */
-  update(updates: Partial<Omit<MaterialTicket, keyof BaseEntity>>, expectedVersion: number): MaterialTicketModel {
+  update(updates: Partial<Omit<MaterialTicket, keyof BaseEntity>> & { metadata?: Record<string, any> }, expectedVersion: number): MaterialTicketModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -400,12 +400,15 @@ export class MaterialTicketModel implements MaterialTicket {
    * Create domain event for ticket changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
+    const now = new Date();
     return {
       id: uuidv4(),
       entityType: 'material_ticket',
       eventType,
-      timestamp: new Date(),
+      timestamp: now,
       eventData: this.toEventData(),
+      createdAt: now,
+      updatedAt: now,
       version: 1
     };
   }
@@ -517,9 +520,9 @@ export class MaterialTicketFactory {
       const materialTypes = legacyData.material_types.split(',').map((m: string) => m.trim());
       const materialWeights = legacyData.material_weights.split(',').map((w: string) => parseFloat(w.trim()));
 
-      const totalWeight = materialWeights.reduce((sum, weight) => sum + weight, 0);
+      const totalWeight = materialWeights.reduce((sum: number, weight: number) => sum + weight, 0);
 
-      return materialTypes.map((materialType, index) => ({
+      return materialTypes.map((materialType: string, index: number) => ({
         materialId: materialType,
         weight: materialWeights[index],
         percentage: (materialWeights[index] / totalWeight) * 100

@@ -12,24 +12,24 @@ import { Event } from '../specifications/entities';
  * Route implementation with comprehensive optimization and performance tracking
  */
 export class RouteModel implements Route {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  name: string;
-  schedule: {
+  name!: string;
+  schedule!: {
     frequency: 'weekly' | 'bi_weekly' | 'monthly' | 'on_call' | 'one_time';
     dayOfWeek: string;
     startTime: string;
     endTime: string;
     holidays?: string[];
   };
-  assignedSites: string[];
+  assignedSites!: string[];
   assignedVehicle?: string;
-  efficiency: number;
+  efficiency!: number;
   performanceMetrics?: {
     averageServiceTime?: number;
     totalDistance?: number;
@@ -51,7 +51,7 @@ export class RouteModel implements Route {
   /**
    * Create a new route with validation
    */
-  static create(data: Omit<Route, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): RouteModel {
+  static create(data: Omit<Route, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version' | 'metadata'> & { metadata?: Record<string, any> }): RouteModel {
     const now = new Date();
     const routeData: Partial<Route> = {
       id: uuidv4(),
@@ -61,9 +61,9 @@ export class RouteModel implements Route {
       version: 1,
       efficiency: data.efficiency || 0,
       metadata: {
-        ...data.metadata,
         createdBy: 'system',
-        source: 'api'
+        source: 'api',
+        ...(data.metadata || {})
       }
     };
 
@@ -73,7 +73,7 @@ export class RouteModel implements Route {
   /**
    * Update route with optimistic locking
    */
-  update(updates: Partial<Omit<Route, keyof BaseEntity>>, expectedVersion: number): RouteModel {
+  update(updates: Partial<Omit<Route, keyof BaseEntity>> & { metadata?: Record<string, any> }, expectedVersion: number): RouteModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -84,10 +84,10 @@ export class RouteModel implements Route {
       version: this.version + 1,
       updatedAt: new Date(),
       metadata: {
-        ...this.metadata,
-        ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
+        previousVersion: this.version,
+        ...(this.metadata || {}),
+        ...(updates.metadata || {})
       }
     };
 
@@ -394,12 +394,20 @@ export class RouteModel implements Route {
    * Create domain event for route changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
+    const now = new Date();
     return {
       id: uuidv4(),
       entityType: 'route',
       eventType,
-      timestamp: new Date(),
+      timestamp: now,
       eventData: this.toEventData(),
+      metadata: {
+        source: 'route-model',
+        eventType,
+        entityId: this.id
+      },
+      createdAt: now,
+      updatedAt: now,
       version: 1
     };
   }

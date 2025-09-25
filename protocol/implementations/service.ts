@@ -12,20 +12,20 @@ import { Event } from '../specifications/entities';
  * Service implementation with comprehensive scheduling and pricing logic
  */
 export class ServiceModel implements Service {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  customerId: string;
-  siteId: string;
-  serviceType: 'waste' | 'recycling' | 'organics' | 'hazardous' | 'bulk';
-  containerType: 'cart' | 'dumpster' | 'bin' | 'rolloff' | 'compactor';
+  customerId!: string;
+  siteId!: string;
+  serviceType!: 'waste' | 'recycling' | 'organics' | 'hazardous' | 'bulk';
+  containerType!: 'cart' | 'dumpster' | 'bin' | 'rolloff' | 'compactor';
   containerSize?: string;
   quantity?: number;
-  schedule: {
+  schedule!: {
     frequency: 'weekly' | 'bi_weekly' | 'monthly' | 'on_call' | 'one_time';
     dayOfWeek?: string;
     startDate: string;
@@ -43,7 +43,7 @@ export class ServiceModel implements Service {
     disposalFee?: number;
     totalRate?: number;
   };
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
+  status!: 'active' | 'inactive' | 'suspended' | 'pending';
   serviceStartDate?: string;
   serviceEndDate?: string;
   contractId?: string;
@@ -95,7 +95,6 @@ export class ServiceModel implements Service {
       updatedAt: now,
       version: 1,
       metadata: {
-        ...data.metadata,
         createdBy: 'system',
         source: 'api'
       }
@@ -119,7 +118,6 @@ export class ServiceModel implements Service {
       updatedAt: new Date(),
       metadata: {
         ...this.metadata,
-        ...updates.metadata,
         lastModifiedBy: 'system',
         previousVersion: this.version
       }
@@ -205,7 +203,7 @@ export class ServiceModel implements Service {
    */
   private isValidDate(dateString: string): boolean {
     const date = new Date(dateString);
-    return !isNaN(date.getTime()) && dateString.match(/^\d{4}-\d{2}-\d{2}$/);
+    return !isNaN(date.getTime()) && !!dateString.match(/^\d{4}-\d{2}-\d{2}$/);
   }
 
   /**
@@ -413,12 +411,15 @@ export class ServiceModel implements Service {
    * Create domain event for service changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
+    const now = new Date();
     return {
       id: uuidv4(),
       entityType: 'service',
       eventType,
-      timestamp: new Date(),
+      timestamp: now,
       eventData: this.toEventData(),
+      createdAt: now,
+      updatedAt: now,
       version: 1
     };
   }

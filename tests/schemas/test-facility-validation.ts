@@ -4,9 +4,10 @@
  */
 
 import { createValidator } from '../test-utils';
+import { FacilityModel } from '../../protocol/implementations/facility-minimal';
 
 // Create the schema validator using shared utilities
-const validateFacility = createValidator('facility');
+const validateFacility = createValidator(FacilityModel);
 
 describe('Facility Entity Schema Validation', () => {
   test('should validate basic facility data structure', () => {
@@ -29,11 +30,11 @@ describe('Facility Entity Schema Validation', () => {
       version: 1
     };
 
-    const isValid = validateFacility(validFacility);
-    expect(isValid).toBe(true);
+    const result = validateFacility.validate(validFacility);
+    expect(result.isValid).toBe(true);
 
-    if (!isValid) {
-      console.error('Validation errors:', validateFacility.errors);
+    if (!result.isValid) {
+      console.error('Validation errors:', result.errors);
     }
   });
 
@@ -46,8 +47,8 @@ describe('Facility Entity Schema Validation', () => {
       // Missing required id, address, createdAt, updatedAt, version
     };
 
-    const isValid = validateFacility(invalidFacility);
-    expect(isValid).toBe(false);
-    expect(validateFacility.errors?.length).toBeGreaterThan(0);
+    const result = validateFacility.validate(invalidFacility);
+    expect(result.isValid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 });

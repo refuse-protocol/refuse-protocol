@@ -12,29 +12,29 @@ import { Event } from '../specifications/entities';
  * Payment implementation with comprehensive reconciliation logic and financial audit capabilities
  */
 export class PaymentModel implements Payment {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  paymentNumber: string;
-  type: 'invoice_payment' | 'advance_payment' | 'refund' | 'adjustment' | 'deposit' | 'final_payment';
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'disputed' | 'refunded' | 'partial';
+  paymentNumber!: string;
+  type!: 'invoice_payment' | 'advance_payment' | 'refund' | 'adjustment' | 'deposit' | 'final_payment';
+  status!: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'disputed' | 'refunded' | 'partial';
 
   // Financial Information
-  amount: number;
-  currency: string;
-  paymentMethod: 'check' | 'wire' | 'ach' | 'credit_card' | 'cash' | 'bank_transfer' | 'digital_wallet';
-  paymentDate: string;
-  dueDate: string;
+  amount!: number;
+  currency!: string;
+  paymentMethod!: 'check' | 'wire' | 'ach' | 'credit_card' | 'cash' | 'bank_transfer' | 'digital_wallet';
+  paymentDate!: string;
+  dueDate!: string;
   processedDate?: string;
 
   // Customer and Billing Information
-  customerId: string;
-  customerName: string;
-  billingAddress: {
+  customerId!: string;
+  customerName!: string;
+  billingAddress!: {
     street1: string;
     street2?: string;
     city: string;
@@ -44,9 +44,9 @@ export class PaymentModel implements Payment {
   };
 
   // Invoice and Order References
-  invoiceIds: string[];
-  orderIds: string[];
-  contractIds: string[];
+  invoiceIds!: string[];
+  orderIds!: string[];
+  contractIds!: string[];
 
   // Transaction Details
   transactionReference?: string;
@@ -55,14 +55,14 @@ export class PaymentModel implements Payment {
   bankReference?: string;
 
   // Fee and Adjustment Information
-  fees: Array<{
+  fees!: Array<{
     type: string;
     amount: number;
     description: string;
     taxable: boolean;
   }>;
 
-  adjustments: Array<{
+  adjustments!: Array<{
     type: 'discount' | 'surcharge' | 'tax_adjustment' | 'fee_waiver' | 'penalty' | 'credit';
     amount: number;
     reason: string;
@@ -71,14 +71,14 @@ export class PaymentModel implements Payment {
   }>;
 
   // Reconciliation Information
-  reconciliationStatus: 'unreconciled' | 'matched' | 'partially_matched' | 'disputed' | 'reconciled';
+  reconciliationStatus!: 'unreconciled' | 'matched' | 'partially_matched' | 'disputed' | 'reconciled';
   reconciledAmount?: number;
   reconciliationDate?: string;
   reconciledBy?: string;
   reconciliationNotes?: string;
 
   // Bank and Processing Information
-  bankInformation: {
+  bankInformation!: {
     bankName: string;
     accountNumber: string; // Masked for security
     routingNumber?: string;
@@ -87,7 +87,7 @@ export class PaymentModel implements Payment {
   };
 
   // Audit and Compliance
-  auditTrail: Array<{
+  auditTrail!: Array<{
     action: string;
     timestamp: string;
     userId?: string;
@@ -97,7 +97,7 @@ export class PaymentModel implements Payment {
     ipAddress?: string;
   }>;
 
-  complianceChecks: Array<{
+  complianceChecks!: Array<{
     checkType: string;
     status: 'passed' | 'failed' | 'pending' | 'waived';
     checkedDate: string;
@@ -107,7 +107,7 @@ export class PaymentModel implements Payment {
   }>;
 
   // Payment Processing Details
-  processingDetails: {
+  processingDetails!: {
     processor: string;
     gatewayTransactionId?: string;
     processingFee?: number;
@@ -215,19 +215,19 @@ export class PaymentModel implements Payment {
       throw new Error('Currency is required and must be a string');
     }
 
-    if (!PaymentModel.VALID_PAYMENT_METHODS.includes(data.paymentMethod)) {
+    if (!data.paymentMethod || !PaymentModel.VALID_PAYMENT_METHODS.includes(data.paymentMethod)) {
       throw new Error(`Payment method must be one of: ${PaymentModel.VALID_PAYMENT_METHODS.join(', ')}`);
     }
 
-    if (!this.isValidDate(data.paymentDate)) {
+    if (data.paymentDate && !this.isValidDate(data.paymentDate)) {
       throw new Error('Payment date must be a valid date');
     }
 
-    if (!this.isValidDate(data.dueDate)) {
+    if (data.dueDate && !this.isValidDate(data.dueDate)) {
       throw new Error('Due date must be a valid date');
     }
 
-    if (new Date(data.paymentDate) > new Date(data.dueDate)) {
+    if (data.paymentDate && data.dueDate && new Date(data.paymentDate) > new Date(data.dueDate)) {
       throw new Error('Payment date cannot be after due date');
     }
 
@@ -711,12 +711,15 @@ export class PaymentModel implements Payment {
    * Create domain event for payment changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
+    const now = new Date();
     return {
       id: uuidv4(),
       entityType: 'payment',
       eventType,
-      timestamp: new Date(),
+      timestamp: now,
       eventData: this.toEventData(),
+      createdAt: now,
+      updatedAt: now,
       version: 1
     };
   }
@@ -1105,7 +1108,6 @@ export class PaymentFactory {
       'waived': 'waived',
       'pass': 'passed',
       'fail': 'failed',
-      'pending': 'pending',
       'waive': 'waived'
     };
 

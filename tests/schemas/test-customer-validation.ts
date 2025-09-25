@@ -4,9 +4,10 @@
  */
 
 import { createValidator } from '../test-utils';
+import { CustomerModel } from '../../protocol/implementations/customer-minimal';
 
 // Create the schema validator using shared utilities
-const validateCustomer = createValidator('customer');
+const validateCustomer = createValidator(CustomerModel);
 
 describe('Customer Entity Schema Validation', () => {
   test('should validate basic customer data structure', () => {
@@ -27,14 +28,14 @@ describe('Customer Entity Schema Validation', () => {
       version: 1
     };
 
-    const isValid = validateCustomer(validCustomer);
+    const result = validateCustomer.validate(validCustomer);
 
     // This test will fail initially since no implementation exists
     // It will pass once the Customer implementation is created
-    expect(isValid).toBe(true);
+    expect(result.isValid).toBe(true);
 
-    if (!isValid) {
-      console.error('Validation errors:', validateCustomer.errors);
+    if (!result.isValid) {
+      console.error('Validation errors:', result.errors);
     }
   });
 
@@ -100,15 +101,15 @@ describe('Customer Entity Schema Validation', () => {
       version: 1
     };
 
-    const isValid = validateCustomer(fullCustomer);
+    const result = validateCustomer.validate(fullCustomer);
 
-    if (!isValid) {
-      console.error('Customer validation errors:', validateCustomer.errors);
+    if (!result.isValid) {
+      console.error('Customer validation errors:', result.errors);
     }
 
     // This test will fail initially since no implementation exists
     // It will pass once the Customer implementation is created
-    expect(isValid).toBe(true);
+    expect(result.isValid).toBe(true);
   });
 
   test('should reject invalid customer data', () => {
@@ -126,11 +127,11 @@ describe('Customer Entity Schema Validation', () => {
       // Missing required id, createdAt, updatedAt, version
     };
 
-    const isValid = validateCustomer(invalidCustomer);
+    const result = validateCustomer.validate(invalidCustomer);
 
     // This test should pass - we want to reject invalid data
-    expect(isValid).toBe(false);
-    expect(validateCustomer.errors?.length).toBeGreaterThan(0);
+    expect(result.isValid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 
   test('should validate customer type enum values', () => {
@@ -154,8 +155,8 @@ describe('Customer Entity Schema Validation', () => {
         version: 1
       };
 
-      const isValid = validateCustomer(customer);
-      expect(isValid).toBe(true);
+      const result = validateCustomer.validate(customer);
+      expect(result.isValid).toBe(true);
     });
   });
 
@@ -180,8 +181,8 @@ describe('Customer Entity Schema Validation', () => {
         version: 1
       };
 
-      const isValid = validateCustomer(customer);
-      expect(isValid).toBe(true);
+      const result = validateCustomer.validate(customer);
+      expect(result.isValid).toBe(true);
     });
   });
 });

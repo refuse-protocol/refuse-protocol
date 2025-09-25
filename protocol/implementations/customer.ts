@@ -4,8 +4,9 @@
  * @version 1.0.0
  */
 
-import { Customer, Address, Contact } from '../specifications/entities';
+import { Customer, Address, Contact, BaseEntity } from '../specifications/entities';
 import { Event } from '../specifications/entities';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ValidationUtils,
   FormatUtils,
@@ -21,21 +22,21 @@ import {
  * Customer implementation with full validation and business logic
  */
 export class CustomerModel implements Customer {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  name: string;
-  type: 'residential' | 'commercial' | 'industrial' | 'municipal';
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
+  name!: string;
+  type!: 'residential' | 'commercial' | 'industrial' | 'municipal';
+  status!: 'active' | 'inactive' | 'suspended' | 'pending';
   taxId?: string;
   primaryContact?: Contact;
   billingContact?: Contact;
   serviceContacts?: Contact[];
-  serviceAddress: Address;
+  serviceAddress!: Address;
   billingAddress?: Address;
   serviceTypes?: string[];
   specialInstructions?: string;
@@ -52,7 +53,7 @@ export class CustomerModel implements Customer {
   /**
    * Create a new customer with validation
    */
-  static create(data: Omit<Customer, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): CustomerModel {
+  static create(data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'version'>): CustomerModel {
     const now = new Date();
     const customerData: Partial<Customer> = {
       id: uuidv4(),
@@ -73,7 +74,7 @@ export class CustomerModel implements Customer {
   /**
    * Update customer with optimistic locking
    */
-  update(updates: Partial<Omit<Customer, keyof BaseEntity>>, expectedVersion: number): CustomerModel {
+  update(updates: Partial<Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'version'>>, expectedVersion: number): CustomerModel {
     if (this.version !== expectedVersion) {
       throw new ConcurrencyError('customer', this.id, expectedVersion, this.version);
     }
@@ -97,12 +98,12 @@ export class CustomerModel implements Customer {
     }
 
     // Validate enum values
-    const typeErrors = ValidationUtils.validateEnum(data.type, Constants.CUSTOMER_TYPES, 'Customer type');
+    const typeErrors = ValidationUtils.validateEnum(data.type, [...Constants.CUSTOMER_TYPES], 'Customer type');
     if (typeErrors.length > 0) {
       throw new ValidationError(typeErrors[0], 'customer', 'type');
     }
 
-    const statusErrors = ValidationUtils.validateEnum(data.status, Constants.CUSTOMER_STATUSES, 'Customer status');
+    const statusErrors = ValidationUtils.validateEnum(data.status, [...Constants.CUSTOMER_STATUSES], 'Customer status');
     if (statusErrors.length > 0) {
       throw new ValidationError(statusErrors[0], 'customer', 'status');
     }

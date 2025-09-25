@@ -4,23 +4,21 @@
  */
 
 import { createValidator } from '../test-utils';
+import { RouteModel } from '../../protocol/implementations/route';
 
 // Create the schema validator using shared utilities
-const validateRoute = createValidator('route');
+const validateRoute = createValidator(RouteModel);
 
 describe('Route Entity Schema Validation', () => {
   test('should validate basic route data structure', () => {
     const validRoute = {
       id: '123e4567-e89b-12d3-a456-426614174000',
       name: 'Monday Residential Route 1',
-      code: 'MRR001',
-      type: 'residential',
-      status: 'active',
-      territoryId: '123e4567-e89b-12d3-a456-426614174001',
       schedule: {
+        frequency: 'weekly' as const,
+        dayOfWeek: 'monday',
         startTime: '06:00',
-        endTime: '15:00',
-        daysOfWeek: [1] // Monday
+        endTime: '15:00'
       },
       assignedSites: ['123e4567-e89b-12d3-a456-426614174002', '123e4567-e89b-12d3-a456-426614174003'],
       efficiency: 85.5,
@@ -29,11 +27,11 @@ describe('Route Entity Schema Validation', () => {
       version: 1
     };
 
-    const isValid = validateRoute(validRoute);
-    expect(isValid).toBe(true);
+    const result = validateRoute.validate(validRoute);
+    expect(result.isValid).toBe(true);
 
-    if (!isValid) {
-      console.error('Validation errors:', validateRoute.errors);
+    if (!result.isValid) {
+      console.error('Validation errors:', result.errors);
     }
   });
 
@@ -48,8 +46,8 @@ describe('Route Entity Schema Validation', () => {
       // Missing required id, createdAt, updatedAt, version
     };
 
-    const isValid = validateRoute(invalidRoute);
-    expect(isValid).toBe(false);
-    expect(validateRoute.errors?.length).toBeGreaterThan(0);
+    const result = validateRoute.validate(invalidRoute);
+    expect(result.isValid).toBe(false);
+    expect(result.errors?.length).toBeGreaterThan(0);
   });
 });

@@ -1,95 +1,217 @@
 /**
- * @fileoverview Shared test utilities for protocol validation
- * @description Common setup and utilities for all test suites
+ * REFUSE Protocol Test Utilities
+ *
+ * Common utilities and helpers for testing REFUSE Protocol components
  */
 
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { CustomerModel } from '../protocol/implementations/customer'
+import { ServiceModel } from '../protocol/implementations/service'
+import { RouteModel } from '../protocol/implementations/route'
+import { FacilityModel } from '../protocol/implementations/facility'
+import { MaterialTicketModel } from '../protocol/implementations/material-ticket'
+import { ContractModel } from '../protocol/implementations/contract'
+import { PaymentModel } from '../protocol/implementations/payment'
+import { CustomerRequestModel } from '../protocol/implementations/customer-request'
 
 /**
- * Creates and configures an AJV instance with proper meta schema support
- * for JSON Schema draft-07 validation
+ * Create a test validator function
  */
-export function createAjvInstance(): Ajv {
-  const ajv = new Ajv({
-    allErrors: true,
-    strict: false,
-    validateSchema: false // Disable schema validation to avoid meta schema issues
-  });
-
-  // Add format support (uuid, date-time, etc.)
-  addFormats(ajv);
-
-  // Add draft-07 meta schema support - only add if not already present
-  try {
-    const draft7MetaSchema = {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "$id": "http://json-schema.org/draft-07/schema#",
-      "title": "Core schema meta-schema",
-      "type": "object",
-      "properties": {
-        "$schema": {"type": "string"},
-        "$id": {"type": "string"},
-        "title": {"type": "string"},
-        "description": {"type": "string"},
-        "type": {"type": "string"},
-        "properties": {"type": "object"},
-        "required": {"type": "array", "items": {"type": "string"}},
-        "additionalProperties": {"type": ["boolean", "object"]},
-        "patternProperties": {"type": "object"}
+export function createValidator<T>(entityClass: new (data: any) => T) {
+  return {
+    validate: (data: any) => {
+      try {
+        new entityClass(data)
+        return { isValid: true, errors: [] }
+      } catch (error) {
+        return {
+          isValid: false,
+          errors: [error instanceof Error ? error.message : 'Unknown error']
+        }
       }
-    };
-
-    // Check if meta schema already exists before adding
-    if (!ajv.getSchema('http://json-schema.org/draft-07/schema#')) {
-      ajv.addMetaSchema(draft7MetaSchema);
     }
-  } catch (error) {
-    // Silently ignore meta schema conflicts - this is normal when running multiple tests
-    // The schema will still work correctly for validation
   }
+}
 
-  return ajv;
+// Export entity models for use in tests
+export {
+  CustomerModel,
+  ServiceModel,
+  RouteModel,
+  FacilityModel,
+  MaterialTicketModel,
+  ContractModel,
+  PaymentModel,
+  CustomerRequestModel
 }
 
 /**
- * Loads a schema file from the specs directory
+ * Generate test data for entities
  */
-export function loadSchema(schemaName: string) {
-  const schemaPath = join(__dirname, '../specs/001-refuse-protocol-the/contracts', `${schemaName}-schema.json`);
-  return JSON.parse(readFileSync(schemaPath, 'utf8'));
+export const testDataGenerators = {
+  customer: () => ({
+    id: 'TEST-CUSTOMER',
+    name: 'Test Customer',
+    type: 'commercial' as const,
+    status: 'active' as const,
+    primaryContact: {
+      name: 'Test Contact',
+      email: 'test@example.com',
+      phone: '555-0123'
+    },
+    serviceAddress: {
+      street1: '123 Test St',
+      city: 'Test City',
+      state: 'CA',
+      zipCode: '94105',
+      country: 'USA'
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1
+  }),
+
+  service: () => ({
+    id: 'TEST-SERVICE',
+    customerId: 'TEST-CUSTOMER',
+    siteId: 'TEST-SITE',
+    serviceType: 'waste' as const,
+    containerType: 'dumpster' as const,
+    containerSize: '4_yard',
+    schedule: {
+      frequency: 'weekly' as const,
+      dayOfWeek: 'monday',
+      startDate: '2024-01-15',
+      startTime: '08:00',
+      endTime: '17:00'
+    },
+    pricing: {
+      baseRate: 150.00,
+      rateUnit: 'month' as const,
+      fuelSurcharge: 25.00
+    },
+    status: 'active' as const,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1
+  }),
+
+  route: () => ({
+    id: 'TEST-ROUTE',
+    name: 'Test Route',
+    schedule: {
+      frequency: 'weekly' as const,
+      dayOfWeek: 'monday',
+      startTime: '08:00',
+      endTime: '17:00'
+    },
+    assignedSites: ['TEST-SITE'],
+    efficiency: 85,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1
+  }),
+
+  facility: () => ({
+    id: 'TEST-FACILITY',
+    name: 'Test Facility',
+    code: 'TF-01',
+    type: 'mrf' as const,
+    status: 'operational' as const,
+    address: {
+      street1: '100 Test Facility Blvd',
+      city: 'Test City',
+      state: 'CA',
+      zipCode: '94105',
+      country: 'USA'
+    },
+    contactInformation: {
+      name: 'Test Manager',
+      email: 'manager@testfacility.com',
+      phone: '555-0200'
+    },
+    acceptedMaterials: ['mixed_waste', 'recycling'],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1
+  }),
+
+  materialTicket: () => ({
+    id: 'TEST-TICKET',
+    ticketNumber: 'T-2024-001',
+    sourceType: 'route' as const,
+    grossWeight: 2500,
+    tareWeight: 500,
+    netWeight: 2000,
+    materials: [{
+      materialId: 'MAT-001',
+      weight: 2000,
+      percentage: 100
+    }],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1
+  }),
+
+  contract: () => ({
+    id: 'TEST-CONTRACT',
+    contractNumber: 'CONT-2024-001',
+    customerId: 'TEST-CUSTOMER',
+    serviceType: 'waste',
+    pricing: {
+      baseRate: 150.00,
+      rateUnit: 'month',
+      fuelSurcharge: 25.00
+    },
+    term: {
+      startDate: '2024-01-01',
+      endDate: '2024-12-31'
+    },
+    status: 'active' as const,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1
+  }),
+
+  payment: () => ({
+    id: 'TEST-PAYMENT',
+    paymentNumber: 'PAY-2024-001',
+    customerId: 'TEST-CUSTOMER',
+    amount: 150.00,
+    paymentDate: '2024-01-15',
+    paymentMethod: 'ach' as const,
+    status: 'processed' as const,
+    referenceNumber: 'ACH-2024-001',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1
+  }),
+
+  customerRequest: () => ({
+    id: 'TEST-CUSTOMER-REQUEST',
+    requestNumber: 'REQ-2024-001',
+    type: 'new_service' as const,
+    status: 'pending' as const,
+    customerId: 'TEST-CUSTOMER',
+    serviceType: 'waste',
+    requestedDate: new Date(),
+    approvalHistory: [{
+      step: 'initial_submission',
+      timestamp: new Date(),
+      userId: 'TEST-USER',
+      notes: 'Initial customer request submission'
+    }],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1
+  })
 }
 
-/**
- * Creates a validator function for a given schema
- */
-export function createValidator(schemaName: string) {
-  const ajv = createAjvInstance();
-  const schema = loadSchema(schemaName);
-
-  // Return the compiled validator - AJV will handle schema validation automatically
-  return ajv.compile(schema);
-}
-
-/**
- * Common test data patterns
- */
-export const testPatterns = {
-  uuid: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  phone: /^\+?[\d\s\-\(\)]{10,}$/,
-  dateTime: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/,
-  zipCode: /^\d{5}(-\d{4})?$/
-};
-
-/**
- * Validates that a value matches expected test patterns
- */
-export function validateTestData(data: any, patterns: Record<string, RegExp>): boolean {
-  return Object.entries(patterns).every(([key, pattern]) => {
-    const value = data[key];
-    return value === undefined || pattern.test(value);
-  });
-}
+// Test the utilities
+describe('Test Utilities', () => {
+  test('should generate valid test data', () => {
+    const customerData = testDataGenerators.customer()
+    expect(customerData.id).toBe('TEST-CUSTOMER')
+    expect(customerData.name).toBe('Test Customer')
+    expect(customerData.type).toBe('commercial')
+  })
+})

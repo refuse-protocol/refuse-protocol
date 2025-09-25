@@ -4,9 +4,10 @@
  */
 
 import { createValidator } from '../test-utils';
+import { EventModel } from '../../protocol/implementations/event';
 
 // Create the schema validator using shared utilities
-const validateEvent = createValidator('event');
+const validateEvent = createValidator(EventModel);
 
 describe('Event Entity Schema Validation', () => {
   test('should validate basic event data structure', () => {
@@ -27,13 +28,13 @@ describe('Event Entity Schema Validation', () => {
       version: 1
     };
 
-    const isValid = validateEvent(validEvent);
+    const result = validateEvent.validate(validEvent);
 
-    if (!isValid) {
-      console.error('Event validation errors:', validateEvent.errors);
+    if (!result.isValid) {
+      console.error('Event validation errors:', result.errors);
     }
 
-    expect(isValid).toBe(true);
+    expect(result.isValid).toBe(true);
   });
 
   test('should reject invalid event data', () => {
@@ -46,8 +47,8 @@ describe('Event Entity Schema Validation', () => {
       // Missing required id, createdAt, version
     };
 
-    const isValid = validateEvent(invalidEvent);
-    expect(isValid).toBe(false);
-    expect(validateEvent.errors?.length).toBeGreaterThan(0);
+    const result = validateEvent.validate(invalidEvent);
+    expect(result.isValid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
   });
 });

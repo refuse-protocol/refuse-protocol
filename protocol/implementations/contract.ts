@@ -12,24 +12,23 @@ import { Event } from '../specifications/entities';
  * Contract implementation with comprehensive guaranteed pricing logic and contract management
  */
 export class ContractModel implements Contract {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  customerId: string;
-  contractNumber: string;
-  term: {
-    startDate: string;
-    endDate: string;
-    autoRenewal?: boolean;
-    renewalTerms?: string;
-  };
-  pricing: {
+  customerId!: string;
+  siteId?: string;
+  contractNumber!: string;
+  serviceTypes!: string[];
+  guaranteedServices!: string[];
+  contractStatus!: 'draft' | 'active' | 'expired' | 'cancelled' | 'renewed' | 'pending_approval';
+  pricing!: {
     baseRate: number;
     rateUnit: string;
+    escalationClause?: number;
     fuelSurcharge?: number;
     environmentalFee?: number;
     disposalFee?: number;
@@ -41,12 +40,19 @@ export class ContractModel implements Contract {
       reason: string;
     }>;
   };
+  term!: {
+    startDate: string;
+    endDate: string;
+    autoRenewal?: boolean;
+    renewalTerms?: string;
+    renewalOptions?: number;
+    noticePeriod?: number;
+  };
+  status!: 'active' | 'expired' | 'cancelled' | 'pending' | 'draft';
   specialTerms?: string[];
-  serviceTypes: string[];
-  guaranteedServices: string[];
-  contractStatus: 'draft' | 'active' | 'expired' | 'cancelled' | 'renewed' | 'pending_approval';
+  serviceType!: string;
 
-  private static readonly VALID_SERVICE_TYPES = [
+  static readonly VALID_SERVICE_TYPES = [
     'waste', 'recycling', 'organics', 'hazardous', 'bulk'
   ];
 
@@ -66,11 +72,11 @@ export class ContractModel implements Contract {
   /**
    * Create a new contract with validation
    */
-  static create(data: Omit<Contract, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): ContractModel {
+  static create(data: Omit<Contract, 'id' | 'createdAt' | 'updatedAt' | 'version'>): ContractModel {
     const now = new Date();
     const contractData: Partial<Contract> = {
-      id: uuidv4(),
       ...data,
+      id: uuidv4(),
       createdAt: now,
       updatedAt: now,
       version: 1,
@@ -87,7 +93,7 @@ export class ContractModel implements Contract {
   /**
    * Update contract with optimistic locking
    */
-  update(updates: Partial<Omit<Contract, keyof BaseEntity>>, expectedVersion: number): ContractModel {
+  update(updates: Partial<Contract>, expectedVersion: number): ContractModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -165,6 +171,24 @@ export class ContractModel implements Contract {
 
     if (!data.contractStatus || !ContractModel.VALID_CONTRACT_STATUSES.includes(data.contractStatus)) {
       throw new Error(`Contract status must be one of: ${ContractModel.VALID_CONTRACT_STATUSES.join(', ')}`);
+    }
+
+    // Set status to match contractStatus if not provided
+    if (!data.status) {
+      const statusMap: Record<string, 'active' | 'expired' | 'cancelled' | 'pending' | 'draft'> = {
+        'active': 'active',
+        'expired': 'expired',
+        'cancelled': 'cancelled',
+        'renewed': 'active',
+        'pending_approval': 'pending',
+        'draft': 'draft'
+      };
+      data.status = statusMap[data.contractStatus] || 'draft';
+    }
+
+    // Set serviceType from serviceTypes if not provided
+    if (!data.serviceType && data.serviceTypes && data.serviceTypes.length > 0) {
+      data.serviceType = data.serviceTypes[0];
     }
 
     // Validate pricing adjustments if provided
@@ -260,7 +284,7 @@ export class ContractModel implements Contract {
   /**
    * Add price adjustment
    */
-  addPriceAdjustment(adjustment: Omit<Contract['pricing']['priceAdjustments'][0], 'effectiveDate'> & { effectiveDate: string }): ContractModel {
+  addPriceAdjustment(adjustment: { type: string; amount: number; effectiveDate: string; reason: string }): ContractModel {
     if (!['increase', 'decrease', 'fixed'].includes(adjustment.type)) {
       throw new Error('Adjustment type must be increase, decrease, or fixed');
     }
@@ -433,13 +457,16 @@ export class ContractModel implements Contract {
       id: this.id,
       externalIds: this.externalIds,
       customerId: this.customerId,
+      siteId: this.siteId,
       contractNumber: this.contractNumber,
-      term: this.term,
-      pricing: this.pricing,
-      specialTerms: this.specialTerms,
       serviceTypes: this.serviceTypes,
       guaranteedServices: this.guaranteedServices,
       contractStatus: this.contractStatus,
+      pricing: this.pricing,
+      term: this.term,
+      status: this.status,
+      specialTerms: this.specialTerms,
+      serviceType: this.serviceType,
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
@@ -459,13 +486,16 @@ export class ContractModel implements Contract {
    * Create domain event for contract changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
+    const now = new Date();
     return {
       id: uuidv4(),
       entityType: 'contract',
       eventType,
-      timestamp: new Date(),
+      timestamp: now,
       eventData: this.toEventData(),
-      version: 1
+      version: 1,
+      createdAt: now,
+      updatedAt: now
     };
   }
 
@@ -528,13 +558,16 @@ export class ContractFactory {
     const mappedData: Partial<Contract> = {
       externalIds: [legacyData.contract_id || legacyData.CONTRACT_ID || legacyData.id],
       customerId: legacyData.customer_id || legacyData.CUSTOMER_ID,
+      siteId: legacyData.site_id || legacyData.SITE_ID,
       contractNumber: legacyData.contract_number || legacyData.CONTRACT_NUMBER || legacyData.contract_no,
-      term: this.mapLegacyTerm(legacyData),
-      pricing: this.mapLegacyPricing(legacyData),
-      specialTerms: this.mapLegacySpecialTerms(legacyData),
       serviceTypes: this.mapLegacyServiceTypes(legacyData),
       guaranteedServices: this.mapLegacyGuaranteedServices(legacyData),
       contractStatus: this.mapLegacyStatus(legacyData),
+      pricing: this.mapLegacyPricing(legacyData),
+      term: this.mapLegacyTerm(legacyData),
+      status: this.mapLegacyStatusToStatus(this.mapLegacyStatus(legacyData)),
+      specialTerms: this.mapLegacySpecialTerms(legacyData),
+      serviceType: (this.mapLegacyServiceTypes(legacyData))[0] || 'waste',
       metadata: {
         legacySystemId: legacyData.system_id || 'legacy',
         originalFieldNames: Object.keys(legacyData),
@@ -686,6 +719,22 @@ export class ContractFactory {
     const legacyStatus = (legacyData.contract_status || legacyData.CONTRACT_STATUS || legacyData.status || 'active').toLowerCase();
     return statusMap[legacyStatus] || 'active';
   }
+
+  /**
+   * Map legacy contract status to status
+   */
+  private static mapLegacyStatusToStatus(contractStatus: Contract['contractStatus']): Contract['status'] {
+    const statusMap: Record<Contract['contractStatus'], Contract['status']> = {
+      'draft': 'draft',
+      'active': 'active',
+      'expired': 'expired',
+      'cancelled': 'cancelled',
+      'renewed': 'active',
+      'pending_approval': 'pending'
+    };
+
+    return statusMap[contractStatus] || 'draft';
+  }
 }
 
 /**
@@ -760,30 +809,33 @@ export class ContractManager {
 
     return {
       customerId: contract.customerId,
+      siteId: contract.siteId,
       contractNumber: `${contract.contractNumber}-R1`,
-      term: {
-        startDate: renewalDate.toISOString().split('T')[0],
-        endDate: newEndDate.toISOString().split('T')[0],
-        autoRenewal: contract.term.autoRenewal,
-        renewalTerms: contract.term.renewalTerms
-      },
+      serviceTypes: contract.serviceTypes,
+      guaranteedServices: contract.guaranteedServices,
+      contractStatus: 'draft',
       pricing: {
         ...contract.pricing,
         baseRate: contract.pricing.baseRate * 1.05, // 5% increase for renewal
         priceAdjustments: [
           ...(contract.pricing.priceAdjustments || []),
           {
-            type: 'increase' as const,
+            type: 'increase',
             amount: contract.pricing.baseRate * 0.05,
             effectiveDate: renewalDate.toISOString().split('T')[0],
             reason: 'Annual renewal adjustment'
           }
         ]
       },
+      term: {
+        startDate: renewalDate.toISOString().split('T')[0],
+        endDate: newEndDate.toISOString().split('T')[0],
+        autoRenewal: contract.term.autoRenewal,
+        renewalTerms: contract.term.renewalTerms
+      },
+      status: 'draft',
       specialTerms: contract.specialTerms,
-      serviceTypes: contract.serviceTypes,
-      guaranteedServices: contract.guaranteedServices,
-      contractStatus: 'draft'
+      serviceType: contract.serviceType
     };
   }
 

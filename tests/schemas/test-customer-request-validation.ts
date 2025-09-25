@@ -3,18 +3,15 @@
  * @description Tests MUST FAIL initially - no implementation exists yet
  */
 
-import { createValidator } from '../test-utils';
-
-// Create the schema validator using shared utilities
-const validateCustomerRequest = createValidator('customer-request');
+import { CustomerRequestModel } from '../../protocol/implementations/customer-request';
 
 describe('CustomerRequest Entity Schema Validation', () => {
   test('should validate basic customer request data structure', () => {
     const validCustomerRequest = {
       id: '123e4567-e89b-12d3-a456-426614174000',
       requestNumber: 'REQ-2024-001',
-      type: 'new_service',
-      status: 'pending',
+      type: 'new_service' as const,
+      status: 'pending' as const,
       customerId: '456e7890-e12b-34c5-b678-901234567890',
       requestedBy: 'John Smith',
       serviceType: 'waste',
@@ -25,34 +22,27 @@ describe('CustomerRequest Entity Schema Validation', () => {
         zipCode: '75201',
         country: 'US'
       },
-      requestedDate: '2024-10-15T09:00:00Z',
+      requestedDate: new Date('2024-10-15T09:00:00Z'),
       approvalHistory: [{
-        stepNumber: 1,
-        approverId: '123e4567-e89b-12d3-a456-426614174001',
-        approverName: 'John Smith',
-        decision: 'approved',
-        decisionDate: new Date().toISOString(),
-        comments: 'Initial submission approved'
+        step: 'initial_submission',
+        timestamp: new Date(),
+        userId: '123e4567-e89b-12d3-a456-426614174001',
+        notes: 'Initial submission approved'
       }],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       version: 1
     };
 
-    const isValid = validateCustomerRequest(validCustomerRequest);
-
-    if (!isValid) {
-      console.error('Customer request validation errors:', validateCustomerRequest.errors);
-    }
-
-    expect(isValid).toBe(true);
+    // Test that valid data can be used to create a CustomerRequestModel
+    expect(() => new CustomerRequestModel(validCustomerRequest)).not.toThrow();
   });
 
   test('should reject invalid customer request data', () => {
     const invalidCustomerRequest = {
       requestNumber: '', // Invalid: empty requestNumber
-      type: 'invalid_type', // Invalid: not in enum
-      status: 'invalid_status', // Invalid: not in enum
+      type: 'invalid_type' as any, // Invalid: not in enum
+      status: 'invalid_status' as any, // Invalid: not in enum
       customerId: 'not-a-uuid', // Invalid: not a UUID
       requestedBy: '', // Invalid: empty requestedBy
       serviceType: 'invalid_service_type', // Invalid: not in enum
@@ -63,12 +53,11 @@ describe('CustomerRequest Entity Schema Validation', () => {
         zipCode: 'invalid', // Invalid: not valid zip
         country: 'USA' // Invalid: too long
       },
-      requestedDate: 'invalid-date' // Invalid: not valid date-time
+      requestedDate: new Date('invalid-date') // Invalid: not valid date-time
       // Missing required id, createdAt, updatedAt, version
     };
 
-    const isValid = validateCustomerRequest(invalidCustomerRequest);
-    expect(isValid).toBe(false);
-    expect(validateCustomerRequest.errors?.length).toBeGreaterThan(0);
+    // Test that invalid data throws an error when creating a CustomerRequestModel
+    expect(() => new CustomerRequestModel(invalidCustomerRequest)).toThrow();
   });
 });

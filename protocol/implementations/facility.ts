@@ -12,18 +12,18 @@ import { Event } from '../specifications/entities';
  * Facility implementation with comprehensive capacity management and compliance
  */
 export class FacilityModel implements Facility {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  name: string;
-  code: string;
-  type: 'landfill' | 'mrf' | 'transfer' | 'composter' | 'export' | 'cad' | 'incinerator' | 'recycling_center';
-  status: 'operational' | 'maintenance' | 'closed' | 'planned' | 'limited';
-  address: Address;
+  name!: string;
+  code!: string;
+  type!: 'landfill' | 'mrf' | 'transfer' | 'composter' | 'export' | 'cad' | 'incinerator' | 'recycling_center';
+  status!: 'operational' | 'maintenance' | 'closed' | 'planned' | 'limited';
+  address!: Address;
   contactInformation?: Contact;
   operatingHours?: OperatingHours;
   capacity?: {
@@ -31,7 +31,7 @@ export class FacilityModel implements Facility {
     monthlyLimit?: number;
     currentUtilization?: number;
   };
-  acceptedMaterials: string[];
+  acceptedMaterials!: string[];
   pricing?: {
     tippingFee?: number;
     materialRates?: Record<string, number>;
@@ -80,7 +80,7 @@ export class FacilityModel implements Facility {
   /**
    * Create a new facility with validation
    */
-  static create(data: Omit<Facility, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): FacilityModel {
+  static create(data: Omit<Facility, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'> & { metadata?: Record<string, any> }): FacilityModel {
     const now = new Date();
     const facilityData: Partial<Facility> = {
       id: uuidv4(),
@@ -101,7 +101,7 @@ export class FacilityModel implements Facility {
   /**
    * Update facility with optimistic locking
    */
-  update(updates: Partial<Omit<Facility, keyof BaseEntity>>, expectedVersion: number): FacilityModel {
+  update(updates: Partial<Omit<Facility, keyof BaseEntity>> & { metadata?: Record<string, any> }, expectedVersion: number): FacilityModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -318,7 +318,7 @@ export class FacilityModel implements Facility {
     // Update daily average (simple moving average)
     if (this.utilization) {
       const currentDailyAvg = this.utilization.dailyAverage || 0;
-      this.utilization.dailyAverage = (currentDailyAvg + this.utilization.currentLevel) / 2;
+      this.utilization.dailyAverage = (currentDailyAvg + (this.utilization.currentLevel || 0)) / 2;
     }
 
     return true;
@@ -445,12 +445,15 @@ export class FacilityModel implements Facility {
    * Create domain event for facility changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
+    const now = new Date();
     return {
       id: uuidv4(),
       entityType: 'facility',
       eventType,
       timestamp: new Date(),
       eventData: this.toEventData(),
+      createdAt: now,
+      updatedAt: now,
       version: 1
     };
   }

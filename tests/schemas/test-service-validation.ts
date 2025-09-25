@@ -4,40 +4,41 @@
  */
 
 import { createValidator } from '../test-utils';
+import { ServiceModel } from '../../protocol/implementations/service';
 
 // Create the schema validator using shared utilities
-const validateService = createValidator('service');
+const validateService = createValidator(ServiceModel);
 
 describe('Service Entity Schema Validation', () => {
   test('should validate basic service data structure', () => {
     const validService = {
       id: '123e4567-e89b-12d3-a456-426614174000',
       customerId: '456e7890-e12b-34c5-b678-901234567890',
+      siteId: '789e0123-e45f-67g8-h901-234567890123',
       serviceType: 'waste',
       containerType: 'dumpster',
       containerSize: '4_yard',
-      frequency: 'weekly',
-      serviceAddress: {
-        street1: '123 Main St',
-        city: 'Dallas',
-        state: 'TX',
-        zipCode: '75201',
-        country: 'US'
+      schedule: {
+        frequency: 'weekly',
+        startDate: '2024-01-15',
+        dayOfWeek: 'monday',
+        startTime: '08:00',
+        endTime: '17:00'
       },
       status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       version: 1
     };
 
-    const isValid = validateService(validService);
+    const result = validateService.validate(validService);
 
     // This test will fail initially since no implementation exists
     // It will pass once the Service implementation is created
-    expect(isValid).toBe(true);
+    expect(result.isValid).toBe(true);
 
-    if (!isValid) {
-      console.error('Validation errors:', validateService.errors);
+    if (!result.isValid) {
+      console.error('Validation errors:', result.errors);
     }
   });
 
@@ -45,48 +46,44 @@ describe('Service Entity Schema Validation', () => {
     const fullService = {
       id: '123e4567-e89b-12d3-a456-426614174001',
       customerId: '456e7890-e12b-34c5-b678-901234567890',
+      siteId: '789e0123-e45f-67g8-h901-234567890123',
       externalIds: ['legacy-svc-001', 'old-system-svc-123'],
       serviceType: 'recycling',
       containerType: 'compactor',
       containerSize: '8_yard',
-      frequency: 'biweekly',
-      schedule: [{
-        daysOfWeek: [2], // Tuesday
+      schedule: {
+        frequency: 'bi_weekly',
+        startDate: '2024-01-15',
+        endDate: '2024-12-31',
+        dayOfWeek: 'tuesday',
         startTime: '09:00',
         endTime: '17:00'
-      }],
-      serviceAddress: {
-        street1: '123 Main St',
-        city: 'Dallas',
-        state: 'TX',
-        zipCode: '75201',
-        country: 'US'
       },
-      nextServiceDate: '2024-09-29T09:00:00Z',
-      lastServiceDate: '2024-09-15T09:00:00Z',
-      specialLocationNotes: 'Pick up after 9 AM',
       pricing: {
         baseRate: 150.00,
-        perPickupRate: 25.00,
+        rateUnit: 'month',
         fuelSurcharge: 0.15,
         environmentalFee: 25.00
       },
-      billingCycle: 'monthly',
       status: 'active',
+      serviceStartDate: '2024-09-25',
+      serviceEndDate: '2024-12-31',
+      contractId: 'contract-123',
+      routeId: 'route-456',
       specialInstructions: 'Handle with care - contains hazardous materials',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       version: 1
     };
 
-    const isValid = validateService(fullService);
+    const result = validateService.validate(fullService);
 
     // This test will fail initially since no implementation exists
     // It will pass once the Service implementation is created
-    expect(isValid).toBe(true);
+    expect(result.isValid).toBe(true);
 
-    if (!isValid) {
-      console.error('Validation errors:', validateService.errors);
+    if (!result.isValid) {
+      console.error('Validation errors:', result.errors);
     }
   });
 
@@ -108,11 +105,11 @@ describe('Service Entity Schema Validation', () => {
       // Missing required id, createdAt, updatedAt, version
     };
 
-    const isValid = validateService(invalidService);
+    const result = validateService.validate(invalidService);
 
     // This test should pass - we want to reject invalid data
-    expect(isValid).toBe(false);
-    expect(validateService.errors?.length).toBeGreaterThan(0);
+    expect(result.isValid).toBe(false);
+    expect(result.errors?.length).toBeGreaterThan(0);
   });
 
   test('should validate service type enum values', () => {
@@ -122,25 +119,22 @@ describe('Service Entity Schema Validation', () => {
       const service = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         customerId: '456e7890-e12b-34c5-b678-901234567890',
+        siteId: '789e0123-e45f-67g8-h901-234567890123',
         serviceType,
         containerType: 'dumpster',
         containerSize: '4_yard',
-        frequency: 'weekly',
-        serviceAddress: {
-          street1: '123 Main St',
-          city: 'Dallas',
-          state: 'TX',
-          zipCode: '75201',
-          country: 'US'
+        schedule: {
+          frequency: 'weekly',
+          startDate: '2024-01-15'
         },
         status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
         version: 1
       };
 
-      const isValid = validateService(service);
-      expect(isValid).toBe(true);
+      const result = validateService.validate(service);
+      expect(result.isValid).toBe(true);
     });
   });
 
@@ -151,54 +145,48 @@ describe('Service Entity Schema Validation', () => {
       const service = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         customerId: '456e7890-e12b-34c5-b678-901234567890',
+        siteId: '789e0123-e45f-67g8-h901-234567890123',
         serviceType: 'waste',
         containerType,
         containerSize: '4_yard',
-        frequency: 'weekly',
-        serviceAddress: {
-          street1: '123 Main St',
-          city: 'Dallas',
-          state: 'TX',
-          zipCode: '75201',
-          country: 'US'
+        schedule: {
+          frequency: 'weekly',
+          startDate: '2024-01-15'
         },
         status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
         version: 1
       };
 
-      const isValid = validateService(service);
-      expect(isValid).toBe(true);
+      const result = validateService.validate(service);
+      expect(result.isValid).toBe(true);
     });
   });
 
   test('should validate frequency enum values', () => {
-    const frequencies = ['weekly', 'biweekly', 'monthly', 'oncall', 'custom'];
+    const frequencies = ['weekly', 'bi_weekly', 'monthly', 'on_call', 'one_time'];
 
     frequencies.forEach(frequency => {
       const service = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         customerId: '456e7890-e12b-34c5-b678-901234567890',
+        siteId: '789e0123-e45f-67g8-h901-234567890123',
         serviceType: 'waste',
         containerType: 'dumpster',
         containerSize: '4_yard',
-        frequency,
-        serviceAddress: {
-          street1: '123 Main St',
-          city: 'Dallas',
-          state: 'TX',
-          zipCode: '75201',
-          country: 'US'
+        schedule: {
+          frequency,
+          startDate: '2024-01-15'
         },
         status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
         version: 1
       };
 
-      const isValid = validateService(service);
-      expect(isValid).toBe(true);
+      const result = validateService.validate(service);
+      expect(result.isValid).toBe(true);
     });
   });
 });

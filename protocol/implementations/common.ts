@@ -214,7 +214,7 @@ export class DataUtils {
     return result;
   }
 
-  private static isObject(item: any): boolean {
+  public static isObject(item: any): boolean {
     return item && typeof item === 'object' && !Array.isArray(item) && !(item instanceof Date);
   }
 
@@ -471,11 +471,11 @@ export class MetadataUtils {
     userId?: string
   ): Record<string, any> {
     return {
-      ...existingMetadata,
+      ...(existingMetadata || {}),
       ...updates,
       lastModifiedBy: userId || 'system',
       lastModifiedAt: new Date(),
-      previousVersion: existingMetadata.version || 1
+      previousVersion: existingMetadata?.version || 1
     };
   }
 

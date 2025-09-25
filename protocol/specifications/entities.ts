@@ -8,7 +8,6 @@
 export interface BaseEntity {
   id: string;
   externalIds?: string[];
-  metadata?: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
   version: number;
@@ -60,6 +59,7 @@ export interface Customer extends BaseEntity {
   billingAddress?: Address;
   serviceTypes?: string[];
   specialInstructions?: string;
+  metadata?: Record<string, any>;
 }
 
 // Service entity
@@ -110,6 +110,7 @@ export interface Service extends BaseEntity {
     safetyRequirements?: string[];
     regulatoryRequirements?: string[];
   };
+  metadata?: Record<string, any>;
 }
 
 // Route entity
@@ -131,6 +132,7 @@ export interface Route extends BaseEntity {
     fuelEfficiency?: number;
     onTimePercentage?: number;
   };
+  metadata?: Record<string, any>;
 }
 
 // Facility entity
@@ -177,6 +179,7 @@ export interface Facility extends BaseEntity {
   qualityStandards?: string[];
   assignedRoutes?: string[];
   materialTickets?: string[];
+  metadata?: Record<string, any>;
 }
 
 // CustomerRequest entity
@@ -194,6 +197,7 @@ export interface CustomerRequest extends BaseEntity {
     notes?: string;
   }>;
   relatedServices?: string[];
+  metadata?: Record<string, any>;
 }
 
 // Territory entity
@@ -233,22 +237,36 @@ export interface Contract extends BaseEntity {
   contractNumber: string;
   customerId: string;
   siteId?: string;
-  serviceType: string;
+  serviceTypes: string[];
+  guaranteedServices: string[];
+  contractStatus: 'draft' | 'active' | 'expired' | 'cancelled' | 'renewed' | 'pending_approval';
   pricing: {
     baseRate: number;
     rateUnit: string;
     escalationClause?: number;
     fuelSurcharge?: number;
     environmentalFee?: number;
+    disposalFee?: number;
+    totalRate?: number;
+    priceAdjustments?: Array<{
+      type: string;
+      amount: number;
+      effectiveDate: string;
+      reason: string;
+    }>;
   };
   term: {
     startDate: string;
     endDate: string;
+    autoRenewal?: boolean;
+    renewalTerms?: string;
     renewalOptions?: number;
     noticePeriod?: number;
   };
   status: 'active' | 'expired' | 'cancelled' | 'pending' | 'draft';
   specialTerms?: string[];
+  serviceType: string;
+  metadata?: Record<string, any>;
 }
 
 // Fleet entity
@@ -305,6 +323,19 @@ export interface Material extends BaseEntity {
   specifications?: Record<string, any>;
 }
 
+// Supporting types for MaterialTicket
+export interface MaterialBreakdown {
+  materialId: string;
+  weight: number;
+  percentage: number;
+}
+
+export interface LeedAllocation {
+  category: string;
+  percentage: number;
+  notes?: string;
+}
+
 // MaterialTicket entity
 export interface MaterialTicket extends BaseEntity {
   ticketNumber: string;
@@ -312,30 +343,111 @@ export interface MaterialTicket extends BaseEntity {
   grossWeight: number;
   tareWeight: number;
   netWeight: number;
-  materials: Array<{
-    materialId: string;
-    weight: number;
-    percentage: number;
-  }>;
-  leedAllocations?: Array<{
-    category: string;
-    percentage: number;
-    notes?: string;
-  }>;
+  materials: MaterialBreakdown[];
+  leedAllocations?: LeedAllocation[];
   facilityId?: string;
   routeId?: string;
   orderId?: string;
+  metadata?: Record<string, any>;
 }
 
 // Payment entity
 export interface Payment extends BaseEntity {
   paymentNumber: string;
+  type: 'invoice_payment' | 'advance_payment' | 'refund' | 'adjustment' | 'deposit' | 'final_payment';
   customerId: string;
-  invoiceId?: string;
+  customerName: string;
+  invoiceIds: string[];
+  orderIds: string[];
+  contractIds: string[];
   amount: number;
+  currency: string;
   paymentDate: string;
-  paymentMethod: 'check' | 'ach' | 'credit_card' | 'cash' | 'other';
-  status: 'pending' | 'processed' | 'failed' | 'cancelled';
+  dueDate: string;
+  processedDate?: string;
+  paymentMethod: 'check' | 'wire' | 'ach' | 'credit_card' | 'cash' | 'bank_transfer' | 'digital_wallet';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'disputed' | 'refunded' | 'partial';
+
+  // Transaction Details
+  transactionReference?: string;
+  authorizationCode?: string;
+  confirmationNumber?: string;
+  bankReference?: string;
+
+  // Customer and Billing Information
+  billingAddress: {
+    street1: string;
+    street2?: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+
+  // Fee and Adjustment Information
+  fees: Array<{
+    type: string;
+    amount: number;
+    description: string;
+    taxable: boolean;
+  }>;
+
+  adjustments: Array<{
+    type: 'discount' | 'surcharge' | 'tax_adjustment' | 'fee_waiver' | 'penalty' | 'credit';
+    amount: number;
+    reason: string;
+    appliedDate: string;
+    approvedBy?: string;
+  }>;
+
+  // Reconciliation Information
+  reconciliationStatus: 'unreconciled' | 'matched' | 'partially_matched' | 'disputed' | 'reconciled';
+  reconciledAmount?: number;
+  reconciliationDate?: string;
+  reconciledBy?: string;
+  reconciliationNotes?: string;
+
+  // Bank and Processing Information
+  bankInformation: {
+    bankName: string;
+    accountNumber: string;
+    routingNumber?: string;
+    checkNumber?: string;
+    depositReference?: string;
+  };
+
+  // Audit and Compliance
+  auditTrail: Array<{
+    action: string;
+    timestamp: string;
+    userId?: string;
+    previousStatus?: string;
+    newStatus: string;
+    notes?: string;
+    ipAddress?: string;
+  }>;
+
+  complianceChecks: Array<{
+    checkType: string;
+    status: 'passed' | 'failed' | 'pending' | 'waived';
+    checkedDate: string;
+    checkedBy?: string;
+    notes?: string;
+    referenceId?: string;
+  }>;
+
+  // Payment Processing Details
+  processingDetails: {
+    processor: string;
+    gatewayTransactionId?: string;
+    processingFee?: number;
+    exchangeRate?: number;
+    originalCurrency?: string;
+    metadata?: Record<string, any>;
+  };
+
+  // Legacy and additional metadata
+  metadata?: Record<string, any>;
   referenceNumber?: string;
   notes?: string;
 }
@@ -354,12 +466,13 @@ export interface Allocation extends BaseEntity {
 
 // Event entity
 export interface Event extends BaseEntity {
-  entityType: 'customer' | 'service' | 'route' | 'facility' | 'customer_request';
+  entityType: 'customer' | 'service' | 'route' | 'facility' | 'customer_request' | 'material_ticket' | 'contract' | 'payment';
   eventType: 'created' | 'updated' | 'completed' | 'cancelled';
   timestamp: Date;
   eventData: Record<string, any>;
   correlationId?: string;
   userId?: string;
+  metadata?: Record<string, any>;
 }
 
 // Entity relationship mappings
