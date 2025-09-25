@@ -1,5 +1,5 @@
 {
-  "generationTimestamp": "2025-09-25T16:39:58.720Z",
+  "generationTimestamp": "2025-09-25T16:48:12.097Z",
   "totalFilesGenerated": 5,
   "generatedFiles": [
     "src/data/protocol-overview.json",
@@ -10,8 +10,8 @@
   ],
   "protocolStats": {},
   "lastCommit": {
-    "hash": "18b5e0184cfd059b5ca0a3006ead49b38175921f",
-    "message": "fix: Cloudflare Pages build configuration\n\n- Fix protocol docs generator to handle empty schemas directory\n- Add Node.js engine requirements to package.json (>=18.0.0)\n- Create wrangler.toml for Cloudflare Pages configuration\n- Add .nvmrc file for Node.js version management\n- Update .gitignore to exclude .nvmrc and build artifacts\n- Specify build environment variables for Cloudflare Pages\n\nFixes build failures in Cloudflare Pages deployment",
-    "date": "Thu Sep 25 09:39:19 2025 -0700"
+    "hash": "769d2c9075b0045250da6a7645b0dfa637716f14",
+    "message": "Merge pull request #2 from refuse-protocol/002-refuse-protocol-org\n\n002 refuse protocol org",
+    "date": "Thu Sep 25 09:47:50 2025 -0700"
   }
 }
