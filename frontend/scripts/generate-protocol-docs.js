@@ -189,7 +189,18 @@ class ProtocolDocsGenerator {
     console.log('📋 Generating schema reference...');
 
     const schemasPath = path.join(this.protocolDir, 'schemas');
-    const schemaFiles = fs.readdirSync(schemasPath);
+
+    // Check if schemas directory exists and has files
+    let schemaFiles = [];
+    try {
+      if (fs.existsSync(schemasPath)) {
+        schemaFiles = fs.readdirSync(schemasPath);
+      } else {
+        console.log('⚠️ Schemas directory not found, generating placeholder schema reference...');
+      }
+    } catch (error) {
+      console.log('⚠️ Error reading schemas directory, generating placeholder schema reference...');
+    }
 
     const schemaReference = {
       availableSchemas: schemaFiles,
@@ -198,7 +209,8 @@ class ProtocolDocsGenerator {
         requiredFields: ['id', 'createdAt', 'updatedAt', 'version'],
         optionalFields: ['externalIds', 'metadata'],
         namingConvention: 'camelCase for JSON, kebab-case for files'
-      }
+      },
+      note: schemaFiles.length === 0 ? 'Schema files will be added as the protocol specification matures' : undefined
     };
 
     const schemaRefPath = path.join(this.outputDir, 'schema-reference.json');

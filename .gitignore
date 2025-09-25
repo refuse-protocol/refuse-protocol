@@ -105,5 +105,8 @@ temp/
 frontend/.vite/
 frontend/coverage/
 
+# Node.js version file (local development)
+.nvmrc
+
 # Specs directory (generated content)
 specs/
