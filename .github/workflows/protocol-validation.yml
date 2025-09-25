@@ -16,7 +16,7 @@ on:
 
 jobs:
   validate-specifications:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Validate Protocol Specifications
 
     steps:
@@ -116,7 +116,7 @@ jobs:
         "
 
   compliance-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Check Compliance Requirements
 
     steps:

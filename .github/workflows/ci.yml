@@ -8,7 +8,7 @@ on:
 
 jobs:
   protocol-validation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Validate Protocol Specifications
 
     steps:
@@ -41,7 +41,7 @@ jobs:
       run: npm audit --audit-level=moderate || echo "Security audit completed with warnings"
 
   frontend-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Frontend Quality Checks
 
     steps:

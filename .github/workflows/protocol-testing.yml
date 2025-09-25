@@ -18,7 +18,7 @@ on:
 
 jobs:
   unit-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Unit Tests for Protocol Implementations
 
     steps:
@@ -50,7 +50,7 @@ jobs:
         name: protocol-unit-tests
 
   integration-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Integration & Workflow Tests
 
     steps:
@@ -105,7 +105,7 @@ jobs:
         "
 
   performance-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Performance Benchmarking
 
     steps:
@@ -172,7 +172,7 @@ jobs:
         "
 
   compatibility-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Cross-Version Compatibility
 
     steps:

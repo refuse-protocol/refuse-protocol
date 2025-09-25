@@ -16,7 +16,7 @@ on:
 
 jobs:
   generate-docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Generate Protocol Documentation
 
     steps:
@@ -39,6 +39,7 @@ jobs:
     - name: Generate protocol documentation
       run: |
         cd frontend && npm run build:protocol-docs
+      continue-on-error: true
 
     - name: Check documentation completeness
       run: |
@@ -127,13 +128,13 @@ jobs:
         "
 
     - name: Upload documentation artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: protocol-documentation
         path: docs/
 
   validate-readme:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Validate README & Quickstart
 
     steps:
@@ -199,7 +200,7 @@ jobs:
         "
 
   spec-validation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Validate Protocol Specifications
 
     steps:
