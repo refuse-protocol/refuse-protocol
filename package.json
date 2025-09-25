@@ -5,7 +5,9 @@
   "main": "protocol/implementations/index.ts",
   "types": "protocol/specifications/index.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "cd frontend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build:protocol-docs": "cd frontend && npm run build:protocol-docs",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint protocol/**/*.ts tests/**/*.ts",

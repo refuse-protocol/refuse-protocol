@@ -12,6 +12,7 @@
     "build": "npm run build:protocol-docs && vite build",
     "build:protocol-docs": "node scripts/generate-protocol-docs.js",
     "preview": "vite preview",
+    "build:pages": "cd /opt/buildhome/repo/frontend && npm run build:protocol-docs && vite build",
     "lint": "eslint src --ext .js,.jsx",
     "lint:fix": "eslint src --ext .js,.jsx --fix",
     "format": "prettier --write src/**/*.{js,jsx,css}",
