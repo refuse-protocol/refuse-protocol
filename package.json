@@ -5,9 +5,10 @@
   "main": "protocol/implementations/index.ts",
   "types": "protocol/specifications/index.ts",
   "scripts": {
-    "build": "cd frontend && npm run build",
+    "build": "cd frontend && npm ci && npm run build",
     "build:frontend": "cd frontend && npm run build",
     "build:protocol-docs": "cd frontend && npm run build:protocol-docs",
+    "install:frontend": "cd frontend && npm ci",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint protocol/**/*.ts tests/**/*.ts",
@@ -56,7 +57,8 @@
     "ts-jest": "^29.0.0",
     "ts-node": "^10.0.0",
     "typedoc": "^0.25.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vite": "^4.4.0"
   },
   "dependencies": {
     "ajv": "^8.12.0",
