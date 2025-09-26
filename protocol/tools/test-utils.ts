@@ -1,10 +1,18 @@
+import { join } from 'path';
 /**
  * @fileoverview Testing utilities for protocol conformance
  * @description Comprehensive testing utilities for validating REFUSE Protocol implementations
  * @version 1.0.0
  */
 
-import { Event, Customer, Service, Route, Facility, MaterialTicket } from '../specifications/entities';
+import {
+  Event,
+  Customer,
+  Service,
+  Route,
+  Facility,
+  MaterialTicket,
+} from '../specifications/entities';
 import { ComplianceValidator } from './compliance-validator';
 import { ConformanceChecker } from './conformance-checker';
 import { Benchmarker } from './benchmarker';
@@ -35,9 +43,9 @@ export class TestingUtilities {
    * Run comprehensive test suite
    */
   async runTestSuite(suiteName: string, options: TestOptions = {}): Promise<TestSuiteResult> {
-    console.log(`Running test suite: ${suiteName}`);
+//     console.log(`Running test suite: ${suiteName}`);
 
-    const suite = this.testSuites.get(suiteName) || this.createDefaultTestSuite(suiteName);
+    // REMOVED UNUSED:     const suite = this.testSuites.get(suiteName) || this.createDefaultTestSuite(suiteName);
     const result: TestSuiteResult = {
       suiteName,
       success: true,
@@ -50,11 +58,11 @@ export class TestingUtilities {
       errors: [],
       startedAt: new Date(),
       completedAt: new Date(),
-      duration: 0
+      duration: 0,
     };
 
     for (const test of suite.tests) {
-      const testResult = await this.runTest(test, options);
+      // REMOVED UNUSED:       const testResult = await this.runTest(test, options);
 
       result.tests.push(testResult);
 
@@ -77,7 +85,7 @@ export class TestingUtilities {
     result.duration = result.completedAt.getTime() - result.startedAt.getTime();
 
     this.testResults.set(suiteName, result);
-    console.log(`Test suite completed: ${result.passedTests}/${result.totalTests} tests passed`);
+//     console.log(`Test suite completed: ${result.passedTests}/${result.totalTests} tests passed`);
 
     return result;
   }
@@ -96,7 +104,7 @@ export class TestingUtilities {
       startedAt: new Date(),
       completedAt: new Date(),
       duration: 0,
-      metadata: {}
+      metadata: {},
     };
 
     try {
@@ -137,7 +145,6 @@ export class TestingUtilities {
           result.success = false;
           result.errors.push(`Unknown test type: ${test.type}`);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(error instanceof Error ? error.message : String(error));
@@ -153,7 +160,7 @@ export class TestingUtilities {
    * Generate test report
    */
   async generateTestReport(suiteName: string, format: ReportFormat = 'html'): Promise<string> {
-    const suiteResult = this.testResults.get(suiteName);
+    // REMOVED UNUSED:     const suiteResult = this.testResults.get(suiteName);
 
     if (!suiteResult) {
       throw new Error(`Test suite not found: ${suiteName}`);
@@ -184,7 +191,7 @@ export class TestingUtilities {
       route: this.generateRouteTestData.bind(this),
       facility: this.generateFacilityTestData.bind(this),
       materialTicket: this.generateMaterialTicketTestData.bind(this),
-      event: this.generateEventTestData.bind(this)
+      event: this.generateEventTestData.bind(this),
     };
   }
 
@@ -199,7 +206,7 @@ export class TestingUtilities {
 
     try {
       // Validate against JSON schema
-      const validationResult = await this.validateAgainstSchema(test.data, test.entityType);
+      // REMOVED UNUSED:       const validationResult = await this.validateAgainstSchema(test.data, test.entityType);
 
       if (!validationResult.valid) {
         result.success = false;
@@ -207,12 +214,13 @@ export class TestingUtilities {
       }
 
       result.metadata = {
-        schemaValidation: validationResult
+        schemaValidation: validationResult,
       };
-
     } catch (error) {
       result.success = false;
-      result.errors.push(`Schema validation failed: ${error instanceof Error ? error.message : String(error)}`);
+      result.errors.push(
+        `Schema validation failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -226,7 +234,7 @@ export class TestingUtilities {
     }
 
     try {
-      const validationResult = await this.validateBusinessLogic(test.data, test.entityType);
+      // REMOVED UNUSED:       const validationResult = await this.validateBusinessLogic(test.data, test.entityType);
 
       if (!validationResult.valid) {
         result.success = false;
@@ -234,12 +242,13 @@ export class TestingUtilities {
       }
 
       result.metadata = {
-        businessLogicValidation: validationResult
+        businessLogicValidation: validationResult,
       };
-
     } catch (error) {
       result.success = false;
-      result.errors.push(`Business logic validation failed: ${error instanceof Error ? error.message : String(error)}`);
+      result.errors.push(
+        `Business logic validation failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -253,7 +262,7 @@ export class TestingUtilities {
     }
 
     try {
-      const complianceResult = await this.complianceValidator.validate(test.data);
+      // REMOVED UNUSED:       const complianceResult = await this.complianceValidator.validate(test.data);
 
       if (!complianceResult.compliant) {
         result.success = false;
@@ -263,12 +272,13 @@ export class TestingUtilities {
       result.metadata = {
         complianceScore: complianceResult.score,
         violations: complianceResult.violations.length,
-        warnings: complianceResult.warnings.length
+        warnings: complianceResult.warnings.length,
       };
-
     } catch (error) {
       result.success = false;
-      result.errors.push(`Compliance validation failed: ${error instanceof Error ? error.message : String(error)}`);
+      result.errors.push(
+        `Compliance validation failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -285,7 +295,7 @@ export class TestingUtilities {
       const conformanceResult = await this.conformanceChecker.checkConformance({
         implementationPath: test.implementationPath,
         type: test.implementationType || 'api',
-        standard: test.conformanceStandard || 'refuse-protocol-v1'
+        standard: test.conformanceStandard || 'refuse-protocol-v1',
       });
 
       if (!conformanceResult.conforms) {
@@ -296,12 +306,13 @@ export class TestingUtilities {
       result.metadata = {
         conformanceScore: conformanceResult.score,
         issues: conformanceResult.issues.length,
-        recommendations: conformanceResult.recommendations
+        recommendations: conformanceResult.recommendations,
       };
-
     } catch (error) {
       result.success = false;
-      result.errors.push(`Conformance check failed: ${error instanceof Error ? error.message : String(error)}`);
+      result.errors.push(
+        `Conformance check failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -313,10 +324,10 @@ export class TestingUtilities {
       const benchmarkResult = await this.benchmarker.runBenchmarks({
         duration: test.performanceDuration || 30,
         concurrency: test.performanceConcurrency || 10,
-        operations: test.performanceOperations || ['create', 'read', 'update', 'delete']
+        operations: test.performanceOperations || ['create', 'read', 'update', 'delete'],
       });
 
-      const success = this.evaluatePerformanceResult(benchmarkResult, test.performanceThresholds);
+      // REMOVED UNUSED:       const success = this.evaluatePerformanceResult(benchmarkResult, test.performanceThresholds);
 
       if (!success) {
         result.success = false;
@@ -325,12 +336,13 @@ export class TestingUtilities {
 
       result.metadata = {
         benchmarkResult,
-        thresholds: test.performanceThresholds
+        thresholds: test.performanceThresholds,
       };
-
     } catch (error) {
       result.success = false;
-      result.errors.push(`Performance test failed: ${error instanceof Error ? error.message : String(error)}`);
+      result.errors.push(
+        `Performance test failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -339,7 +351,7 @@ export class TestingUtilities {
    */
   private async runEventStreamingTest(test: ProtocolTest, result: TestResult): Promise<void> {
     try {
-      const eventTestResult = await this.testEventStreaming(test.eventTestOptions);
+      // REMOVED UNUSED:       const eventTestResult = await this.testEventStreaming(test.eventTestOptions);
 
       if (!eventTestResult.success) {
         result.success = false;
@@ -349,12 +361,13 @@ export class TestingUtilities {
       result.metadata = {
         eventTestResult,
         eventCount: eventTestResult.eventCount,
-        deliveryTime: eventTestResult.averageDeliveryTime
+        deliveryTime: eventTestResult.averageDeliveryTime,
       };
-
     } catch (error) {
       result.success = false;
-      result.errors.push(`Event streaming test failed: ${error instanceof Error ? error.message : String(error)}`);
+      result.errors.push(
+        `Event streaming test failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -363,7 +376,7 @@ export class TestingUtilities {
    */
   private async runIntegrationTest(test: ProtocolTest, result: TestResult): Promise<void> {
     try {
-      const integrationResult = await this.runIntegrationScenario(test.integrationScenario);
+      // REMOVED UNUSED:       const integrationResult = await this.runIntegrationScenario(test.integrationScenario);
 
       if (!integrationResult.success) {
         result.success = false;
@@ -372,12 +385,13 @@ export class TestingUtilities {
 
       result.metadata = {
         integrationResult,
-        scenario: test.integrationScenario
+        scenario: test.integrationScenario,
       };
-
     } catch (error) {
       result.success = false;
-      result.errors.push(`Integration test failed: ${error instanceof Error ? error.message : String(error)}`);
+      result.errors.push(
+        `Integration test failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -386,7 +400,7 @@ export class TestingUtilities {
    */
   private async runLoadTest(test: ProtocolTest, result: TestResult): Promise<void> {
     try {
-      const loadTestResult = await this.runLoadScenario(test.loadTestScenario);
+      // REMOVED UNUSED:       const loadTestResult = await this.runLoadScenario(test.loadTestScenario);
 
       if (!loadTestResult.success) {
         result.success = false;
@@ -395,12 +409,13 @@ export class TestingUtilities {
 
       result.metadata = {
         loadTestResult,
-        scenario: test.loadTestScenario
+        scenario: test.loadTestScenario,
       };
-
     } catch (error) {
       result.success = false;
-      result.errors.push(`Load test failed: ${error instanceof Error ? error.message : String(error)}`);
+      result.errors.push(
+        `Load test failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -412,7 +427,7 @@ export class TestingUtilities {
     return {
       valid: true,
       errors: [],
-      warnings: []
+      warnings: [],
     };
   }
 
@@ -424,7 +439,7 @@ export class TestingUtilities {
     return {
       valid: true,
       errors: [],
-      warnings: []
+      warnings: [],
     };
   }
 
@@ -437,11 +452,11 @@ export class TestingUtilities {
       eventCount: 0,
       averageDeliveryTime: 0,
       errors: [],
-      warnings: []
+      warnings: [],
     };
 
     // Simulate event streaming test
-    console.log('Testing event streaming...');
+//     console.log('Testing event streaming...');
 
     // Create test events
     const testEvents: Event[] = [
@@ -449,24 +464,24 @@ export class TestingUtilities {
         id: 'test-event-1',
         entityType: 'customer',
         eventType: 'created',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
         eventData: { id: 'TEST001' },
-        source: 'test'
-      }
+        source: 'test',
+      },
     ];
 
     // Test event publishing
     for (const event of testEvents) {
-      const startTime = Date.now();
-      const success = await this.eventSystem.publishEvent(event);
-      const endTime = Date.now();
+      // REMOVED UNUSED:       const startTime = Date.now();
+      // REMOVED UNUSED:       const success = await this.eventSystem.publishEvent(event);
+      // REMOVED UNUSED:       const endTime = Date.now();
 
       if (!success) {
         result.success = false;
         result.errors.push(`Failed to publish event: ${event.id}`);
       } else {
         result.eventCount++;
-        result.averageDeliveryTime += (endTime - startTime);
+        result.averageDeliveryTime += endTime - startTime;
       }
     }
 
@@ -480,13 +495,15 @@ export class TestingUtilities {
   /**
    * Run integration scenario
    */
-  private async runIntegrationScenario(scenario: IntegrationScenario): Promise<IntegrationTestResult> {
+  private async runIntegrationScenario(
+    scenario: IntegrationScenario
+  ): Promise<IntegrationTestResult> {
     // Integration test implementation
     return {
       success: true,
       steps: [],
       errors: [],
-      warnings: []
+      warnings: [],
     };
   }
 
@@ -502,14 +519,17 @@ export class TestingUtilities {
       failedRequests: 0,
       averageResponseTime: 0,
       errors: [],
-      warnings: []
+      warnings: [],
     };
   }
 
   /**
    * Evaluate performance result
    */
-  private evaluatePerformanceResult(benchmarkResult: any, thresholds?: PerformanceThresholds): boolean {
+  private evaluatePerformanceResult(
+    benchmarkResult: any,
+    thresholds?: PerformanceThresholds
+  ): boolean {
     if (!thresholds) return true;
 
     // Simple performance evaluation
@@ -535,13 +555,13 @@ export class TestingUtilities {
             street: `${i} Test Street`,
             city: 'Test City',
             state: 'TC',
-            zipCode: '12345'
-          }
+            zipCode: '12345',
+          },
         },
         serviceArea: `Area ${i}`,
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
+        version: 1,
       });
     }
 
@@ -564,15 +584,15 @@ export class TestingUtilities {
         pricing: {
           baseRate: 100 + i,
           rateUnit: 'month',
-          additionalCharges: 25
+          additionalCharges: 25,
         },
         requirements: {
           containerTypes: ['dumpster'],
-          specialHandling: null
+          specialHandling: null,
         },
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
+        version: 1,
       });
     }
 
@@ -596,13 +616,13 @@ export class TestingUtilities {
             customerId: `TEST-CUST-${i.toString().padStart(3, '0')}`,
             address: `${i} Test Street, Test City, TC 12345`,
             scheduledTime: '08:00',
-            serviceType: 'waste_collection'
-          }
+            serviceType: 'waste_collection',
+          },
         ],
         status: 'active',
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
+        version: 1,
       });
     }
 
@@ -624,27 +644,27 @@ export class TestingUtilities {
         capacity: {
           total: 1000,
           available: 750,
-          unit: 'tons'
+          unit: 'tons',
         },
         address: {
           street: `${i} Facility Street`,
           city: 'Facility City',
           state: 'FC',
-          zipCode: '67890'
+          zipCode: '67890',
         },
         operationalHours: {
           open: '06:00',
           close: '18:00',
-          timezone: 'UTC'
+          timezone: 'UTC',
         },
         contactInfo: {
           primaryPhone: `555-FAC-${i.toString().padStart(3, '0')}`,
-          email: `facility-${i}@example.com`
+          email: `facility-${i}@example.com`,
         },
         permits: [],
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
+        version: 1,
       });
     }
 
@@ -666,23 +686,23 @@ export class TestingUtilities {
           id: `TEST-MAT-${i.toString().padStart(3, '0')}`,
           name: 'Test Material',
           type: 'mixed_waste',
-          classification: 'non_recyclable'
+          classification: 'non_recyclable',
         },
         weight: {
           gross: 2500,
           tare: 500,
-          net: 2000
+          net: 2000,
         },
         pricing: {
-          rate: 75.00,
+          rate: 75.0,
           rateUnit: 'ton',
-          totalAmount: 150.00
+          totalAmount: 150.0,
         },
         timestamp: new Date(),
         status: 'processed',
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: 1
+        version: 1,
       });
     }
 
@@ -700,9 +720,9 @@ export class TestingUtilities {
         id: `TEST-EVENT-${i.toString().padStart(6, '0')}`,
         entityType: 'customer',
         eventType: 'created',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
         eventData: { id: `TEST-CUST-${i.toString().padStart(3, '0')}` },
-        source: 'test-suite'
+        source: 'test-suite',
       });
     }
 
@@ -723,7 +743,7 @@ export class TestingUtilities {
           description: 'Test JSON schema validation',
           entityType: 'customer',
           data: this.generateCustomerTestData(1)[0],
-          expectedResult: 'valid'
+          expectedResult: 'valid',
         },
         {
           name: 'Business Logic Test',
@@ -731,13 +751,13 @@ export class TestingUtilities {
           description: 'Test business rule validation',
           entityType: 'customer',
           data: this.generateCustomerTestData(1)[0],
-          expectedResult: 'valid'
+          expectedResult: 'valid',
         },
         {
           name: 'Compliance Test',
           type: 'compliance',
           description: 'Test regulatory compliance',
-          data: this.generateCustomerTestData(1)[0]
+          data: this.generateCustomerTestData(1)[0],
         },
         {
           name: 'Event Streaming Test',
@@ -745,8 +765,8 @@ export class TestingUtilities {
           description: 'Test event streaming functionality',
           eventTestOptions: {
             eventCount: 10,
-            expectedDeliveryTime: 100
-          }
+            expectedDeliveryTime: 100,
+          },
         },
         {
           name: 'Performance Test',
@@ -757,10 +777,10 @@ export class TestingUtilities {
           performanceOperations: ['create', 'read'],
           performanceThresholds: {
             maxResponseTime: 1000,
-            minThroughput: 10
-          }
-        }
-      ]
+            minThroughput: 10,
+          },
+        },
+      ],
     };
   }
 
@@ -814,7 +834,9 @@ export class TestingUtilities {
     </div>
 
     <h2>Test Results</h2>
-    ${suiteResult.tests.map(test => `
+    ${suiteResult.tests
+      .map(
+        (test) => `
     <div class="test ${test.success ? 'success' : 'failed'} ${test.skipped ? 'skipped' : ''}">
         <h4>${test.testName}</h4>
         <p><strong>Type:</strong> ${test.testType}</p>
@@ -822,17 +844,27 @@ export class TestingUtilities {
         ${test.errors.length > 0 ? `<div class="error">Errors: ${test.errors.join(', ')}</div>` : ''}
         ${test.warnings.length > 0 ? `<div class="warning">Warnings: ${test.warnings.join(', ')}</div>` : ''}
     </div>
-    `).join('')}
+    `
+      )
+      .join('')}
 
-    ${suiteResult.warnings.length > 0 ? `
+    ${
+      suiteResult.warnings.length > 0
+        ? `
     <h2>Warnings</h2>
-    ${suiteResult.warnings.map(w => `<div class="warning">${w}</div>`).join('')}
-    ` : ''}
+    ${suiteResult.warnings.map((w) => `<div class="warning">${w}</div>`).join('')}
+    `
+        : ''
+    }
 
-    ${suiteResult.errors.length > 0 ? `
+    ${
+      suiteResult.errors.length > 0
+        ? `
     <h2>Errors</h2>
-    ${suiteResult.errors.map(e => `<div class="error">${e}</div>`).join('')}
-    ` : ''}
+    ${suiteResult.errors.map((e) => `<div class="error">${e}</div>`).join('')}
+    `
+        : ''
+    }
 </body>
 </html>`;
 
@@ -852,14 +884,18 @@ export class TestingUtilities {
                skipped="${suiteResult.skippedTests}"
                time="${suiteResult.duration / 1000}"
                timestamp="${suiteResult.startedAt.toISOString()}">
-        ${suiteResult.tests.map(test => `
+        ${suiteResult.tests
+          .map(
+            (test) => `
         <testcase name="${test.testName}"
                   classname="${suiteResult.suiteName}"
                   time="${test.duration / 1000}">
-            ${test.errors.map(error => `<failure message="${error}"/>`).join('')}
+            ${test.errors.map((error) => `<failure message="${error}"/>`).join('')}
             ${test.skipped ? '<skipped/>' : ''}
         </testcase>
-        `).join('')}
+        `
+          )
+          .join('')}
     </testsuite>
 </testsuites>`;
 
@@ -892,7 +928,15 @@ export interface TestSuite {
  */
 export interface ProtocolTest {
   name: string;
-  type: 'schema_validation' | 'business_logic' | 'compliance' | 'conformance' | 'performance' | 'event_streaming' | 'integration' | 'load';
+  type:
+    | 'schema_validation'
+    | 'business_logic'
+    | 'compliance'
+    | 'conformance'
+    | 'performance'
+    | 'event_streaming'
+    | 'integration'
+    | 'load';
   description?: string;
   entityType?: string;
   data?: any;
@@ -1097,5 +1141,5 @@ export type {
   LoadOperation,
   LoadTestResult,
   ValidationResult,
-  TestDataGenerators
+  TestDataGenerators,
 };

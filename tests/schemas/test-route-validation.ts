@@ -3,21 +3,11 @@
  * @description Tests MUST FAIL initially - no implementation exists yet
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import { createValidator } from '../test-utils';
+import { RouteModel } from '../../protocol/implementations/route';
 
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-
-// Load the route schema
-const routeSchema = JSON.parse(
-  readFileSync(join(__dirname, '../../specs/001-refuse-protocol-the/contracts/route-schema.json'), 'utf8')
-);
-
-// Compile the schema validator
-const validateRoute = ajv.compile(routeSchema);
+// Create the schema validator using shared utilities
+const validateRoute = createValidator(RouteModel);
 
 describe('Route Entity Schema Validation', () => {
   test('should validate basic route data structure', () => {
@@ -25,35 +15,42 @@ describe('Route Entity Schema Validation', () => {
       id: '123e4567-e89b-12d3-a456-426614174000',
       name: 'Monday Residential Route 1',
       schedule: {
-        frequency: 'weekly',
+        frequency: 'weekly' as const,
         dayOfWeek: 'monday',
         startTime: '06:00',
-        endTime: '15:00'
+        endTime: '15:00',
       },
-      assignedSites: ['site-1', 'site-2', 'site-3'],
+      assignedSites: [
+        '123e4567-e89b-12d3-a456-426614174002',
+        '123e4567-e89b-12d3-a456-426614174003',
+      ],
       efficiency: 85.5,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      version: 1
+      version: 1,
     };
 
-    const isValid = validateRoute(validRoute);
-    expect(isValid).toBe(true);
+    const result = validateRoute.validate(validRoute);
+    expect(result.isValid).toBe(true);
 
-    if (!isValid) {
-      console.error('Validation errors:', validateRoute.errors);
+    if (!result.isValid) {
+//       console.error('Validation errors:', result.errors);
     }
   });
 
   test('should reject invalid route data', () => {
     const invalidRoute = {
       name: '', // Invalid: empty name
-      schedule: { frequency: 'invalid' } // Invalid: not in enum
+      code: '', // Invalid: empty code
+      type: 'invalid', // Invalid: not in enum
+      status: 'invalid', // Invalid: not in enum
+      territoryId: 'not-a-uuid', // Invalid: not a UUID format
+      schedule: { startTime: 'invalid', endTime: 'invalid' }, // Invalid: not valid time format
       // Missing required id, createdAt, updatedAt, version
     };
 
-    const isValid = validateRoute(invalidRoute);
-    expect(isValid).toBe(false);
-    expect(validateRoute.errors?.length).toBeGreaterThan(0);
+    const result = validateRoute.validate(invalidRoute);
+    expect(result.isValid).toBe(false);
+    expect(result.errors?.length).toBeGreaterThan(0);
   });
 });

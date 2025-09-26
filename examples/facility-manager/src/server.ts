@@ -8,6 +8,15 @@ import { errorHandler } from './middleware/errorHandler'
 import { validateRequest } from './middleware/validation'
 import { capacityRequestSchema } from './models/schemas'
 
+// Simple logger for Node.js environment
+const createLogger = () => ({
+  info: (msg: string, data?: any) => console.log(`[INFO] ${msg}`, data || ''),
+  error: (msg: string, data?: any, err?: Error) => console.error(`[ERROR] ${msg}`, data || '', err || ''),
+  warn: (msg: string, data?: any) => console.warn(`[WARN] ${msg}`, data || '')
+})
+
+const logger = createLogger()
+
 // Load environment variables
 dotenv.config()
 
@@ -39,7 +48,7 @@ app.post('/api/capacity/optimize', validateRequest(capacityRequestSchema), async
     const optimizationResult = await facilityManager.optimizeCapacity(req.body)
     res.json(optimizationResult)
   } catch (error) {
-    console.error('Capacity optimization error:', error)
+    logger.error('Capacity optimization error', { facilityId: req.params.facilityId, body: req.body }, error instanceof Error ? error : new Error(String(error)))
     res.status(500).json({
       error: 'Capacity optimization failed',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -55,7 +64,7 @@ app.get('/api/facilities/:facilityId/capacity', async (req, res) => {
     }
     res.json(capacity)
   } catch (error) {
-    console.error('Get capacity error:', error)
+    logger.error('Get capacity error', { facilityId: req.params.facilityId }, error instanceof Error ? error : new Error(String(error)))
     res.status(500).json({ error: 'Failed to retrieve facility capacity' })
   }
 })
@@ -65,7 +74,7 @@ app.get('/api/facilities/:facilityId/schedule', async (req, res) => {
     const schedule = await facilityManager.getFacilitySchedule(req.params.facilityId)
     res.json(schedule)
   } catch (error) {
-    console.error('Get schedule error:', error)
+    logger.error('Get schedule error', { facilityId: req.params.facilityId }, error instanceof Error ? error : new Error(String(error)))
     res.status(500).json({ error: 'Failed to retrieve facility schedule' })
   }
 })
@@ -75,7 +84,7 @@ app.post('/api/facilities/:facilityId/material-tickets', async (req, res) => {
     const result = await facilityManager.processMaterialTicket(req.params.facilityId, req.body)
     res.json(result)
   } catch (error) {
-    console.error('Process material ticket error:', error)
+    logger.error('Process material ticket error', { facilityId: req.params.facilityId, body: req.body }, error instanceof Error ? error : new Error(String(error)))
     res.status(500).json({ error: 'Failed to process material ticket' })
   }
 })
@@ -85,7 +94,7 @@ app.get('/api/facilities', async (req, res) => {
     const facilities = await facilityManager.getAllFacilities()
     res.json(facilities)
   } catch (error) {
-    console.error('Get facilities error:', error)
+    logger.error('Get facilities error', {}, error instanceof Error ? error : new Error(String(error)))
     res.status(500).json({ error: 'Failed to retrieve facilities' })
   }
 })
@@ -95,19 +104,21 @@ app.use(errorHandler)
 
 // Start server
 app.listen(port, () => {
-  console.log(`🏭 REFUSE Protocol Facility Manager running on port ${port}`)
-  console.log(`📊 Health check: http://localhost:${port}/health`)
-  console.log(`⚡ Capacity API: http://localhost:${port}/api/capacity/optimize`)
+  logger.info('REFUSE Protocol Facility Manager started', {
+    port,
+    healthCheck: `http://localhost:${port}/health`,
+    capacityAPI: `http://localhost:${port}/api/capacity/optimize`
+  })
 })
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully')
+  logger.info('SIGTERM received, shutting down gracefully')
   process.exit(0)
 })
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully')
+  logger.info('SIGINT received, shutting down gracefully')
   process.exit(0)
 })
 

@@ -1,11 +1,18 @@
+import { basename } from 'path';
+import { mkdirSync } from 'fs';
+import { existsSync } from 'fs';
+import { writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { resolve } from 'path';
 /**
  * @fileoverview Protocol specification documentation generator for REFUSE Protocol
  * @description Automatically generates comprehensive documentation from entity implementations, schemas, and protocol artifacts
  * @version 1.0.0
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join, resolve, dirname, basename, extname } from 'path';
+// REMOVED UNUSED IMPORT: // REMOVED UNUSED: import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+// REMOVED UNUSED IMPORT: // REMOVED UNUSED: import { join, resolve, dirname, basename, extname } from 'path';
 import { glob } from 'glob';
 import chalk from 'chalk';
 import { JSDocParser } from './jsdoc-parser.js';
@@ -33,14 +40,14 @@ export class SpecGenerator {
    * Generate complete protocol specification documentation
    */
   async generateFullSpecification(options: GenerationOptions = {}): Promise<GenerationResult> {
-    console.log(chalk.blue('📚 Generating REFUSE Protocol specification documentation...'));
+  console.log(chalk.blue('📚 Generating REFUSE Protocol specification documentation...'));
 
     const startTime = Date.now();
     const results: GenerationResult = {
       timestamp: new Date().toISOString(),
       totalFilesGenerated: 0,
       files: [],
-      errors: []
+      errors: [],
     };
 
     try {
@@ -54,12 +61,16 @@ export class SpecGenerator {
 
       const generationTime = Date.now() - startTime;
 
-      console.log(chalk.green(`✅ Generated ${results.files.length} documentation files in ${generationTime}ms`));
+      console.log(
+        chalk.green(
+          `✅ Generated ${results.files.length} documentation files in ${generationTime}ms`
+        )
+      );
 
       return results;
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error(chalk.red(`❌ Documentation generation failed: ${errorMsg}`));
+// FIXED PARSING:       const errorMsg = error instanceof Error ? error.message : String(error);
+  console.error(chalk.red(`❌ Documentation generation failed: ${errorMsg}`));
       results.errors.push(errorMsg);
       return results;
     }
@@ -182,7 +193,7 @@ The protocol follows strict governance rules defined in the REFUSE Protocol Cons
     const entitiesPath = join(this.outputDir, 'entities.md');
 
     if (!existsSync(implementationsDir)) {
-      console.warn(chalk.yellow(`⚠️ Implementations directory not found: ${implementationsDir}`));
+  console.warn(chalk.yellow(`⚠️ Implementations directory not found: ${implementationsDir}`));
       return;
     }
 
@@ -235,11 +246,19 @@ ${prop.default ? `- **Default**: ${prop.default}` : ''}
             entitiesDoc += `#### ${method.name}()
 ${method.description || 'No description'}
 
-${method.parameters && method.parameters.length > 0 ? `**Parameters:**
-${method.parameters.map(p => `- ${p.name}: ${p.type || 'any'} - ${p.description || 'No description'}`).join('\n')}
+${
+  method.parameters && method.parameters.length > 0
+    ? `**Parameters:**
+${method.parameters.map((p) => `- ${p.name}: ${p.type || 'any'} - ${p.description || 'No description'}`).join('\n')}
 
-` : ''}${method.returns ? `**Returns**: ${method.returns}
-` : ''}`;
+`
+    : ''
+}${
+              method.returns
+                ? `**Returns**: ${method.returns}
+`
+                : ''
+            }`;
           }
         }
 
@@ -247,7 +266,11 @@ ${method.parameters.map(p => `- ${p.name}: ${p.type || 'any'} - ${p.description 
 
 `;
       } catch (error) {
-        console.warn(chalk.yellow(`⚠️ Failed to parse entity ${entityName}: ${error instanceof Error ? error.message : String(error)}`));
+  console.warn(
+          chalk.yellow(
+            `⚠️ Failed to parse entity ${entityName}: ${error instanceof Error ? error.message : String(error)}`
+          )
+        );
       }
     }
 
@@ -262,11 +285,13 @@ ${method.parameters.map(p => `- ${p.name}: ${p.type || 'any'} - ${p.description 
    * Generate schema documentation from JSON Schema files
    */
   private async generateSchemaDocumentation(options: GenerationOptions): Promise<void> {
-    const contractsDir = resolve(options.contractsDir || './specs/001-refuse-protocol-the/contracts');
+    const contractsDir = resolve(
+      options.contractsDir || './specs/001-refuse-protocol-the/contracts'
+    );
     const schemasPath = join(this.outputDir, 'schemas.md');
 
     if (!existsSync(contractsDir)) {
-      console.warn(chalk.yellow(`⚠️ Contracts directory not found: ${contractsDir}`));
+  console.warn(chalk.yellow(`⚠️ Contracts directory not found: ${contractsDir}`));
       return;
     }
 
@@ -327,7 +352,11 @@ ${schema.required ? schema.required.map((req: string) => `- ${req}`).join('\n') 
 
 `;
       } catch (error) {
-        console.warn(chalk.yellow(`⚠️ Failed to parse schema ${schemaName}: ${error instanceof Error ? error.message : String(error)}`));
+  console.warn(
+          chalk.yellow(
+            `⚠️ Failed to parse schema ${schemaName}: ${error instanceof Error ? error.message : String(error)}`
+          )
+        );
       }
     }
 
@@ -675,8 +704,8 @@ const customer = await client.customers.create({
     country: 'US'
   }
 });
-
-console.log('Created customer:', customer.id);
+// 
+  console.log('Created customer:', customer.id);
 \`\`\`
 
 ## Migration from Legacy Systems
@@ -768,7 +797,7 @@ const streamer = new EventStreamer({
 
 // Subscribe to customer events
 streamer.subscribe(['customer', 'service'], ['created', 'updated'], (event) => {
-  console.log('Received event:', event.entityType, event.eventType);
+//   console.log('Received event:', event.entityType, event.eventType);
 
   switch (event.entityType) {
     case 'customer':
@@ -837,10 +866,10 @@ try {
   const customer = await client.customers.create(customerData);
 } catch (error) {
   if (error.code === 'VALIDATION_ERROR') {
-    console.log('Validation failed:', error.details);
+//   console.log('Validation failed:', error.details);
     // Handle specific validation errors
     for (const detail of error.details) {
-      console.log(\`Field \${detail.field}: \${detail.message}\`);
+//   console.log(\`Field \${detail.field}: \${detail.message}\`);
     }
   }
 }
@@ -886,7 +915,7 @@ const results = await client.customers.createBatch(customers);
 // Handle results
 const successful = results.filter(r => r.success).length;
 const failed = results.filter(r => !r.success).length;
-console.log(\`Batch completed: \${successful} successful, \${failed} failed\`);
+//   console.log(\`Batch completed: \${successful} successful, \${failed} failed\`);
 \`\`\`
 
 ### Pagination
@@ -907,8 +936,8 @@ while (true) {
 
   offset += limit;
 }
-
-console.log(\`Retrieved \${allCustomers.length} customers\`);
+// 
+  console.log(\`Retrieved \${allCustomers.length} customers\`);
 \`\`\`
 
 ### Caching
@@ -989,13 +1018,13 @@ Log all REFUSE Protocol interactions:
 \`\`\`typescript
 const logger = {
   info: (message: string, meta?: any) => {
-    console.log(\`[INFO] \${message}\`, meta);
+//   console.log(\`[INFO] \${message}\`, meta);
   },
   error: (message: string, error?: any) => {
-    console.error(\`[ERROR] \${message}\`, error);
+//   console.error(\`[ERROR] \${message}\`, error);
   },
   warn: (message: string, meta?: any) => {
-    console.warn(\`[WARN] \${message}\`, meta);
+//   console.warn(\`[WARN] \${message}\`, meta);
   }
 };
 
@@ -1125,7 +1154,6 @@ This document provides practical examples of using the REFUSE Protocol in real-w
 ### Creating a New Customer
 
 \`\`\`typescript
-import { REFUSEClient } from 'refuse-protocol-sdk';
 
 const client = new REFUSEClient({
   apiKey: 'your-api-key',
@@ -1180,8 +1208,8 @@ const customer = await client.customers.create({
     onboardingDate: '2024-01-15'
   }
 });
-
-console.log('Customer created:', customer.id);
+// 
+  console.log('Customer created:', customer.id);
 \`\`\`
 
 ### Managing Customer Sites
@@ -1314,8 +1342,8 @@ const optimizedRoute = await client.routes.optimize(mondayRoute.id, {
   timeWindows: true,
   trafficConsideration: true
 });
-
-console.log('Optimized route efficiency:', optimizedRoute.efficiency);
+// 
+  console.log('Optimized route efficiency:', optimizedRoute.efficiency);
 \`\`\`
 
 ### Route Performance Tracking
@@ -1338,9 +1366,9 @@ const performance = await client.routes.getPerformance(mondayRoute.id, {
   startDate: '2024-01-01',
   endDate: '2024-01-31'
 });
-
-console.log('Average efficiency:', performance.averageEfficiency);
-console.log('On-time performance:', performance.onTimePercentage);
+// 
+  console.log('Average efficiency:', performance.averageEfficiency);
+//   console.log('On-time performance:', performance.onTimePercentage);
 \`\`\`
 
 ## Facility Management Examples
@@ -1386,9 +1414,9 @@ const utilization = await client.facilities.getUtilization(mrf.id, {
   startDate: '2024-01-01',
   endDate: '2024-01-31'
 });
-
-console.log('Daily average utilization:', utilization.averageDailyUtilization);
-console.log('Peak utilization day:', utilization.peakUtilization.date);
+// 
+  console.log('Daily average utilization:', utilization.averageDailyUtilization);
+//   console.log('Peak utilization day:', utilization.peakUtilization.date);
 
 // Check if facility can accept more material
 const canAccept = await client.facilities.canAcceptMaterial(mrf.id, {
@@ -1398,10 +1426,10 @@ const canAccept = await client.facilities.canAcceptMaterial(mrf.id, {
 });
 
 if (canAccept.accepted) {
-  console.log('Facility can accept the material');
-  console.log('Available capacity:', canAccept.availableCapacity);
+//   console.log('Facility can accept the material');
+//   console.log('Available capacity:', canAccept.availableCapacity);
 } else {
-  console.log('Facility cannot accept material:', canAccept.reason);
+//   console.log('Facility cannot accept material:', canAccept.reason);
 }
 \`\`\`
 
@@ -1410,7 +1438,6 @@ if (canAccept.accepted) {
 ### Real-time Event Processing
 
 \`\`\`typescript
-import { EventStreamer } from 'refuse-protocol-sdk';
 
 const streamer = new EventStreamer({
   apiKey: 'your-api-key',
@@ -1422,7 +1449,7 @@ streamer.subscribe(
   ['customer', 'service', 'route', 'facility'],
   ['created', 'updated', 'completed', 'cancelled'],
   async (event) => {
-    console.log(\`Event: \${event.entityType}.\${event.eventType}\`);
+//   console.log(\`Event: \${event.entityType}.\${event.eventType}\`);
 
     // Handle different event types
     switch (event.entityType) {
@@ -1445,11 +1472,11 @@ streamer.subscribe(
 async function handleCustomerEvent(event: any) {
   switch (event.eventType) {
     case 'created':
-      console.log('New customer onboarded:', event.eventData.name);
+//   console.log('New customer onboarded:', event.eventData.name);
       // Trigger welcome email, setup billing, etc.
       break;
     case 'updated':
-      console.log('Customer updated:', event.eventData.name);
+//   console.log('Customer updated:', event.eventData.name);
       // Update CRM, recalculate pricing, etc.
       break;
   }
@@ -1458,11 +1485,11 @@ async function handleCustomerEvent(event: any) {
 async function handleServiceEvent(event: any) {
   switch (event.eventType) {
     case 'created':
-      console.log('New service created for customer');
+//   console.log('New service created for customer');
       // Schedule initial pickup, assign containers, etc.
       break;
     case 'completed':
-      console.log('Service completed:', event.eventData.serviceType);
+//   console.log('Service completed:', event.eventData.serviceType);
       // Process payment, update next service date, etc.
       break;
   }
@@ -1491,12 +1518,12 @@ const customerData = {
 const validationResult = validator.validate('./schemas/customer-schema.json', customerData);
 
 if (validationResult.isValid) {
-  console.log('✅ Customer data is valid');
+//   console.log('✅ Customer data is valid');
 } else {
-  console.log('❌ Validation failed:');
+//   console.log('❌ Validation failed:');
   validationResult.errors.forEach(error => {
-    console.log(\`  - \${error.path}: \${error.message}\`);
-    console.log(\`    Suggestion: \${error.suggestion}\`);
+//   console.log(\`  - \${error.path}: \${error.message}\`);
+//   console.log(\`    Suggestion: \${error.suggestion}\`);
   });
 }
 \`\`\`
@@ -1665,8 +1692,8 @@ const results = await client.customers.createBatch(customerDataArray);
 // Process results
 const successful = results.filter(r => r.success);
 const failed = results.filter(r => !r.success);
-
-console.log(\`Created \${successful.length} customers, \${failed.length} failed\`);
+// 
+  console.log(\`Created \${successful.length} customers, \${failed.length} failed\`);
 \`\`\`
 
 ### 4. Monitoring
@@ -1762,7 +1789,7 @@ export class JSDocParser {
       properties: [],
       methods: [],
       examples: [],
-      tags: {}
+      tags: {},
     };
 
     // Extract description (first JSDoc comment)
@@ -1772,12 +1799,14 @@ export class JSDocParser {
     }
 
     // Extract @property tags
-    const propertyMatches = content.matchAll(/@property\s+{(\w+)}\s+(\w+)\s+-\s*(.*?)(?=\n\s*\*|$)/g);
+    const propertyMatches = content.matchAll(
+      /@property\s+{(\w+)}\s+(\w+)\s+-\s*(.*?)(?=\n\s*\*|$)/g
+    );
     for (const match of propertyMatches) {
       result.properties.push({
         type: match[1],
         name: match[2],
-        description: this.cleanJSDocComment(match[3])
+        description: this.cleanJSDocComment(match[3]),
       });
     }
 
@@ -1788,7 +1817,7 @@ export class JSDocParser {
         type: match[1],
         name: match[2],
         description: this.cleanJSDocComment(match[3]),
-        isParameter: true
+        isParameter: true,
       });
     }
 
@@ -1797,7 +1826,7 @@ export class JSDocParser {
     for (const match of methodMatches) {
       result.methods.push({
         name: match[1],
-        description: this.cleanJSDocComment(match[2])
+        description: this.cleanJSDocComment(match[2]),
       });
     }
 
@@ -1813,7 +1842,7 @@ export class JSDocParser {
   private cleanJSDocComment(comment: string): string {
     return comment
       .split('\n')
-      .map(line => line.replace(/^\s*\*/, '').trim())
+      .map((line) => line.replace(/^\s*\*/, '').trim())
       .join(' ')
       .trim();
   }
@@ -1891,18 +1920,20 @@ export class SpecGeneratorCLI {
     try {
       const result = await this.generator.generateFullSpecification(options);
 
-      console.log(chalk.green(`✅ Generated ${result.files.length} documentation files`));
-      console.log(chalk.blue('Generated files:'));
-      result.files.forEach(file => {
-        console.log(`  📄 ${file.path} (${file.size} bytes)`);
+  console.log(chalk.green(`✅ Generated ${result.files.length} documentation files`));
+  console.log(chalk.blue('Generated files:'));
+      result.files.forEach((file) => {
+  console.log(`  📄 ${file.path} (${file.size} bytes)`);
       });
 
       if (result.errors.length > 0) {
-        console.warn(chalk.yellow(`⚠️ ${result.errors.length} errors occurred:`));
-        result.errors.forEach(error => console.warn(`  - ${error}`));
+  console.warn(chalk.yellow(`⚠️ ${result.errors.length} errors occurred:`));
+  result.errors.forEach((error) => console.warn(`  - ${error}`));
       }
     } catch (error) {
-      console.error(chalk.red(`❌ Generation failed: ${error instanceof Error ? error.message : String(error)}`));
+  console.error(
+        chalk.red(`❌ Generation failed: ${error instanceof Error ? error.message : String(error)}`)
+      );
       process.exit(1);
     }
   }
@@ -1913,23 +1944,25 @@ export class SpecGeneratorCLI {
   }
 
   private printUsage(): void {
-    console.log(chalk.blue('\nREFUSE Protocol Specification Generator'));
-    console.log(chalk.gray('Usage: spec-generator <command> [options]\n'));
+  console.log(chalk.blue('\nREFUSE Protocol Specification Generator'));
+  console.log(chalk.gray('Usage: spec-generator <command> [options]\n'));
 
-    console.log(chalk.green('Commands:'));
-    console.log('  generate [options]    Generate documentation with custom options');
-    console.log('  full [options]        Generate complete documentation (same as generate)\n');
+  console.log(chalk.green('Commands:'));
+//   console.log('  generate [options]    Generate documentation with custom options');
+  console.log('  full [options]        Generate complete documentation (same as generate)\n');
 
-    console.log(chalk.green('Options:'));
-    console.log('  --implementations <dir>  Path to entity implementation directory');
-    console.log('  --contracts <dir>        Path to JSON schema contracts directory');
-    console.log('  --output <dir>           Output directory for generated docs');
-    console.log('  --verbose                Enable verbose logging\n');
+  console.log(chalk.green('Options:'));
+//   console.log('  --implementations <dir>  Path to entity implementation directory');
+//   console.log('  --contracts <dir>        Path to JSON schema contracts directory');
+//   console.log('  --output <dir>           Output directory for generated docs');
+//   console.log('  --verbose                Enable verbose logging\n');
 
-    console.log(chalk.green('Examples:'));
-    console.log('  spec-generator generate --output ./docs --verbose');
-    console.log('  spec-generator generate --implementations ./protocol/implementations --contracts ./contracts');
-    console.log('  spec-generator full --output ./documentation --verbose\n');
+  console.log(chalk.green('Examples:'));
+  console.log('  spec-generator generate --output ./docs --verbose');
+  console.log(
+      '  spec-generator generate --implementations ./protocol/implementations --contracts ./contracts'
+    );
+//   console.log('  spec-generator full --output ./documentation --verbose\n');
   }
 }
 
@@ -1945,8 +1978,4 @@ export function createSpecGeneratorCLI(outputDir?: string): SpecGeneratorCLI {
 }
 
 // Export types
-export type {
-  GenerationOptions,
-  GenerationResult,
-  ParsedJSDoc
-};
+export type { GenerationOptions, GenerationResult, ParsedJSDoc };

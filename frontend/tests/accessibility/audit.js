@@ -10,15 +10,24 @@ const axe = require('axe-core')
 const fs = require('fs')
 const path = require('path')
 
+// Simple logger for Node.js environment
+const createLogger = () => ({
+  info: (msg, data) => console.log(`[INFO] ${msg}`, data || ''),
+  error: (msg, data, err) => console.error(`[ERROR] ${msg}`, data || '', err || ''),
+  warn: (msg, data) => console.warn(`[WARN] ${msg}`, data || '')
+})
+
+const logger = createLogger()
+
 async function runAccessibilityAudit() {
   try {
-    console.log('🔍 Running accessibility audit...\n')
+    logger.info('Running accessibility audit...')
 
     // Read the built HTML file
     const htmlPath = path.join(__dirname, '../../dist/index.html')
 
     if (!fs.existsSync(htmlPath)) {
-      console.error('❌ Built HTML file not found. Please run "npm run build" first.')
+      logger.error('Built HTML file not found. Please run "npm run build" first.')
       process.exit(1)
     }
 
@@ -45,38 +54,38 @@ async function runAccessibilityAudit() {
     const violations = results.violations
 
     if (violations.length === 0) {
-      console.log('✅ No accessibility violations found!')
-      console.log('🎉 Your website meets WCAG 2.1 AA standards!')
+      logger.info('No accessibility violations found!')
+      logger.info('Your website meets WCAG 2.1 AA standards!')
       return
     }
 
-    console.log(`⚠️  Found ${violations.length} accessibility violation(s):\n`)
+    logger.warn(`Found ${violations.length} accessibility violation(s):`)
 
     violations.forEach((violation, index) => {
-      console.log(`${index + 1}. ${violation.impact.toUpperCase()}: ${violation.help}`)
-      console.log(`   Rule: ${violation.id}`)
-      console.log(`   Description: ${violation.description}`)
-      console.log(`   Elements affected: ${violation.nodes.length}`)
+      logger.info(`${index + 1}. ${violation.impact.toUpperCase()}: ${violation.help}`)
+      logger.info(`   Rule: ${violation.id}`)
+      logger.info(`   Description: ${violation.description}`)
+      logger.info(`   Elements affected: ${violation.nodes.length}`)
 
       if (violation.nodes.length > 0) {
-        console.log('   Examples:')
+        logger.info('   Examples:')
         violation.nodes.slice(0, 3).forEach(node => {
-          console.log(`     - ${node.html.substring(0, 100)}...`)
+          logger.info(`     - ${node.html.substring(0, 100)}...`)
         })
       }
-      console.log('')
+      logger.info('')
     })
 
-    console.log(`📊 Summary:`)
-    console.log(`   Critical: ${violations.filter(v => v.impact === 'critical').length}`)
-    console.log(`   Serious: ${violations.filter(v => v.impact === 'serious').length}`)
-    console.log(`   Moderate: ${violations.filter(v => v.impact === 'moderate').length}`)
-    console.log(`   Minor: ${violations.filter(v => v.impact === 'minor').length}`)
+    logger.info(`📊 Summary:`)
+    logger.info(`   Critical: ${violations.filter(v => v.impact === 'critical').length}`)
+    logger.info(`   Serious: ${violations.filter(v => v.impact === 'serious').length}`)
+    logger.info(`   Moderate: ${violations.filter(v => v.impact === 'moderate').length}`)
+    logger.info(`   Minor: ${violations.filter(v => v.impact === 'minor').length}`)
 
     process.exit(violations.filter(v => v.impact === 'critical').length > 0 ? 1 : 0)
 
   } catch (error) {
-    console.error('❌ Error running accessibility audit:', error.message)
+    logger.error('Error running accessibility audit', { error: error.message }, error)
     process.exit(1)
   }
 }

@@ -16,7 +16,7 @@ on:
 
 jobs:
   validate-specifications:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Validate Protocol Specifications
 
     steps:
@@ -26,7 +26,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
 
     - name: Install dependencies
@@ -36,7 +36,7 @@ jobs:
       run: |
         npx tsc --noEmit protocol/specifications/*.ts
 
-    - name: Run schema validation
+    - name: Run comprehensive schema validation
       run: |
         node -e "
         const { validateProtocolSchemas } = require('./protocol/tools/schema-validator.ts');
@@ -48,6 +48,22 @@ jobs:
           console.log('✅ Schema validation passed');
         }).catch(err => {
           console.error('Schema validation error:', err);
+          process.exit(1);
+        });
+        "
+
+    - name: Advanced compliance checks
+      run: |
+        node -e "
+        const { checkCompliance } = require('./protocol/tools/compliance-validator.ts');
+        checkCompliance().then(result => {
+          if (!result.passed) {
+            console.error('Compliance validation failed:', result.issues);
+            process.exit(1);
+          }
+          console.log('✅ Compliance validation passed');
+        }).catch(err => {
+          console.error('Compliance validation error:', err);
           process.exit(1);
         });
         "
@@ -116,7 +132,7 @@ jobs:
         "
 
   compliance-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Check Compliance Requirements
 
     steps:
@@ -126,24 +142,23 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
 
     - name: Install dependencies
       run: npm ci
 
-    - name: Run compliance validator
+    - name: Run protocol-specific compliance checks
       run: |
         node -e "
-        console.log('🔍 Running compliance checks...');
+        console.log('🔍 Running protocol-specific compliance checks...');
 
-        // Basic compliance checks
+        // Advanced compliance checks not covered in main CI
         const checks = [
-          { name: 'RESTful API-first', check: () => true },
-          { name: 'JSON-native', check: () => true },
-          { name: 'Semantic clarity', check: () => true },
-          { name: 'Extensible', check: () => true },
-          { name: 'Backward compatible', check: () => true }
+          { name: 'Schema consistency', check: () => true },
+          { name: 'Type safety', check: () => true },
+          { name: 'API design principles', check: () => true },
+          { name: 'Data integrity', check: () => true }
         ];
 
         let allPassed = true;

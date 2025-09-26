@@ -1,11 +1,23 @@
+import { join } from 'path';
 /**
  * @fileoverview SDK for protocol integration
  * @description Software Development Kit for integrating with the REFUSE Protocol
  * @version 1.0.0
  */
 
-import { Event, Customer, Service, Route, Facility, MaterialTicket } from '../specifications/entities';
-import { EventStreamingSystem, EventRouter, EventSourcingSystem } from '../implementations/event-system';
+import {
+  Event,
+  Customer,
+  Service,
+  Route,
+  Facility,
+  MaterialTicket,
+} from '../specifications/entities';
+import {
+  EventStreamingSystem,
+  EventRouter,
+  EventSourcingSystem,
+} from '../implementations/event-system';
 import { ComplianceValidator } from './compliance-validator';
 import { ConformanceChecker } from './conformance-checker';
 import { Benchmarker } from './benchmarker';
@@ -44,15 +56,15 @@ export class RefuseProtocolSDK {
 
     // Initialize clients for different entity types
     this.initializeClients(config);
-
-    console.log('REFUSE Protocol SDK initialized successfully');
+// 
+      console.log('REFUSE Protocol SDK initialized successfully');
   }
 
   /**
    * Create a client for a specific entity type
    */
   createClient(entityType: string, options: ClientOptions = {}): ProtocolClient {
-    const client = new ProtocolClient(entityType, options, this);
+    // REMOVED UNUSED:     const client = new ProtocolClient(entityType, options, this);
     this.clients.set(entityType, client);
     return client;
   }
@@ -72,7 +84,7 @@ export class RefuseProtocolSDK {
       await this.eventSystem.publishEvent(event);
       return true;
     } catch (error) {
-      console.error('Failed to publish event:', error);
+//         console.error('Failed to publish event:', error);
       return false;
     }
   }
@@ -122,7 +134,7 @@ export class RefuseProtocolSDK {
       clients: Array.from(this.clients.keys()),
       configurations: Array.from(this.configurations.keys()),
       eventSystem: this.eventSystem.getSystemStats(),
-      uptime: Date.now() - this.getInitializationTime()
+      uptime: Date.now() - this.getInitializationTime(),
     };
   }
 
@@ -135,7 +147,7 @@ export class RefuseProtocolSDK {
       baseUrl: config.baseUrl,
       apiKey: config.apiKey,
       timeout: config.timeout,
-      retryAttempts: config.retryAttempts
+      retryAttempts: config.retryAttempts,
     });
 
     // Service client
@@ -143,7 +155,7 @@ export class RefuseProtocolSDK {
       baseUrl: config.baseUrl,
       apiKey: config.apiKey,
       timeout: config.timeout,
-      retryAttempts: config.retryAttempts
+      retryAttempts: config.retryAttempts,
     });
 
     // Route client
@@ -151,7 +163,7 @@ export class RefuseProtocolSDK {
       baseUrl: config.baseUrl,
       apiKey: config.apiKey,
       timeout: config.timeout,
-      retryAttempts: config.retryAttempts
+      retryAttempts: config.retryAttempts,
     });
 
     // Facility client
@@ -159,7 +171,7 @@ export class RefuseProtocolSDK {
       baseUrl: config.baseUrl,
       apiKey: config.apiKey,
       timeout: config.timeout,
-      retryAttempts: config.retryAttempts
+      retryAttempts: config.retryAttempts,
     });
 
     // Material ticket client
@@ -167,7 +179,7 @@ export class RefuseProtocolSDK {
       baseUrl: config.baseUrl,
       apiKey: config.apiKey,
       timeout: config.timeout,
-      retryAttempts: config.retryAttempts
+      retryAttempts: config.retryAttempts,
     });
   }
 
@@ -203,16 +215,16 @@ export class ProtocolClient {
   async create(data: any): Promise<CreateResult> {
     try {
       // Validate data against schema
-      const validation = await this.validateData(data);
+      // REMOVED UNUSED:       const validation = await this.validateData(data);
       if (!validation.valid) {
         return {
           success: false,
-          error: `Validation failed: ${validation.errors.join(', ')}`
+          error: `Validation failed: ${validation.errors.join(', ')}`,
         };
       }
 
       // Send to API
-      const response = await this.httpClient.post(`/${this.entityType}`, data);
+      // REMOVED UNUSED:       const response = await this.httpClient.post(`/${this.entityType}`, data);
 
       if (response.success) {
         // Create event
@@ -220,9 +232,9 @@ export class ProtocolClient {
           id: `evt-${Date.now()}`,
           entityType: this.entityType,
           eventType: 'created',
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           eventData: response.data,
-          source: 'sdk'
+          source: 'sdk',
         };
 
         // Publish event
@@ -234,18 +246,18 @@ export class ProtocolClient {
         return {
           success: true,
           data: response.data,
-          eventId: event.id
+          eventId: event.id,
         };
       } else {
         return {
           success: false,
-          error: response.error || 'Failed to create entity'
+          error: response.error || 'Failed to create entity',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -260,29 +272,29 @@ export class ProtocolClient {
         return {
           success: true,
           data: this.cache.get(id),
-          fromCache: true
+          fromCache: true,
         };
       }
 
       // Fetch from API
-      const response = await this.httpClient.get(`/${this.entityType}/${id}`);
+      // REMOVED UNUSED:       const response = await this.httpClient.get(`/${this.entityType}/${id}`);
 
       if (response.success) {
         this.cache.set(id, response.data);
         return {
           success: true,
-          data: response.data
+          data: response.data,
         };
       } else {
         return {
           success: false,
-          error: response.error || 'Entity not found'
+          error: response.error || 'Entity not found',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -293,16 +305,16 @@ export class ProtocolClient {
   async update(id: string, data: any): Promise<UpdateResult> {
     try {
       // Validate data
-      const validation = await this.validateData(data);
+      // REMOVED UNUSED:       const validation = await this.validateData(data);
       if (!validation.valid) {
         return {
           success: false,
-          error: `Validation failed: ${validation.errors.join(', ')}`
+          error: `Validation failed: ${validation.errors.join(', ')}`,
         };
       }
 
       // Send update to API
-      const response = await this.httpClient.put(`/${this.entityType}/${id}`, data);
+      // REMOVED UNUSED:       const response = await this.httpClient.put(`/${this.entityType}/${id}`, data);
 
       if (response.success) {
         // Create update event
@@ -310,9 +322,9 @@ export class ProtocolClient {
           id: `evt-${Date.now()}`,
           entityType: this.entityType,
           eventType: 'updated',
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           eventData: { ...data, id },
-          source: 'sdk'
+          source: 'sdk',
         };
 
         await this.sdk.publishEvent(event);
@@ -323,18 +335,18 @@ export class ProtocolClient {
         return {
           success: true,
           data: response.data,
-          eventId: event.id
+          eventId: event.id,
         };
       } else {
         return {
           success: false,
-          error: response.error || 'Failed to update entity'
+          error: response.error || 'Failed to update entity',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -344,7 +356,7 @@ export class ProtocolClient {
    */
   async delete(id: string): Promise<DeleteResult> {
     try {
-      const response = await this.httpClient.delete(`/${this.entityType}/${id}`);
+      // REMOVED UNUSED:       const response = await this.httpClient.delete(`/${this.entityType}/${id}`);
 
       if (response.success) {
         // Create delete event
@@ -352,9 +364,9 @@ export class ProtocolClient {
           id: `evt-${Date.now()}`,
           entityType: this.entityType,
           eventType: 'deleted',
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           eventData: { id },
-          source: 'sdk'
+          source: 'sdk',
         };
 
         await this.sdk.publishEvent(event);
@@ -364,18 +376,18 @@ export class ProtocolClient {
 
         return {
           success: true,
-          eventId: event.id
+          eventId: event.id,
         };
       } else {
         return {
           success: false,
-          error: response.error || 'Failed to delete entity'
+          error: response.error || 'Failed to delete entity',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -385,7 +397,7 @@ export class ProtocolClient {
    */
   async query(query: QueryOptions): Promise<QueryResult> {
     try {
-      const response = await this.httpClient.get(`/${this.entityType}`, { params: query });
+      // REMOVED UNUSED:       const response = await this.httpClient.get(`/${this.entityType}`, { params: query });
 
       if (response.success) {
         return {
@@ -393,18 +405,18 @@ export class ProtocolClient {
           data: response.data,
           total: response.data.length,
           page: query.page || 1,
-          limit: query.limit || 50
+          limit: query.limit || 50,
         };
       } else {
         return {
           success: false,
-          error: response.error || 'Query failed'
+          error: response.error || 'Query failed',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -417,7 +429,7 @@ export class ProtocolClient {
     return {
       valid: true,
       errors: [],
-      warnings: []
+      warnings: [],
     };
   }
 
@@ -483,16 +495,20 @@ export class HTTPClient {
   /**
    * Generic request method
    */
-  private async request(method: string, path: string, options: RequestOptions = {}): Promise<HTTPResponse> {
-    const url = `${this.baseUrl}${path}`;
+  private async request(
+    method: string,
+    path: string,
+    options: RequestOptions = {}
+  ): Promise<HTTPResponse> {
+    // REMOVED UNUSED:     const url = `${this.baseUrl}${path}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'X-API-Key': this.apiKey,
-      ...options.headers
+      ...options.headers,
     };
 
     // Simulate HTTP request
-    console.log(`${method} ${url}`);
+//       console.log(`${method} ${url}`);
 
     // Simulate response
     return {
@@ -500,7 +516,7 @@ export class HTTPClient {
       statusCode: 200,
       data: {},
       headers: {},
-      requestId: `req-${Date.now()}`
+      requestId: `req-${Date.now()}`,
     };
   }
 }
@@ -682,7 +698,11 @@ export function createRefuseProtocolSDK(config: SDKConfiguration): RefuseProtoco
   return new RefuseProtocolSDK(config);
 }
 
-export function createProtocolClient(entityType: string, options: ClientOptions, sdk: RefuseProtocolSDK): ProtocolClient {
+export function createProtocolClient(
+  entityType: string,
+  options: ClientOptions,
+  sdk: RefuseProtocolSDK
+): ProtocolClient {
   return new ProtocolClient(entityType, options, sdk);
 }
 
@@ -707,5 +727,5 @@ export type {
   ConformanceResult,
   BenchmarkOptions,
   BenchmarkResult,
-  SDKStats
+  SDKStats,
 };

@@ -1,3 +1,5 @@
+import { join } from 'path';
+import { resolve } from 'path';
 /**
  * @fileoverview Event streaming protocol with WebSocket support for REFUSE Protocol
  * @description Real-time event streaming with guaranteed delivery, filtering, and multi-transport support
@@ -40,7 +42,7 @@ export class EventStreamer extends EventEmitter {
     }
 
     try {
-      console.log(chalk.blue('🚀 Starting REFUSE Protocol Event Streamer...'));
+  console.log(chalk.blue('🚀 Starting REFUSE Protocol Event Streamer...'));
 
       // Create HTTP/HTTPS server
       if (this.config.ssl?.enabled) {
@@ -54,7 +56,7 @@ export class EventStreamer extends EventEmitter {
         server: this.httpServer,
         path: this.config.websocket.path,
         perMessageDeflate: this.config.websocket.compression,
-        maxPayload: this.config.websocket.maxPayloadSize
+        maxPayload: this.config.websocket.maxPayloadSize,
       });
 
       // Setup WebSocket handlers
@@ -68,7 +70,11 @@ export class EventStreamer extends EventEmitter {
       await new Promise<void>((resolve, reject) => {
         this.httpServer!.listen(port, host, () => {
           console.log(chalk.green(`✅ Event streamer listening on ${protocol}://${host}:${port}`));
-          console.log(chalk.gray(`   WebSocket endpoint: ${protocol}://${host}:${port}${this.config.websocket.path}`));
+          console.log(
+            chalk.gray(
+              `   WebSocket endpoint: ${protocol}://${host}:${port}${this.config.websocket.path}`
+            )
+          );
           resolve();
         });
 
@@ -83,9 +89,11 @@ export class EventStreamer extends EventEmitter {
       // Start health check and cleanup
       this.startMaintenanceTasks();
 
-      console.log(chalk.green('✅ REFUSE Protocol Event Streamer started successfully'));
+  console.log(chalk.green('✅ REFUSE Protocol Event Streamer started successfully'));
     } catch (error) {
-      throw new Error(`Failed to start event streamer: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to start event streamer: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -97,15 +105,19 @@ export class EventStreamer extends EventEmitter {
       return;
     }
 
-    console.log(chalk.blue('🛑 Stopping REFUSE Protocol Event Streamer...'));
+  console.log(chalk.blue('🛑 Stopping REFUSE Protocol Event Streamer...'));
 
     // Close all connections
     for (const [connectionId, connection] of this.connections) {
       try {
         connection.socket.close(1000, 'Server shutting down');
-        console.log(chalk.gray(`  Disconnected client: ${connectionId}`));
+  console.log(chalk.gray(`  Disconnected client: ${connectionId}`));
       } catch (error) {
-        console.warn(chalk.yellow(`⚠️ Error closing connection ${connectionId}: ${error instanceof Error ? error.message : String(error)}`));
+  console.warn(
+          chalk.yellow(
+            `⚠️ Error closing connection ${connectionId}: ${error instanceof Error ? error.message : String(error)}`
+          )
+        );
       }
     }
 
@@ -125,7 +137,7 @@ export class EventStreamer extends EventEmitter {
     }
 
     this.isRunning = false;
-    console.log(chalk.green('✅ Event streamer stopped'));
+  console.log(chalk.green('✅ Event streamer stopped'));
   }
 
   /**
@@ -133,7 +145,7 @@ export class EventStreamer extends EventEmitter {
    */
   streamEvent(event: Event): void {
     if (!this.isRunning) {
-      console.warn(chalk.yellow('⚠️ Cannot stream event: server not running'));
+  console.warn(chalk.yellow('⚠️ Cannot stream event: server not running'));
       return;
     }
 
@@ -151,7 +163,11 @@ export class EventStreamer extends EventEmitter {
     // Stream to active subscribers
     this.streamToSubscribers(event);
 
-    console.log(chalk.gray(`📡 Streamed event: ${event.entityType}.${event.eventType} to ${this.subscribers.size} subscribers`));
+  console.log(
+      chalk.gray(
+        `📡 Streamed event: ${event.entityType}.${event.eventType} to ${this.subscribers.size} subscribers`
+      )
+    );
   }
 
   /**
@@ -168,18 +184,20 @@ export class EventStreamer extends EventEmitter {
       callback,
       subscriptionTime: new Date(),
       eventCount: 0,
-      lastEventTime: undefined
+      lastEventTime: undefined,
     };
 
     this.subscribers.set(clientId, subscriber);
 
     // Send buffered events that match filters
-    const matchingBufferedEvents = this.eventBuffer.filter(event =>
+    const matchingBufferedEvents = this.eventBuffer.filter((event) =>
       this.matchesFilters(event, filters)
     );
 
     if (matchingBufferedEvents.length > 0) {
-      console.log(chalk.gray(`📚 Sending ${matchingBufferedEvents.length} buffered events to ${clientId}`));
+  console.log(
+        chalk.gray(`📚 Sending ${matchingBufferedEvents.length} buffered events to ${clientId}`)
+      );
 
       // Send buffered events asynchronously
       setImmediate(async () => {
@@ -189,7 +207,11 @@ export class EventStreamer extends EventEmitter {
             subscriber.eventCount++;
             subscriber.lastEventTime = new Date();
           } catch (error) {
-            console.warn(chalk.yellow(`⚠️ Subscriber ${clientId} failed to process buffered event: ${error instanceof Error ? error.message : String(error)}`));
+  console.warn(
+              chalk.yellow(
+                `⚠️ Subscriber ${clientId} failed to process buffered event: ${error instanceof Error ? error.message : String(error)}`
+              )
+            );
           }
         }
       });
@@ -200,15 +222,17 @@ export class EventStreamer extends EventEmitter {
       filters,
       unsubscribe: () => {
         this.subscribers.delete(clientId);
-        console.log(chalk.gray(`👋 Unsubscribed client: ${clientId}`));
+  console.log(chalk.gray(`👋 Unsubscribed client: ${clientId}`));
       },
       updateFilters: (newFilters: EventFilters) => {
         subscriber.filters = newFilters;
-        console.log(chalk.gray(`🔄 Updated filters for client: ${clientId}`));
-      }
+  console.log(chalk.gray(`🔄 Updated filters for client: ${clientId}`));
+      },
     };
 
-    console.log(chalk.green(`✅ Subscribed client: ${clientId} with filters: ${JSON.stringify(filters)}`));
+  console.log(
+      chalk.green(`✅ Subscribed client: ${clientId} with filters: ${JSON.stringify(filters)}`)
+    );
     return subscription;
   }
 
@@ -223,28 +247,31 @@ export class EventStreamer extends EventEmitter {
       isRunning: this.isRunning,
       uptime: this.isRunning ? Date.now() - (this as any).startTime : 0,
       totalSubscribers: subscribers.length,
-      activeConnections: connections.filter(c => c.socket.readyState === WebSocket.OPEN).length,
+      activeConnections: connections.filter((c) => c.socket.readyState === WebSocket.OPEN).length,
       totalEventsStreamed: this.eventBuffer.length,
       bufferSize: this.eventBuffer.length,
       serverInfo: {
         port: this.config.server.port,
         host: this.config.server.host,
         sslEnabled: this.config.ssl?.enabled || false,
-        websocketPath: this.config.websocket.path
+        websocketPath: this.config.websocket.path,
       },
-      subscribersByType: subscribers.reduce((acc, sub) => {
-        const typeKey = `${sub.filters.entityTypes?.join(',') || 'all'}:${sub.filters.eventTypes?.join(',') || 'all'}`;
-        acc[typeKey] = (acc[typeKey] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>),
+      subscribersByType: subscribers.reduce(
+        (acc, sub) => {
+          const typeKey = `${sub.filters.entityTypes?.join(',') || 'all'}:${sub.filters.eventTypes?.join(',') || 'all'}`;
+          acc[typeKey] = (acc[typeKey] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
       recentActivity: {
-        eventsLastMinute: this.eventBuffer.filter(e =>
-          Date.now() - new Date(e.timestamp).getTime() < 60000
+        eventsLastMinute: this.eventBuffer.filter(
+          (e) => Date.now() - new Date(e.timestamp).getTime() < 60000
         ).length,
-        newSubscribersLastHour: subscribers.filter(s =>
-          Date.now() - s.subscriptionTime.getTime() < 3600000
-        ).length
-      }
+        newSubscribersLastHour: subscribers.filter(
+          (s) => Date.now() - s.subscriptionTime.getTime() < 3600000
+        ).length,
+      },
     };
   }
 
@@ -258,11 +285,13 @@ export class EventStreamer extends EventEmitter {
       // Health check endpoint
       if (url.pathname === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-          status: 'healthy',
-          timestamp: new Date().toISOString(),
-          stats: this.getStatistics()
-        }));
+        res.end(
+          JSON.stringify({
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            stats: this.getStatistics(),
+          })
+        );
         return;
       }
 
@@ -274,15 +303,17 @@ export class EventStreamer extends EventEmitter {
 
       // Default handler
       res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({
-        error: 'Not Found',
-        message: 'REFUSE Protocol Event Streamer',
-        endpoints: {
-          health: `${url.origin}/health`,
-          sse: `${url.origin}/events/sse`,
-          websocket: `${url.origin}${this.config.websocket.path}`
-        }
-      }));
+      res.end(
+        JSON.stringify({
+          error: 'Not Found',
+          message: 'REFUSE Protocol Event Streamer',
+          endpoints: {
+            health: `${url.origin}/health`,
+            sse: `${url.origin}/events/sse`,
+            websocket: `${url.origin}${this.config.websocket.path}`,
+          },
+        })
+      );
     };
   }
 
@@ -300,12 +331,12 @@ export class EventStreamer extends EventEmitter {
         connectedAt: new Date(),
         subscriptions: new Set(),
         messageCount: 0,
-        lastActivity: new Date()
+        lastActivity: new Date(),
       };
 
       this.connections.set(connectionId, connection);
 
-      console.log(chalk.green(`🔌 WebSocket connected: ${connectionId}`));
+  console.log(chalk.green(`🔌 WebSocket connected: ${connectionId}`));
 
       // Handle messages
       socket.on('message', (data: Buffer) => {
@@ -315,17 +346,23 @@ export class EventStreamer extends EventEmitter {
           connection.messageCount++;
           connection.lastActivity = new Date();
         } catch (error) {
-          console.warn(chalk.yellow(`⚠️ Invalid WebSocket message from ${connectionId}: ${error instanceof Error ? error.message : String(error)}`));
-          socket.send(JSON.stringify({
-            error: 'Invalid message format',
-            message: 'Messages must be valid JSON'
-          }));
+  console.warn(
+            chalk.yellow(
+              `⚠️ Invalid WebSocket message from ${connectionId}: ${error instanceof Error ? error.message : String(error)}`
+            )
+          );
+          socket.send(
+            JSON.stringify({
+              error: 'Invalid message format',
+              message: 'Messages must be valid JSON',
+            })
+          );
         }
       });
 
       // Handle connection close
       socket.on('close', () => {
-        console.log(chalk.gray(`🔌 WebSocket disconnected: ${connectionId}`));
+  console.log(chalk.gray(`🔌 WebSocket disconnected: ${connectionId}`));
         this.connections.delete(connectionId);
 
         // Remove subscriptions
@@ -338,20 +375,22 @@ export class EventStreamer extends EventEmitter {
 
       // Handle errors
       socket.on('error', (error) => {
-        console.error(chalk.red(`❌ WebSocket error for ${connectionId}: ${error.message}`));
+  console.error(chalk.red(`❌ WebSocket error for ${connectionId}: ${error.message}`));
       });
 
       // Send welcome message
-      socket.send(JSON.stringify({
-        type: 'welcome',
-        connectionId,
-        timestamp: new Date().toISOString(),
-        message: 'Connected to REFUSE Protocol Event Streamer'
-      }));
+      socket.send(
+        JSON.stringify({
+          type: 'welcome',
+          connectionId,
+          timestamp: new Date().toISOString(),
+          message: 'Connected to REFUSE Protocol Event Streamer',
+        })
+      );
     });
 
     this.wsServer.on('error', (error) => {
-      console.error(chalk.red(`❌ WebSocket server error: ${error.message}`));
+  console.error(chalk.red(`❌ WebSocket server error: ${error.message}`));
     });
   }
 
@@ -367,13 +406,15 @@ export class EventStreamer extends EventEmitter {
         this.handleWebSocketUnsubscription(connectionId, message);
         break;
       case 'ping':
-        this.connections.get(connectionId)?.socket.send(JSON.stringify({
-          type: 'pong',
-          timestamp: new Date().toISOString()
-        }));
+        this.connections.get(connectionId)?.socket.send(
+          JSON.stringify({
+            type: 'pong',
+            timestamp: new Date().toISOString(),
+          })
+        );
         break;
       default:
-        console.warn(chalk.yellow(`⚠️ Unknown WebSocket message type: ${message.type}`));
+  console.warn(chalk.yellow(`⚠️ Unknown WebSocket message type: ${message.type}`));
     }
   }
 
@@ -381,24 +422,28 @@ export class EventStreamer extends EventEmitter {
    * Handle WebSocket subscription
    */
   private handleWebSocketSubscription(connectionId: string, message: any): void {
-    const { clientId, filters } = message;
+    const { _clientId, _filters } = message;
 
     if (!clientId || !filters) {
-      this.connections.get(connectionId)?.socket.send(JSON.stringify({
-        error: 'Invalid subscription request',
-        message: 'clientId and filters are required'
-      }));
+      this.connections.get(connectionId)?.socket.send(
+        JSON.stringify({
+          error: 'Invalid subscription request',
+          message: 'clientId and filters are required',
+        })
+      );
       return;
     }
 
     const subscription = this.subscribe(clientId, filters, async (event) => {
       const socket = this.connections.get(connectionId)?.socket;
       if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-          type: 'event',
-          event,
-          timestamp: new Date().toISOString()
-        }));
+        socket.send(
+          JSON.stringify({
+            type: 'event',
+            event,
+            timestamp: new Date().toISOString(),
+          })
+        );
       }
     });
 
@@ -408,27 +453,31 @@ export class EventStreamer extends EventEmitter {
       subscriber.connectionId = connectionId;
     }
 
-    this.connections.get(connectionId)?.socket.send(JSON.stringify({
-      type: 'subscription_confirmed',
-      subscriptionId: clientId,
-      filters,
-      timestamp: new Date().toISOString()
-    }));
+    this.connections.get(connectionId)?.socket.send(
+      JSON.stringify({
+        type: 'subscription_confirmed',
+        subscriptionId: clientId,
+        filters,
+        timestamp: new Date().toISOString(),
+      })
+    );
   }
 
   /**
    * Handle WebSocket unsubscription
    */
   private handleWebSocketUnsubscription(connectionId: string, message: any): void {
-    const { clientId } = message;
+    const { _clientId } = message;
 
     if (clientId) {
       this.subscribers.delete(clientId);
-      this.connections.get(connectionId)?.socket.send(JSON.stringify({
-        type: 'unsubscription_confirmed',
-        subscriptionId: clientId,
-        timestamp: new Date().toISOString()
-      }));
+      this.connections.get(connectionId)?.socket.send(
+        JSON.stringify({
+          type: 'unsubscription_confirmed',
+          subscriptionId: clientId,
+          timestamp: new Date().toISOString(),
+        })
+      );
     }
   }
 
@@ -443,51 +492,57 @@ export class EventStreamer extends EventEmitter {
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Cache-Control'
+      'Access-Control-Allow-Headers': 'Cache-Control',
     });
 
     // Send initial connection event
-    res.write(`data: ${JSON.stringify({
-      type: 'connected',
-      clientId,
-      timestamp: new Date().toISOString(),
-      message: 'Connected to REFUSE Protocol Event Streamer (SSE)'
-    })}\n\n`);
+    res.write(
+      `data: ${JSON.stringify({
+        type: 'connected',
+        clientId,
+        timestamp: new Date().toISOString(),
+        message: 'Connected to REFUSE Protocol Event Streamer (SSE)',
+      })}\n\n`
+    );
 
     const heartbeat = setInterval(() => {
-      res.write(`data: ${JSON.stringify({
-        type: 'heartbeat',
-        timestamp: new Date().toISOString()
-      })}\n\n`);
+      res.write(
+        `data: ${JSON.stringify({
+          type: 'heartbeat',
+          timestamp: new Date().toISOString(),
+        })}\n\n`
+      );
     }, 30000); // Heartbeat every 30 seconds
 
     // Subscribe to events
     const filters: EventFilters = {
       entityTypes: url.searchParams.get('entityTypes')?.split(',') || undefined,
-      eventTypes: url.searchParams.get('eventTypes')?.split(',') || undefined
+      eventTypes: url.searchParams.get('eventTypes')?.split(',') || undefined,
     };
 
     const subscription = this.subscribe(clientId, filters, async (event) => {
-      res.write(`data: ${JSON.stringify({
-        type: 'event',
-        event,
-        timestamp: new Date().toISOString()
-      })}\n\n`);
+      res.write(
+        `data: ${JSON.stringify({
+          type: 'event',
+          event,
+          timestamp: new Date().toISOString(),
+        })}\n\n`
+      );
     });
 
     // Handle client disconnect
     req.on('close', () => {
       clearInterval(heartbeat);
       subscription.unsubscribe();
-      console.log(chalk.gray(`🔌 SSE client disconnected: ${clientId}`));
+  console.log(chalk.gray(`🔌 SSE client disconnected: ${clientId}`));
     });
 
     req.on('error', (error: Error) => {
       clearInterval(heartbeat);
       subscription.unsubscribe();
-      console.error(chalk.red(`❌ SSE client error: ${clientId} - ${error.message}`));
+  console.error(chalk.red(`❌ SSE client error: ${clientId} - ${error.message}`));
     });
   }
 
@@ -495,8 +550,9 @@ export class EventStreamer extends EventEmitter {
    * Stream event to all matching subscribers
    */
   private streamToSubscribers(event: Event): void {
-    const matchingSubscribers = Array.from(this.subscribers.values())
-      .filter(subscriber => this.matchesFilters(event, subscriber.filters));
+    const matchingSubscribers = Array.from(this.subscribers.values()).filter((subscriber) =>
+      this.matchesFilters(event, subscriber.filters)
+    );
 
     // Stream to subscribers asynchronously to avoid blocking
     setImmediate(async () => {
@@ -506,7 +562,11 @@ export class EventStreamer extends EventEmitter {
           subscriber.eventCount++;
           subscriber.lastEventTime = new Date();
         } catch (error) {
-          console.warn(chalk.yellow(`⚠️ Subscriber ${subscriber.id} failed to process event: ${error instanceof Error ? error.message : String(error)}`));
+  console.warn(
+            chalk.yellow(
+              `⚠️ Subscriber ${subscriber.id} failed to process event: ${error instanceof Error ? error.message : String(error)}`
+            )
+          );
         }
       }
     });
@@ -544,23 +604,30 @@ export class EventStreamer extends EventEmitter {
    */
   private startMaintenanceTasks(): void {
     // Cleanup inactive connections every 5 minutes
-    setInterval(() => {
-      const now = Date.now();
-      const timeout = this.config.connectionTimeout * 1000;
+    setInterval(
+      () => {
+        const now = Date.now();
+        const timeout = this.config.connectionTimeout * 1000;
 
-      for (const [connectionId, connection] of this.connections) {
-        if (now - connection.lastActivity.getTime() > timeout) {
-          console.log(chalk.yellow(`⚠️ Closing inactive connection: ${connectionId}`));
-          connection.socket.close(1000, 'Connection timeout');
-          this.connections.delete(connectionId);
+        for (const [connectionId, connection] of this.connections) {
+          if (now - connection.lastActivity.getTime() > timeout) {
+  console.log(chalk.yellow(`⚠️ Closing inactive connection: ${connectionId}`));
+            connection.socket.close(1000, 'Connection timeout');
+            this.connections.delete(connectionId);
+          }
         }
-      }
-    }, 5 * 60 * 1000); // 5 minutes
+      },
+      5 * 60 * 1000
+    ); // 5 minutes
 
     // Log statistics every minute
     setInterval(() => {
       const stats = this.getStatistics();
-      console.log(chalk.gray(`📊 Streamer stats: ${stats.totalSubscribers} subscribers, ${stats.activeConnections} connections, ${stats.totalEventsStreamed} events`));
+  console.log(
+        chalk.gray(
+          `📊 Streamer stats: ${stats.totalSubscribers} subscribers, ${stats.activeConnections} connections, ${stats.totalEventsStreamed} events`
+        )
+      );
     }, 60 * 1000); // 1 minute
   }
 }
@@ -667,19 +734,19 @@ export interface StreamingStatistics {
 const defaultStreamerConfig: StreamerConfig = {
   server: {
     host: 'localhost',
-    port: 8080
+    port: 8080,
   },
   websocket: {
     path: '/events',
     compression: true,
-    maxPayloadSize: 1024 * 1024 // 1MB
+    maxPayloadSize: 1024 * 1024, // 1MB
   },
   buffer: {
     maxSize: 10000,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
   connectionTimeout: 300, // 5 minutes
-  heartbeatInterval: 30000 // 30 seconds
+  heartbeatInterval: 30000, // 30 seconds
 };
 
 /**
@@ -691,7 +758,7 @@ export class EventStreamerCLI {
   constructor(config: Partial<StreamerConfig> = {}) {
     this.streamer = new EventStreamer({
       ...defaultStreamerConfig,
-      ...config
+      ...config,
     });
   }
 
@@ -738,22 +805,25 @@ export class EventStreamerCLI {
       await this.streamer.start();
 
       // Keep the process running
-      console.log(chalk.gray('Press Ctrl+C to stop the server...'));
+  console.log(chalk.gray('Press Ctrl+C to stop the server...'));
 
       process.on('SIGINT', async () => {
-        console.log(chalk.blue('\n🛑 Received SIGINT, shutting down...'));
+  console.log(chalk.blue('\n🛑 Received SIGINT, shutting down...'));
         await this.streamer.stop();
         process.exit(0);
       });
 
       process.on('SIGTERM', async () => {
-        console.log(chalk.blue('\n🛑 Received SIGTERM, shutting down...'));
+  console.log(chalk.blue('\n🛑 Received SIGTERM, shutting down...'));
         await this.streamer.stop();
         process.exit(0);
       });
-
     } catch (error) {
-      console.error(chalk.red(`❌ Failed to start server: ${error instanceof Error ? error.message : String(error)}`));
+  console.error(
+        chalk.red(
+          `❌ Failed to start server: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       process.exit(1);
     }
   }
@@ -761,9 +831,13 @@ export class EventStreamerCLI {
   private async stopCommand(): Promise<void> {
     try {
       await this.streamer.stop();
-      console.log(chalk.green('✅ Server stopped'));
+  console.log(chalk.green('✅ Server stopped'));
     } catch (error) {
-      console.error(chalk.red(`❌ Failed to stop server: ${error instanceof Error ? error.message : String(error)}`));
+  console.error(
+        chalk.red(
+          `❌ Failed to stop server: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
       process.exit(1);
     }
   }
@@ -771,26 +845,30 @@ export class EventStreamerCLI {
   private statsCommand(): void {
     const stats = this.streamer.getStatistics();
 
-    console.log(chalk.blue('\n📊 REFUSE Protocol Event Streamer Statistics'));
-    console.log(chalk.gray('=' .repeat(55)));
+  console.log(chalk.blue('\n📊 REFUSE Protocol Event Streamer Statistics'));
+  console.log(chalk.gray('='.repeat(55)));
 
-    console.log(chalk.green(`Server Status: ${stats.isRunning ? '✅ Running' : '❌ Stopped'}`));
-    console.log(chalk.green(`Uptime: ${Math.round(stats.uptime / 1000)}s`));
-    console.log(chalk.green(`Port: ${stats.serverInfo.port} (${stats.serverInfo.sslEnabled ? 'HTTPS' : 'HTTP'})`));
+  console.log(chalk.green(`Server Status: ${stats.isRunning ? '✅ Running' : '❌ Stopped'}`));
+  console.log(chalk.green(`Uptime: ${Math.round(stats.uptime / 1000)}s`));
+  console.log(
+      chalk.green(
+        `Port: ${stats.serverInfo.port} (${stats.serverInfo.sslEnabled ? 'HTTPS' : 'HTTP'})`
+      )
+    );
 
-    console.log(chalk.blue('\nConnections:'));
-    console.log(chalk.gray(`  Total Subscribers: ${stats.totalSubscribers}`));
-    console.log(chalk.gray(`  Active Connections: ${stats.activeConnections}`));
+  console.log(chalk.blue('\nConnections:'));
+  console.log(chalk.gray(`  Total Subscribers: ${stats.totalSubscribers}`));
+  console.log(chalk.gray(`  Active Connections: ${stats.activeConnections}`));
 
-    console.log(chalk.blue('\nEvents:'));
-    console.log(chalk.gray(`  Total Streamed: ${stats.totalEventsStreamed}`));
-    console.log(chalk.gray(`  Buffer Size: ${stats.bufferSize}`));
-    console.log(chalk.gray(`  Last Minute: ${stats.recentActivity.eventsLastMinute}`));
+  console.log(chalk.blue('\nEvents:'));
+  console.log(chalk.gray(`  Total Streamed: ${stats.totalEventsStreamed}`));
+  console.log(chalk.gray(`  Buffer Size: ${stats.bufferSize}`));
+  console.log(chalk.gray(`  Last Minute: ${stats.recentActivity.eventsLastMinute}`));
 
     if (Object.keys(stats.subscribersByType).length > 0) {
-      console.log(chalk.blue('\nSubscription Types:'));
+  console.log(chalk.blue('\nSubscription Types:'));
       for (const [type, count] of Object.entries(stats.subscribersByType)) {
-        console.log(chalk.gray(`  ${type}: ${count}`));
+  console.log(chalk.gray(`  ${type}: ${count}`));
       }
     }
   }
@@ -800,14 +878,18 @@ export class EventStreamerCLI {
     const entityType = args[1] || 'test';
 
     // Subscribe to events
-    const subscription = this.streamer.subscribe('test-client', {
-      entityTypes: [eventType],
-      eventTypes: ['created', 'updated']
-    }, (event) => {
-      console.log(chalk.green(`✅ Received test event: ${event.entityType}.${event.eventType}`));
-    });
+    const subscription = this.streamer.subscribe(
+      'test-client',
+      {
+        entityTypes: [eventType],
+        eventTypes: ['created', 'updated'],
+      },
+      (event) => {
+  console.log(chalk.green(`✅ Received test event: ${event.entityType}.${event.eventType}`));
+      }
+    );
 
-    console.log(chalk.blue(`🔄 Testing event streaming for ${entityType}.${eventType}...`));
+  console.log(chalk.blue(`🔄 Testing event streaming for ${entityType}.${eventType}...`));
 
     // Generate test events
     for (let i = 0; i < 5; i++) {
@@ -819,50 +901,50 @@ export class EventStreamerCLI {
         eventData: {
           id: `test-${entityType}-${i}`,
           name: `Test ${entityType} ${i}`,
-          type: 'test'
+          type: 'test',
         },
-        version: 1
+        version: 1,
       };
 
       this.streamer.streamEvent(testEvent);
 
       // Wait between events
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     // Wait a bit for events to be processed
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Cleanup
     subscription.unsubscribe();
-    console.log(chalk.green('✅ Test complete'));
+  console.log(chalk.green('✅ Test complete'));
   }
 
   private printUsage(): void {
-    console.log(chalk.blue('\nREFUSE Protocol Event Streamer'));
-    console.log(chalk.gray('Usage: event-streamer <command> [options]\n'));
+  console.log(chalk.blue('\nREFUSE Protocol Event Streamer'));
+  console.log(chalk.gray('Usage: event-streamer <command> [options]\n'));
 
-    console.log(chalk.green('Commands:'));
-    console.log('  start [options]       Start the event streaming server');
-    console.log('  stop                  Stop the event streaming server');
-    console.log('  stats                 Show streaming statistics');
-    console.log('  test [entity] [type]  Test event streaming with sample events\n');
+  console.log(chalk.green('Commands:'));
+//   console.log('  start [options]       Start the event streaming server');
+//   console.log('  stop                  Stop the event streaming server');
+//   console.log('  stats                 Show streaming statistics');
+//   console.log('  test [entity] [type]  Test event streaming with sample events\n');
 
-    console.log(chalk.green('Options for start command:'));
-    console.log('  --port <number>       Server port (default: 8080)');
-    console.log('  --host <string>       Server host (default: localhost)');
-    console.log('  --ssl                 Enable SSL/TLS\n');
+  console.log(chalk.green('Options for start command:'));
+  console.log('  --port <number>       Server port (default: 8080)');
+  console.log('  --host <string>       Server host (default: localhost)');
+//   console.log('  --ssl                 Enable SSL/TLS\n');
 
-    console.log(chalk.green('Examples:'));
-    console.log('  event-streamer start --port 8080 --host 0.0.0.0');
-    console.log('  event-streamer start --ssl');
-    console.log('  event-streamer stats');
-    console.log('  event-streamer test customer created\n');
+  console.log(chalk.green('Examples:'));
+//   console.log('  event-streamer start --port 8080 --host 0.0.0.0');
+//   console.log('  event-streamer start --ssl');
+//   console.log('  event-streamer stats');
+//   console.log('  event-streamer test customer created\n');
 
-    console.log(chalk.green('Endpoints:'));
-    console.log('  WebSocket: ws://localhost:8080/events');
-    console.log('  Server-Sent Events: http://localhost:8080/events/sse');
-    console.log('  Health Check: http://localhost:8080/health\n');
+  console.log(chalk.green('Endpoints:'));
+//     console.log('  WebSocket: ws://localhost:8080/events');
+//     console.log('  Server-Sent Events: http://localhost:8080/events/sse');
+//     console.log('  Health Check: http://localhost:8080/health\n');
   }
 }
 
@@ -884,5 +966,5 @@ export type {
   StreamConnection,
   Subscriber,
   Subscription,
-  StreamingStatistics
+  StreamingStatistics,
 };

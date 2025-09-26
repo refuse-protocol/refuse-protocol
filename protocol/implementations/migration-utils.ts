@@ -4,7 +4,14 @@
  * @version 1.0.0
  */
 
-import { Event, Customer, Service, Route, Facility, MaterialTicket } from '../specifications/entities';
+import {
+  Event,
+  Customer,
+  Service,
+  Route,
+  Facility,
+  MaterialTicket,
+} from '../specifications/entities';
 import { DataTransformer } from '../tools/data-transformer';
 import { LegacySystemBridge } from './legacy-bridge';
 
@@ -26,7 +33,11 @@ export class MigrationUtilities {
   /**
    * Create migration plan
    */
-  async createMigrationPlan(sourceSystem: string, targetSystem: string, options: MigrationOptions = {}): Promise<MigrationPlan> {
+  async createMigrationPlan(
+    sourceSystem: string,
+    targetSystem: string,
+    options: MigrationOptions = {}
+  ): Promise<MigrationPlan> {
     const plan: MigrationPlan = {
       id: `migration-${Date.now()}`,
       sourceSystem,
@@ -35,7 +46,7 @@ export class MigrationUtilities {
       totalEstimatedTime: 0,
       riskLevel: 'medium',
       createdAt: new Date(),
-      options
+      options,
     };
 
     // Analyze source system
@@ -45,7 +56,10 @@ export class MigrationUtilities {
     plan.phases = await this.createMigrationPhases(sourceAnalysis, options);
 
     // Calculate total time
-    plan.totalEstimatedTime = plan.phases.reduce((total, phase) => total + phase.estimatedDuration, 0);
+    plan.totalEstimatedTime = plan.phases.reduce(
+      (total, phase) => total + phase.estimatedDuration,
+      0
+    );
 
     // Assess risk level
     plan.riskLevel = this.assessRiskLevel(plan.phases);
@@ -71,13 +85,13 @@ export class MigrationUtilities {
       warnings: [],
       errors: [],
       startedAt: new Date(),
-      completedAt: new Date()
+      completedAt: new Date(),
     };
-
+// 
     console.log(`Starting migration: ${plan.id}`);
 
     for (const phase of plan.phases) {
-      console.log(`Executing phase: ${phase.name}`);
+//       console.log(`Executing phase: ${phase.name}`);
 
       const phaseResult = await this.executeMigrationPhase(phase, plan);
 
@@ -98,13 +112,13 @@ export class MigrationUtilities {
     result.completedAt = new Date();
 
     if (!result.success) {
-      console.log(`Migration failed: ${plan.id}`);
+//       console.log(`Migration failed: ${plan.id}`);
       // Execute rollback if configured
       if (plan.options.enableRollback) {
         await this.executeRollback(plan.id);
       }
     } else {
-      console.log(`Migration completed successfully: ${plan.id}`);
+//       console.log(`Migration completed successfully: ${plan.id}`);
     }
 
     return result;
@@ -120,7 +134,7 @@ export class MigrationUtilities {
       valid: true,
       errors: [],
       warnings: [],
-      validatedAt: new Date()
+      validatedAt: new Date(),
     };
 
     for (const rule of validationRules) {
@@ -142,7 +156,10 @@ export class MigrationUtilities {
   /**
    * Execute migration phase
    */
-  private async executeMigrationPhase(phase: MigrationPhase, plan: MigrationPlan): Promise<PhaseExecutionResult> {
+  private async executeMigrationPhase(
+    phase: MigrationPhase,
+    plan: MigrationPlan
+  ): Promise<PhaseExecutionResult> {
     const result: PhaseExecutionResult = {
       phaseId: phase.id,
       phaseName: phase.name,
@@ -153,7 +170,7 @@ export class MigrationUtilities {
       warnings: [],
       errors: [],
       startedAt: new Date(),
-      completedAt: new Date()
+      completedAt: new Date(),
     };
 
     try {
@@ -183,7 +200,6 @@ export class MigrationUtilities {
       result.errors.push(...loadResult.errors);
 
       result.success = loadResult.success;
-
     } catch (error) {
       result.success = false;
       result.errors.push(error instanceof Error ? error.message : String(error));
@@ -198,7 +214,7 @@ export class MigrationUtilities {
    */
   private async extractSourceData(phase: MigrationPhase, plan: MigrationPlan): Promise<any> {
     // This would connect to the source system and extract data
-    console.log(`Extracting data for phase: ${phase.name} from ${plan.sourceSystem}`);
+//     console.log(`Extracting data for phase: ${phase.name} from ${plan.sourceSystem}`);
 
     // Simulate data extraction
     return {
@@ -207,21 +223,25 @@ export class MigrationUtilities {
           id: 'SAMPLE001',
           name: 'Sample Data',
           createdAt: new Date('2023-01-15'),
-          updatedAt: new Date('2024-01-15')
-        }
-      ]
+          updatedAt: new Date('2024-01-15'),
+        },
+      ],
     };
   }
 
   /**
    * Transform data for migration
    */
-  private async transformData(sourceData: any, phase: MigrationPhase, plan: MigrationPlan): Promise<any> {
+  private async transformData(
+    sourceData: any,
+    phase: MigrationPhase,
+    plan: MigrationPlan
+  ): Promise<any> {
     const transformer = this.transformers.get(plan.targetSystem);
     if (!transformer) {
       throw new Error(`No transformer found for target system: ${plan.targetSystem}`);
     }
-
+// 
     console.log(`Transforming data for phase: ${phase.name} to ${plan.targetSystem}`);
 
     return await transformer.transform(sourceData);
@@ -230,12 +250,16 @@ export class MigrationUtilities {
   /**
    * Validate phase data
    */
-  private async validatePhaseData(data: any, phase: MigrationPhase, plan: MigrationPlan): Promise<ValidationResult> {
+  private async validatePhaseData(
+    data: any,
+    phase: MigrationPhase,
+    plan: MigrationPlan
+  ): Promise<ValidationResult> {
     const validationResult: ValidationResult = {
       valid: true,
       errors: [],
       warnings: [],
-      validatedAt: new Date()
+      validatedAt: new Date(),
     };
 
     // Apply entity-specific validation
@@ -259,8 +283,12 @@ export class MigrationUtilities {
   /**
    * Load data to target system
    */
-  private async loadTargetData(data: any, phase: MigrationPhase, plan: MigrationPlan): Promise<LoadResult> {
-    console.log(`Loading data for phase: ${phase.name} to ${plan.targetSystem}`);
+  private async loadTargetData(
+    data: any,
+    phase: MigrationPhase,
+    plan: MigrationPlan
+  ): Promise<LoadResult> {
+//     console.log(`Loading data for phase: ${phase.name} to ${plan.targetSystem}`);
 
     // Simulate loading to target system
     return {
@@ -269,7 +297,7 @@ export class MigrationUtilities {
       successfulRecords: Array.isArray(data) ? data.length : 1,
       failedRecords: 0,
       warnings: [],
-      errors: []
+      errors: [],
     };
   }
 
@@ -281,7 +309,7 @@ export class MigrationUtilities {
     if (!rollbackStrategy) {
       throw new Error(`No rollback strategy found for migration: ${migrationId}`);
     }
-
+// 
     console.log(`Executing rollback for migration: ${migrationId}`);
 
     const result: RollbackResult = {
@@ -290,7 +318,7 @@ export class MigrationUtilities {
       rolledBackPhases: [],
       warnings: [],
       errors: [],
-      executedAt: new Date()
+      executedAt: new Date(),
     };
 
     // Execute rollback phases in reverse order
@@ -300,7 +328,9 @@ export class MigrationUtilities {
         result.rolledBackPhases.push(phase);
       } catch (error) {
         result.success = false;
-        result.errors.push(`Failed to rollback phase ${phase.name}: ${error instanceof Error ? error.message : String(error)}`);
+        result.errors.push(
+          `Failed to rollback phase ${phase.name}: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
     }
 
@@ -311,22 +341,22 @@ export class MigrationUtilities {
    * Execute rollback phase
    */
   private async executeRollbackPhase(phase: RollbackPhase): Promise<void> {
-    console.log(`Rolling back phase: ${phase.name}`);
+//     console.log(`Rolling back phase: ${phase.name}`);
 
     switch (phase.type) {
       case 'data_removal':
         // Remove migrated data
-        console.log(`Removing data for entity: ${phase.entity}`);
+//         console.log(`Removing data for entity: ${phase.entity}`);
         break;
 
       case 'state_restoration':
         // Restore previous state
-        console.log(`Restoring state for entity: ${phase.entity}`);
+//         console.log(`Restoring state for entity: ${phase.entity}`);
         break;
 
       case 'notification':
         // Send rollback notifications
-        console.log(`Sending rollback notification: ${phase.description}`);
+//         console.log(`Sending rollback notification: ${phase.description}`);
         break;
     }
   }
@@ -344,16 +374,19 @@ export class MigrationUtilities {
         customer: 1000,
         service: 500,
         route: 100,
-        facility: 50
+        facility: 50,
       },
-      complexity: 'medium'
+      complexity: 'medium',
     };
   }
 
   /**
    * Create migration phases
    */
-  private async createMigrationPhases(analysis: SourceSystemAnalysis, options: MigrationOptions): Promise<MigrationPhase[]> {
+  private async createMigrationPhases(
+    analysis: SourceSystemAnalysis,
+    options: MigrationOptions
+  ): Promise<MigrationPhase[]> {
     const phases: MigrationPhase[] = [];
 
     // Create phase for each entity
@@ -371,9 +404,9 @@ export class MigrationUtilities {
           'Transform data structure',
           'Validate transformed data',
           'Load to target system',
-          'Verify migration success'
+          'Verify migration success',
         ],
-        status: 'pending'
+        status: 'pending',
       };
 
       phases.push(phase);
@@ -391,7 +424,7 @@ export class MigrationUtilities {
       phases: [],
       totalEstimatedTime: 0,
       riskLevel: 'low',
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     // Create rollback phases for each migration phase
@@ -404,13 +437,16 @@ export class MigrationUtilities {
         type: 'data_removal',
         order: plan.phases.length - phase.order + 1,
         estimatedDuration: phase.estimatedDuration * 0.5, // Rollback is usually faster
-        dependencies: [phase.id]
+        dependencies: [phase.id],
       };
 
       strategy.phases.push(rollbackPhase);
     }
 
-    strategy.totalEstimatedTime = strategy.phases.reduce((total, phase) => total + phase.estimatedDuration, 0);
+    strategy.totalEstimatedTime = strategy.phases.reduce(
+      (total, phase) => total + phase.estimatedDuration,
+      0
+    );
     return strategy;
   }
 
@@ -419,7 +455,8 @@ export class MigrationUtilities {
    */
   private calculatePhaseDuration(entity: string, analysis: SourceSystemAnalysis): number {
     const baseHours = 2;
-    const volumeMultiplier = (analysis.dataVolume[entity as keyof typeof analysis.dataVolume] || 100) / 100;
+    const volumeMultiplier =
+      (analysis.dataVolume[entity as keyof typeof analysis.dataVolume] || 100) / 100;
 
     return baseHours * volumeMultiplier;
   }
@@ -435,7 +472,10 @@ export class MigrationUtilities {
       dependencies.push('customer');
     }
 
-    if (entity === 'route' && (analysis.entities.includes('customer') || analysis.entities.includes('facility'))) {
+    if (
+      entity === 'route' &&
+      (analysis.entities.includes('customer') || analysis.entities.includes('facility'))
+    ) {
       dependencies.push('customer', 'facility');
     }
 
@@ -447,7 +487,7 @@ export class MigrationUtilities {
    */
   private assessRiskLevel(phases: MigrationPhase[]): 'low' | 'medium' | 'high' {
     const totalComplexity = phases.length;
-    const highComplexityPhases = phases.filter(p => p.estimatedDuration > 10).length;
+    const highComplexityPhases = phases.filter((p) => p.estimatedDuration > 10).length;
 
     if (totalComplexity > 10 || highComplexityPhases > 2) return 'high';
     if (totalComplexity > 5 || highComplexityPhases > 0) return 'medium';
@@ -457,12 +497,15 @@ export class MigrationUtilities {
   /**
    * Apply validation rule
    */
-  private async applyValidationRule(rule: ValidationRule, data: any): Promise<ValidationRuleResult> {
+  private async applyValidationRule(
+    rule: ValidationRule,
+    data: any
+  ): Promise<ValidationRuleResult> {
     // Simple validation rule application
     return {
       ruleId: rule.id,
       passed: true,
-      message: `Validation rule ${rule.name} passed`
+      message: `Validation rule ${rule.name} passed`,
     };
   }
 
@@ -472,11 +515,7 @@ export class MigrationUtilities {
   private validateCustomerData(customers: any[]): boolean {
     if (!Array.isArray(customers)) return false;
 
-    return customers.every(customer =>
-      customer.id &&
-      customer.name &&
-      customer.contactInfo
-    );
+    return customers.every((customer) => customer.id && customer.name && customer.contactInfo);
   }
 
   /**
@@ -485,11 +524,7 @@ export class MigrationUtilities {
   private validateServiceData(services: any[]): boolean {
     if (!Array.isArray(services)) return false;
 
-    return services.every(service =>
-      service.id &&
-      service.name &&
-      service.type
-    );
+    return services.every((service) => service.id && service.name && service.type);
   }
 
   /**
@@ -502,7 +537,7 @@ export class MigrationUtilities {
       transform: async (data: any) => {
         // Transform data to JSON-compatible format
         return JSON.parse(JSON.stringify(data));
-      }
+      },
     });
 
     // CSV transformer
@@ -515,7 +550,7 @@ export class MigrationUtilities {
           return data;
         }
         return data;
-      }
+      },
     });
 
     // Database transformer
@@ -524,7 +559,7 @@ export class MigrationUtilities {
       transform: async (data: any) => {
         // Transform data for database insertion
         return data;
-      }
+      },
     });
   }
 
@@ -539,22 +574,22 @@ export class MigrationUtilities {
         description: 'Ensure all required fields are present',
         type: 'structure',
         severity: 'error',
-        fields: ['id', 'createdAt', 'updatedAt']
+        fields: ['id', 'createdAt', 'updatedAt'],
       },
       {
         id: 'data-types',
         name: 'Data Type Validation',
         description: 'Validate data types match schema',
         type: 'type',
-        severity: 'error'
+        severity: 'error',
       },
       {
         id: 'business-rules',
         name: 'Business Rules Validation',
         description: 'Validate business logic constraints',
         type: 'business',
-        severity: 'warning'
-      }
+        severity: 'warning',
+      },
     ]);
   }
 }
@@ -753,5 +788,5 @@ export type {
   RollbackResult,
   LoadResult,
   SourceSystemAnalysis,
-  DataTransformer
+  DataTransformer,
 };

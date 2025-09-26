@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Common utilities for REFUSE Protocol entities
  * @description Shared validation, formatting, and utility functions
@@ -14,7 +15,7 @@ export class ValidationUtils {
    * Validate email format
    */
   static isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
@@ -22,7 +23,7 @@ export class ValidationUtils {
    * Validate phone format
    */
   static isValidPhone(phone: string): boolean {
-    const phoneRegex = /^\+?[\d\s\-\(\)]{10,}$/;
+    const phoneRegex = /^\+?[\d\s\-()]{10,}$/;
     return phoneRegex.test(phone);
   }
 
@@ -97,7 +98,7 @@ export class FormatUtils {
     const parts = [
       address.street1 || address.street,
       address.street2,
-      address.city && `${address.city}, ${address.state} ${address.zipCode}`
+      address.city && `${address.city}, ${address.state} ${address.zipCode}`,
     ].filter(Boolean);
 
     return parts.join(', ');
@@ -126,7 +127,7 @@ export class FormatUtils {
   static formatCurrency(amount: number, currency: string = 'USD'): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency
+      currency,
     }).format(amount);
   }
 
@@ -137,7 +138,7 @@ export class FormatUtils {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     }).format(date);
   }
 
@@ -150,7 +151,7 @@ export class FormatUtils {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(date);
   }
 }
@@ -179,7 +180,7 @@ export class DataUtils {
     }
 
     if (Array.isArray(obj)) {
-      return obj.map(item => this.deepClone(item)) as unknown as T;
+      return obj.map((item) => this.deepClone(item)) as unknown as T;
     }
 
     const cloned = {} as T;
@@ -214,7 +215,7 @@ export class DataUtils {
     return result;
   }
 
-  private static isObject(item: any): boolean {
+  public static isObject(item: any): boolean {
     return item && typeof item === 'object' && !Array.isArray(item) && !(item instanceof Date);
   }
 
@@ -260,7 +261,12 @@ export class DataUtils {
  */
 export class Constants {
   // Customer types
-  static readonly CUSTOMER_TYPES = ['residential', 'commercial', 'industrial', 'municipal'] as const;
+  static readonly CUSTOMER_TYPES = [
+    'residential',
+    'commercial',
+    'industrial',
+    'municipal',
+  ] as const;
 
   // Customer statuses
   static readonly CUSTOMER_STATUSES = ['active', 'inactive', 'suspended', 'pending'] as const;
@@ -269,42 +275,79 @@ export class Constants {
   static readonly SERVICE_TYPES = ['waste', 'recycling', 'organics', 'hazardous'] as const;
 
   // Service frequencies
-  static readonly SERVICE_FREQUENCIES = ['daily', 'weekly', 'biweekly', 'monthly', 'on_demand'] as const;
+  static readonly SERVICE_FREQUENCIES = [
+    'daily',
+    'weekly',
+    'biweekly',
+    'monthly',
+    'on_demand',
+  ] as const;
 
   // Container types
   static readonly CONTAINER_TYPES = ['dumpster', 'rolloff', 'compactor', 'cart'] as const;
 
   // Container sizes
-  static readonly CONTAINER_SIZES = ['1_yard', '2_yard', '4_yard', '6_yard', '8_yard', '10_yard', '20_yard', '30_yard', '40_yard'] as const;
+  static readonly CONTAINER_SIZES = [
+    '1_yard',
+    '2_yard',
+    '4_yard',
+    '6_yard',
+    '8_yard',
+    '10_yard',
+    '20_yard',
+    '30_yard',
+    '40_yard',
+  ] as const;
 
   // Material categories
-  static readonly MATERIAL_CATEGORIES = ['paper', 'plastic', 'metal', 'glass', 'organic', 'hazardous', 'mixed_waste'] as const;
+  static readonly MATERIAL_CATEGORIES = [
+    'paper',
+    'plastic',
+    'metal',
+    'glass',
+    'organic',
+    'hazardous',
+    'mixed_waste',
+  ] as const;
 
   // Payment methods
   static readonly PAYMENT_METHODS = ['cash', 'check', 'credit_card', 'ach', 'wire'] as const;
 
   // Payment statuses
-  static readonly PAYMENT_STATUSES = ['pending', 'processing', 'processed', 'failed', 'cancelled', 'refunded'] as const;
+  static readonly PAYMENT_STATUSES = [
+    'pending',
+    'processing',
+    'processed',
+    'failed',
+    'cancelled',
+    'refunded',
+  ] as const;
 
   // Route statuses
   static readonly ROUTE_STATUSES = ['planned', 'active', 'completed', 'cancelled'] as const;
 
   // Facility types
-  static readonly FACILITY_TYPES = ['mrf', 'transfer', 'landfill', 'compost', 'incinerator'] as const;
+  static readonly FACILITY_TYPES = [
+    'mrf',
+    'transfer',
+    'landfill',
+    'compost',
+    'incinerator',
+  ] as const;
 
   // Address validation patterns
   static readonly ADDRESS_PATTERNS = {
-    street: /^[a-zA-Z0-9\s\-\.\#]+$/,
-    city: /^[a-zA-Z\s\-\.]+$/,
+    street: /^[a-zA-Z0-9\s\-.#]+$/,
+    city: /^[a-zA-Z\s\-.]+$/,
     state: /^[A-Z]{2}$/,
-    zipCode: /^\d{5}(-\d{4})?$/
+    zipCode: /^\d{5}(-\d{4})?$/,
   };
 
   // Contact validation patterns
   static readonly CONTACT_PATTERNS = {
-    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    phone: /^\+?[\d\s\-\(\)]{10,}$/,
-    taxId: /^\d{9}$|^\d{2}-\d{7}$/
+    email: /^[^\s@]+@[^\s@]+.[^\s@]+$/,
+    phone: /^\+?[\d\s\-()]{10,}$/,
+    taxId: /^\d{9}$|^\d{2}-\d{7}$/,
   };
 
   // Business rule constants
@@ -315,7 +358,7 @@ export class Constants {
     MAX_ROUTE_STOPS: 25,
     MAX_FACILITY_CAPACITY: 10000, // tons/day
     MIN_CONTRACT_VALUE: 100,
-    MAX_PAYMENT_RETRIES: 3
+    MAX_PAYMENT_RETRIES: 3,
   };
 }
 
@@ -335,23 +378,14 @@ export class EntityError extends Error {
 }
 
 export class ValidationError extends EntityError {
-  constructor(
-    message: string,
-    entityType: string,
-    field?: string,
-    entityId?: string
-  ) {
+  constructor(message: string, entityType: string, field?: string, entityId?: string) {
     super(message, entityType, entityId, field);
     this.name = 'ValidationError';
   }
 }
 
 export class BusinessRuleError extends EntityError {
-  constructor(
-    message: string,
-    entityType: string,
-    entityId?: string
-  ) {
+  constructor(message: string, entityType: string, entityId?: string) {
     super(message, entityType, entityId);
     this.name = 'BusinessRuleError';
   }
@@ -397,8 +431,8 @@ export class AuditUtils {
       metadata: {
         userId: userId || 'system',
         source: 'api',
-        version: 1
-      }
+        version: 1,
+      },
     };
   }
 
@@ -411,7 +445,7 @@ export class AuditUtils {
 
     for (let i = 0; i < entityString.length; i++) {
       const char = entityString.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
 
@@ -432,7 +466,7 @@ export class AuditUtils {
         if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
           changes[key] = {
             from: oldValue,
-            to: newValue
+            to: newValue,
           };
         }
       }
@@ -458,7 +492,7 @@ export class MetadataUtils {
       createdBy: userId || 'system',
       source,
       createdAt: new Date(),
-      ...additionalData
+      ...additionalData,
     };
   }
 
@@ -471,11 +505,11 @@ export class MetadataUtils {
     userId?: string
   ): Record<string, any> {
     return {
-      ...existingMetadata,
+      ...(existingMetadata || {}),
       ...updates,
       lastModifiedBy: userId || 'system',
       lastModifiedAt: new Date(),
-      previousVersion: existingMetadata.version || 1
+      previousVersion: existingMetadata?.version || 1,
     };
   }
 

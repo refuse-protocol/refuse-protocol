@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Order/Job entity implementation with work scheduling
  * @description Complete Order model for managing work orders, job scheduling, and operational workflows
@@ -21,7 +22,14 @@ export class OrderModel implements Order {
 
   orderNumber: string;
   type: 'pickup' | 'delivery' | 'service' | 'maintenance' | 'emergency' | 'scheduled';
-  status: 'draft' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'on_hold' | 'pending_approval';
+  status:
+    | 'draft'
+    | 'scheduled'
+    | 'in_progress'
+    | 'completed'
+    | 'cancelled'
+    | 'on_hold'
+    | 'pending_approval';
   priority: 'low' | 'medium' | 'high' | 'critical' | 'emergency';
 
   // Customer and Location Information
@@ -102,30 +110,56 @@ export class OrderModel implements Order {
   relatedRequests?: string[];
 
   private static readonly VALID_ORDER_TYPES: Order['type'][] = [
-    'pickup', 'delivery', 'service', 'maintenance', 'emergency', 'scheduled'
+    'pickup',
+    'delivery',
+    'service',
+    'maintenance',
+    'emergency',
+    'scheduled',
   ];
 
   private static readonly VALID_STATUSES: Order['status'][] = [
-    'draft', 'scheduled', 'in_progress', 'completed', 'cancelled', 'on_hold', 'pending_approval'
+    'draft',
+    'scheduled',
+    'in_progress',
+    'completed',
+    'cancelled',
+    'on_hold',
+    'pending_approval',
   ];
 
   private static readonly VALID_PRIORITIES: Order['priority'][] = [
-    'low', 'medium', 'high', 'critical', 'emergency'
+    'low',
+    'medium',
+    'high',
+    'critical',
+    'emergency',
   ];
 
   private static readonly VALID_SERVICE_TYPES = [
-    'waste_collection', 'recycling_collection', 'organics_collection', 'bulk_waste',
-    'hazardous_waste', 'container_delivery', 'container_pickup', 'maintenance',
-    'inspection', 'cleaning', 'repair', 'emergency_response'
+    'waste_collection',
+    'recycling_collection',
+    'organics_collection',
+    'bulk_waste',
+    'hazardous_waste',
+    'container_delivery',
+    'container_pickup',
+    'maintenance',
+    'inspection',
+    'cleaning',
+    'repair',
+    'emergency_response',
   ];
 
   private static readonly VALID_BILLING_STATUSES: Order['billingStatus'][] = [
-    'pending', 'billed', 'paid', 'disputed'
+    'pending',
+    'billed',
+    'paid',
+    'disputed',
   ];
 
-  private static readonly VALID_ENVIRONMENTAL_IMPACTS: Order['environmentalCompliance']['environmentalImpact'][] = [
-    'low', 'medium', 'high'
-  ];
+  private static readonly VALID_ENVIRONMENTAL_IMPACTS: Order['environmentalCompliance']['environmentalImpact'][] =
+    ['low', 'medium', 'high'];
 
   constructor(data: Partial<Order>) {
     this.validateAndAssign(data);
@@ -134,7 +168,9 @@ export class OrderModel implements Order {
   /**
    * Create a new order with validation
    */
-  static create(data: Omit<Order, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): OrderModel {
+  static create(
+    data: Omit<Order, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>
+  ): OrderModel {
     const now = new Date();
     const orderData: Partial<Order> = {
       id: uuidv4(),
@@ -145,8 +181,8 @@ export class OrderModel implements Order {
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'order_system'
-      }
+        source: 'order_system',
+      },
     };
 
     return new OrderModel(orderData);
@@ -169,8 +205,8 @@ export class OrderModel implements Order {
         ...this.metadata,
         ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new OrderModel(updatedData);
@@ -214,11 +250,16 @@ export class OrderModel implements Order {
     }
 
     if (!data.billingStatus || !OrderModel.VALID_BILLING_STATUSES.includes(data.billingStatus)) {
-      throw new Error(`Billing status must be one of: ${OrderModel.VALID_BILLING_STATUSES.join(', ')}`);
+      throw new Error(
+        `Billing status must be one of: ${OrderModel.VALID_BILLING_STATUSES.join(', ')}`
+      );
     }
 
     // Validate estimated duration if provided
-    if (data.estimatedDuration && (typeof data.estimatedDuration !== 'number' || data.estimatedDuration <= 0)) {
+    if (
+      data.estimatedDuration &&
+      (typeof data.estimatedDuration !== 'number' || data.estimatedDuration <= 0)
+    ) {
       throw new Error('Estimated duration must be a positive number');
     }
 
@@ -247,7 +288,10 @@ export class OrderModel implements Order {
           throw new Error(`Expected material ${index}: unit is required`);
         }
 
-        if (material.actualQuantity && (typeof material.actualQuantity !== 'number' || material.actualQuantity < 0)) {
+        if (
+          material.actualQuantity &&
+          (typeof material.actualQuantity !== 'number' || material.actualQuantity < 0)
+        ) {
           throw new Error(`Expected material ${index}: actual quantity must be non-negative`);
         }
       });
@@ -261,7 +305,9 @@ export class OrderModel implements Order {
         }
 
         if (!['approved', 'rejected', 'pending'].includes(approval.status)) {
-          throw new Error(`Approval history ${index}: status must be approved, rejected, or pending`);
+          throw new Error(
+            `Approval history ${index}: status must be approved, rejected, or pending`
+          );
         }
 
         if (!this.isValidDate(approval.timestamp)) {
@@ -285,16 +331,28 @@ export class OrderModel implements Order {
 
     // Validate environmental compliance if provided
     if (data.environmentalCompliance) {
-      if (!data.environmentalCompliance.wasteClassification || typeof data.environmentalCompliance.wasteClassification !== 'string') {
+      if (
+        !data.environmentalCompliance.wasteClassification ||
+        typeof data.environmentalCompliance.wasteClassification !== 'string'
+      ) {
         throw new Error('Waste classification is required for environmental compliance');
       }
 
-      if (!data.environmentalCompliance.disposalMethod || typeof data.environmentalCompliance.disposalMethod !== 'string') {
+      if (
+        !data.environmentalCompliance.disposalMethod ||
+        typeof data.environmentalCompliance.disposalMethod !== 'string'
+      ) {
         throw new Error('Disposal method is required for environmental compliance');
       }
 
-      if (!OrderModel.VALID_ENVIRONMENTAL_IMPACTS.includes(data.environmentalCompliance.environmentalImpact)) {
-        throw new Error(`Environmental impact must be one of: ${OrderModel.VALID_ENVIRONMENTAL_IMPACTS.join(', ')}`);
+      if (
+        !OrderModel.VALID_ENVIRONMENTAL_IMPACTS.includes(
+          data.environmentalCompliance.environmentalImpact
+        )
+      ) {
+        throw new Error(
+          `Environmental impact must be one of: ${OrderModel.VALID_ENVIRONMENTAL_IMPACTS.join(', ')}`
+        );
       }
     }
 
@@ -324,7 +382,7 @@ export class OrderModel implements Order {
     const now = new Date().toISOString();
     const updateData: Partial<Order> = {
       status: 'in_progress',
-      actualStartTime: now
+      actualStartTime: now,
     };
 
     return this.update(updateData, this.version);
@@ -342,7 +400,7 @@ export class OrderModel implements Order {
     const updateData: Partial<Order> = {
       status: 'completed',
       actualEndTime: now,
-      completedDate: now.split('T')[0]
+      completedDate: now.split('T')[0],
     };
 
     return this.update(updateData, this.version);
@@ -357,7 +415,7 @@ export class OrderModel implements Order {
     }
 
     const updateData: Partial<Order> = {
-      status: 'cancelled'
+      status: 'cancelled',
     };
 
     return this.update(updateData, this.version);
@@ -372,7 +430,7 @@ export class OrderModel implements Order {
     }
 
     const updateData: Partial<Order> = {
-      status: 'on_hold'
+      status: 'on_hold',
     };
 
     return this.update(updateData, this.version);
@@ -387,7 +445,7 @@ export class OrderModel implements Order {
     }
 
     const updateData: Partial<Order> = {
-      status: 'scheduled'
+      status: 'scheduled',
     };
 
     return this.update(updateData, this.version);
@@ -401,7 +459,7 @@ export class OrderModel implements Order {
       timestamp: new Date().toISOString(),
       status,
       notes,
-      location
+      location,
     };
 
     const newProgressUpdates = [...this.progressUpdates, progressUpdate];
@@ -427,7 +485,7 @@ export class OrderModel implements Order {
    * Remove personnel from order
    */
   removePersonnel(personnelId: string): OrderModel {
-    const newPersonnel = (this.assignedPersonnel || []).filter(id => id !== personnelId);
+    const newPersonnel = (this.assignedPersonnel || []).filter((id) => id !== personnelId);
     return this.update({ assignedPersonnel: newPersonnel }, this.version);
   }
 
@@ -443,12 +501,13 @@ export class OrderModel implements Order {
    * Update material quantities
    */
   updateMaterialQuantity(materialType: string, actualQuantity: number): OrderModel {
-    const newExpectedMaterials = this.expectedMaterials?.map(material => {
-      if (material.materialType === materialType) {
-        return { ...material, actualQuantity };
-      }
-      return material;
-    }) || [];
+    const newExpectedMaterials =
+      this.expectedMaterials?.map((material) => {
+        if (material.materialType === materialType) {
+          return { ...material, actualQuantity };
+        }
+        return material;
+      }) || [];
 
     return this.update({ expectedMaterials: newExpectedMaterials }, this.version);
   }
@@ -468,7 +527,7 @@ export class OrderModel implements Order {
       performed: true,
       score,
       notes,
-      inspectorId
+      inspectorId,
     };
 
     return this.update({ qualityCheck }, this.version);
@@ -536,7 +595,8 @@ export class OrderModel implements Order {
 
     // Reduce score based on duration variance
     if (this.estimatedDuration && this.getDurationMinutes() > 0) {
-      const variance = Math.abs(this.getDurationMinutes() - this.estimatedDuration) / this.estimatedDuration;
+      const variance =
+        Math.abs(this.getDurationMinutes() - this.estimatedDuration) / this.estimatedDuration;
       if (variance > 0.5) score -= 15; // More than 50% variance
     }
 
@@ -598,10 +658,15 @@ export class OrderModel implements Order {
       ageInHours,
       estimatedDuration: this.estimatedDuration,
       actualDuration: durationMinutes,
-      durationVariance: this.estimatedDuration ? Math.round(((durationMinutes - this.estimatedDuration) / this.estimatedDuration) * 100) : 0,
+      durationVariance: this.estimatedDuration
+        ? Math.round(((durationMinutes - this.estimatedDuration) / this.estimatedDuration) * 100)
+        : 0,
       estimatedCost: this.estimatedCost,
       actualCost: this.actualCost,
-      costVariance: this.estimatedCost && this.actualCost ? Math.round(((this.actualCost - this.estimatedCost) / this.estimatedCost) * 100) : 0,
+      costVariance:
+        this.estimatedCost && this.actualCost
+          ? Math.round(((this.actualCost - this.estimatedCost) / this.estimatedCost) * 100)
+          : 0,
       assignedFleet: this.assignedFleet,
       assignedPersonnelCount: this.assignedPersonnel?.length || 0,
       expectedMaterialsCount: this.expectedMaterials?.length || 0,
@@ -609,7 +674,7 @@ export class OrderModel implements Order {
       approvalHistoryCount: this.approvalHistory.length,
       billingStatus: this.billingStatus,
       qualityScore: this.qualityCheck?.score || null,
-      environmentalImpact: this.environmentalCompliance?.environmentalImpact || 'low'
+      environmentalImpact: this.environmentalCompliance?.environmentalImpact || 'low',
     };
   }
 
@@ -654,7 +719,7 @@ export class OrderModel implements Order {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -662,7 +727,7 @@ export class OrderModel implements Order {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Order> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 
@@ -676,7 +741,7 @@ export class OrderModel implements Order {
       eventType,
       timestamp: new Date(),
       eventData: this.toEventData(),
-      version: 1
+      version: 1,
     };
   }
 
@@ -708,7 +773,11 @@ export class OrderModel implements Order {
 
     // Business rule: Quality check required for certain service types
     const qualityRequiredServices = ['hazardous_waste', 'maintenance', 'repair'];
-    if (qualityRequiredServices.includes(this.serviceType) && this.status === 'completed' && !this.qualityCheck?.performed) {
+    if (
+      qualityRequiredServices.includes(this.serviceType) &&
+      this.status === 'completed' &&
+      !this.qualityCheck?.performed
+    ) {
       errors.push('Quality check required for this service type');
     }
 
@@ -723,7 +792,8 @@ export class OrderModel implements Order {
     }
 
     // Business rule: Duration should be reasonable
-    if (this.estimatedDuration && this.estimatedDuration > 480) { // 8 hours
+    if (this.estimatedDuration && this.estimatedDuration > 480) {
+      // 8 hours
       errors.push('Estimated duration exceeds 8 hours - consider splitting order');
     }
 
@@ -741,28 +811,42 @@ export class OrderFactory {
   static fromLegacyData(legacyData: Record<string, any>): OrderModel {
     // Data archaeology: Handle various legacy field names and formats
     const mappedData: Partial<Order> = {
-      externalIds: [legacyData.order_id || legacyData.ORDER_ID || legacyData.work_order_id || legacyData.id],
-      orderNumber: legacyData.order_number || legacyData.ORDER_NUMBER || legacyData.work_order_number || `WO-${Date.now()}`,
+      externalIds: [
+        legacyData.order_id || legacyData.ORDER_ID || legacyData.work_order_id || legacyData.id,
+      ],
+      orderNumber:
+        legacyData.order_number ||
+        legacyData.ORDER_NUMBER ||
+        legacyData.work_order_number ||
+        `WO-${Date.now()}`,
       type: this.mapLegacyOrderType(legacyData.order_type || legacyData.type || 'service'),
       status: this.mapLegacyStatus(legacyData.status || legacyData.STATUS || 'scheduled'),
       priority: this.mapLegacyPriority(legacyData.priority || legacyData.PRIORITY || 'medium'),
       customerId: legacyData.customer_id || legacyData.CUSTOMER_ID,
       siteId: legacyData.site_id || legacyData.SITE_ID,
       location: this.mapLegacyLocation(legacyData),
-      scheduledDate: legacyData.scheduled_date || legacyData.SCHEDULED_DATE || new Date().toISOString().split('T')[0],
+      scheduledDate:
+        legacyData.scheduled_date ||
+        legacyData.SCHEDULED_DATE ||
+        new Date().toISOString().split('T')[0],
       scheduledTime: legacyData.scheduled_time || legacyData.SCHEDULED_TIME,
       estimatedDuration: legacyData.estimated_duration || legacyData.ESTIMATED_DURATION,
-      serviceType: this.mapLegacyServiceType(legacyData.service_type || legacyData.SERVICE_TYPE || 'waste_collection'),
+      serviceType: this.mapLegacyServiceType(
+        legacyData.service_type || legacyData.SERVICE_TYPE || 'waste_collection'
+      ),
       description: legacyData.description || legacyData.DESCRIPTION || legacyData.notes,
       instructions: legacyData.instructions || legacyData.INSTRUCTIONS,
       specialRequirements: this.mapLegacySpecialRequirements(legacyData),
-      assignedFleet: legacyData.assigned_fleet || legacyData.ASSIGNED_FLEET || legacyData.vehicle_id,
+      assignedFleet:
+        legacyData.assigned_fleet || legacyData.ASSIGNED_FLEET || legacyData.vehicle_id,
       assignedPersonnel: this.mapLegacyPersonnel(legacyData),
       requiredEquipment: this.mapLegacyEquipment(legacyData),
       expectedMaterials: this.mapLegacyMaterials(legacyData),
       estimatedCost: legacyData.estimated_cost || legacyData.ESTIMATED_COST,
       actualCost: legacyData.actual_cost || legacyData.ACTUAL_COST,
-      billingStatus: this.mapLegacyBillingStatus(legacyData.billing_status || legacyData.BILLING_STATUS || 'pending'),
+      billingStatus: this.mapLegacyBillingStatus(
+        legacyData.billing_status || legacyData.BILLING_STATUS || 'pending'
+      ),
       qualityCheck: this.mapLegacyQualityCheck(legacyData),
       environmentalCompliance: this.mapLegacyEnvironmentalCompliance(legacyData),
       approvalHistory: this.mapLegacyApprovalHistory(legacyData),
@@ -779,9 +863,9 @@ export class OrderFactory {
         orderData: {
           department: legacyData.department || 'operations',
           costCenter: legacyData.cost_center,
-          projectCode: legacyData.project_code
-        }
-      }
+          projectCode: legacyData.project_code,
+        },
+      },
     };
 
     return OrderModel.create(mappedData as any);
@@ -792,14 +876,14 @@ export class OrderFactory {
    */
   private static mapLegacyOrderType(legacyType: string): Order['type'] {
     const typeMap: Record<string, Order['type']> = {
-      'pickup': 'pickup',
-      'delivery': 'delivery',
-      'service': 'service',
-      'maintenance': 'maintenance',
-      'emergency': 'emergency',
-      'scheduled': 'scheduled',
-      'work_order': 'service',
-      'wo': 'service'
+      pickup: 'pickup',
+      delivery: 'delivery',
+      service: 'service',
+      maintenance: 'maintenance',
+      emergency: 'emergency',
+      scheduled: 'scheduled',
+      work_order: 'service',
+      wo: 'service',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'service';
@@ -810,19 +894,19 @@ export class OrderFactory {
    */
   private static mapLegacyStatus(legacyStatus: string): Order['status'] {
     const statusMap: Record<string, Order['status']> = {
-      'draft': 'draft',
-      'scheduled': 'scheduled',
-      'in_progress': 'in_progress',
-      'completed': 'completed',
-      'cancelled': 'cancelled',
-      'on_hold': 'on_hold',
-      'pending_approval': 'pending_approval',
-      'pending': 'pending_approval',
-      'approved': 'scheduled',
+      draft: 'draft',
+      scheduled: 'scheduled',
+      in_progress: 'in_progress',
+      completed: 'completed',
+      cancelled: 'cancelled',
+      on_hold: 'on_hold',
+      pending_approval: 'pending_approval',
+      pending: 'pending_approval',
+      approved: 'scheduled',
       'in progress': 'in_progress',
-      'complete': 'completed',
-      'canceled': 'cancelled',
-      'hold': 'on_hold'
+      complete: 'completed',
+      canceled: 'cancelled',
+      hold: 'on_hold',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'scheduled';
@@ -833,16 +917,16 @@ export class OrderFactory {
    */
   private static mapLegacyPriority(legacyPriority: string): Order['priority'] {
     const priorityMap: Record<string, Order['priority']> = {
-      'low': 'low',
-      'medium': 'medium',
-      'high': 'high',
-      'critical': 'critical',
-      'emergency': 'emergency',
+      low: 'low',
+      medium: 'medium',
+      high: 'high',
+      critical: 'critical',
+      emergency: 'emergency',
       '1': 'low',
       '2': 'medium',
       '3': 'high',
       '4': 'critical',
-      '5': 'emergency'
+      '5': 'emergency',
     };
 
     return priorityMap[legacyPriority.toLowerCase()] || 'medium';
@@ -853,12 +937,18 @@ export class OrderFactory {
    */
   private static mapLegacyLocation(legacyData: Record<string, any>): Address {
     return {
-      street1: legacyData.location_street1 || legacyData.LOCATION_STREET1 || legacyData.address1 || 'Unknown',
+      street1:
+        legacyData.location_street1 ||
+        legacyData.LOCATION_STREET1 ||
+        legacyData.address1 ||
+        'Unknown',
       street2: legacyData.location_street2 || legacyData.LOCATION_STREET2 || legacyData.address2,
       city: legacyData.location_city || legacyData.LOCATION_CITY || legacyData.city || 'Unknown',
-      state: legacyData.location_state || legacyData.LOCATION_STATE || legacyData.state || 'Unknown',
+      state:
+        legacyData.location_state || legacyData.LOCATION_STATE || legacyData.state || 'Unknown',
       zipCode: legacyData.location_zip || legacyData.LOCATION_ZIP || legacyData.zipcode || '00000',
-      country: legacyData.location_country || legacyData.LOCATION_COUNTRY || legacyData.country || 'US'
+      country:
+        legacyData.location_country || legacyData.LOCATION_COUNTRY || legacyData.country || 'US',
     };
   }
 
@@ -867,22 +957,22 @@ export class OrderFactory {
    */
   private static mapLegacyServiceType(legacyServiceType: string): string {
     const serviceMap: Record<string, string> = {
-      'waste_collection': 'waste_collection',
-      'recycling_collection': 'recycling_collection',
-      'organics_collection': 'organics_collection',
-      'bulk_waste': 'bulk_waste',
-      'hazardous_waste': 'hazardous_waste',
-      'container_delivery': 'container_delivery',
-      'container_pickup': 'container_pickup',
-      'maintenance': 'maintenance',
-      'inspection': 'inspection',
-      'cleaning': 'cleaning',
-      'repair': 'repair',
-      'emergency_response': 'emergency_response',
-      'waste': 'waste_collection',
-      'recycling': 'recycling_collection',
-      'delivery': 'container_delivery',
-      'pickup': 'container_pickup'
+      waste_collection: 'waste_collection',
+      recycling_collection: 'recycling_collection',
+      organics_collection: 'organics_collection',
+      bulk_waste: 'bulk_waste',
+      hazardous_waste: 'hazardous_waste',
+      container_delivery: 'container_delivery',
+      container_pickup: 'container_pickup',
+      maintenance: 'maintenance',
+      inspection: 'inspection',
+      cleaning: 'cleaning',
+      repair: 'repair',
+      emergency_response: 'emergency_response',
+      waste: 'waste_collection',
+      recycling: 'recycling_collection',
+      delivery: 'container_delivery',
+      pickup: 'container_pickup',
     };
 
     return serviceMap[legacyServiceType.toLowerCase()] || 'waste_collection';
@@ -952,7 +1042,7 @@ export class OrderFactory {
         materialType: material.type || material.material_type || 'mixed_waste',
         estimatedQuantity: material.quantity || material.estimated_quantity || 0,
         unit: material.unit || 'cubic_yards',
-        actualQuantity: material.actual_quantity
+        actualQuantity: material.actual_quantity,
       }));
     }
 
@@ -964,12 +1054,12 @@ export class OrderFactory {
    */
   private static mapLegacyBillingStatus(legacyStatus: string): Order['billingStatus'] {
     const statusMap: Record<string, Order['billingStatus']> = {
-      'pending': 'pending',
-      'billed': 'billed',
-      'paid': 'paid',
-      'disputed': 'disputed',
-      'unbilled': 'pending',
-      'invoiced': 'billed'
+      pending: 'pending',
+      billed: 'billed',
+      paid: 'paid',
+      disputed: 'disputed',
+      unbilled: 'pending',
+      invoiced: 'billed',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'pending';
@@ -989,14 +1079,16 @@ export class OrderFactory {
       performed: qcData.performed !== undefined ? qcData.performed : true,
       score: qcData.score || qcData.rating,
       notes: qcData.notes || qcData.comments,
-      inspectorId: qcData.inspector_id || qcData.inspector
+      inspectorId: qcData.inspector_id || qcData.inspector,
     };
   }
 
   /**
    * Map legacy environmental compliance
    */
-  private static mapLegacyEnvironmentalCompliance(legacyData: Record<string, any>): Order['environmentalCompliance'] {
+  private static mapLegacyEnvironmentalCompliance(
+    legacyData: Record<string, any>
+  ): Order['environmentalCompliance'] {
     if (!legacyData.environmental_compliance && !legacyData.waste_classification) {
       return undefined;
     }
@@ -1004,19 +1096,22 @@ export class OrderFactory {
     const ecData = legacyData.environmental_compliance || {};
 
     return {
-      wasteClassification: ecData.waste_classification || legacyData.waste_classification || 'non_hazardous',
+      wasteClassification:
+        ecData.waste_classification || legacyData.waste_classification || 'non_hazardous',
       disposalMethod: ecData.disposal_method || 'landfill',
       permitsRequired: ecData.permits_required || [],
       actualPermitsUsed: ecData.actual_permits_used || [],
       environmentalImpact: ecData.environmental_impact || 'low',
-      notes: ecData.notes
+      notes: ecData.notes,
     };
   }
 
   /**
    * Map legacy approval history
    */
-  private static mapLegacyApprovalHistory(legacyData: Record<string, any>): Order['approvalHistory'] {
+  private static mapLegacyApprovalHistory(
+    legacyData: Record<string, any>
+  ): Order['approvalHistory'] {
     if (!legacyData.approval_history && !legacyData.approvals) {
       return [];
     }
@@ -1029,7 +1124,7 @@ export class OrderFactory {
         status: approval.status || approval.approval_status || 'approved',
         userId: approval.user_id || approval.approver_id,
         timestamp: approval.timestamp || approval.date || new Date().toISOString(),
-        notes: approval.notes || approval.comments
+        notes: approval.notes || approval.comments,
       }));
     }
 
@@ -1039,7 +1134,9 @@ export class OrderFactory {
   /**
    * Map legacy progress updates
    */
-  private static mapLegacyProgressUpdates(legacyData: Record<string, any>): Order['progressUpdates'] {
+  private static mapLegacyProgressUpdates(
+    legacyData: Record<string, any>
+  ): Order['progressUpdates'] {
     if (!legacyData.progress_updates && !legacyData.status_history) {
       return [];
     }
@@ -1052,7 +1149,7 @@ export class OrderFactory {
         status: update.status || 'updated',
         notes: update.notes || update.description,
         updatedBy: update.updated_by || update.user_id,
-        location: update.location
+        location: update.location,
       }));
     }
 
@@ -1074,7 +1171,7 @@ export class OrderValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -1099,7 +1196,7 @@ export class OrderManager {
 
     // Sort by priority and scheduled date
     optimizedOrders.sort((a, b) => {
-      const priorityOrder = { 'emergency': 5, 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+      const priorityOrder = { emergency: 5, critical: 4, high: 3, medium: 2, low: 1 };
       const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
 
       if (priorityDiff !== 0) return priorityDiff;
@@ -1114,41 +1211,53 @@ export class OrderManager {
    * Get overdue orders
    */
   static getOverdueOrders(orders: OrderModel[]): OrderModel[] {
-    return orders.filter(order => order.isOverdue());
+    return orders.filter((order) => order.isOverdue());
   }
 
   /**
    * Get orders requiring approval
    */
   static getOrdersRequiringApproval(orders: OrderModel[]): OrderModel[] {
-    return orders.filter(order => order.requiresApproval());
+    return orders.filter((order) => order.requiresApproval());
   }
 
   /**
    * Get order performance report
    */
   static getPerformanceReport(orders: OrderModel[]): Record<string, any> {
-    const completedOrders = orders.filter(order => order.status === 'completed');
+    const completedOrders = orders.filter((order) => order.status === 'completed');
     const overdueOrders = this.getOverdueOrders(orders);
     const totalOrders = orders.length;
 
     const totalEstimatedCost = orders.reduce((sum, order) => sum + (order.estimatedCost || 0), 0);
-    const totalActualCost = completedOrders.reduce((sum, order) => sum + (order.actualCost || 0), 0);
+    const totalActualCost = completedOrders.reduce(
+      (sum, order) => sum + (order.actualCost || 0),
+      0
+    );
 
-    const costVariance = totalEstimatedCost > 0 ?
-      ((totalActualCost - totalEstimatedCost) / totalEstimatedCost) * 100 : 0;
+    const costVariance =
+      totalEstimatedCost > 0
+        ? ((totalActualCost - totalEstimatedCost) / totalEstimatedCost) * 100
+        : 0;
 
-    const averageEfficiency = orders.reduce((sum, order) => sum + order.getEfficiencyScore(), 0) / orders.length;
+    const averageEfficiency =
+      orders.reduce((sum, order) => sum + order.getEfficiencyScore(), 0) / orders.length;
 
-    const ordersByPriority = orders.reduce((acc, order) => {
-      acc[order.priority] = (acc[order.priority] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const ordersByPriority = orders.reduce(
+      (acc, order) => {
+        acc[order.priority] = (acc[order.priority] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const ordersByStatus = orders.reduce((acc, order) => {
-      acc[order.status] = (acc[order.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const ordersByStatus = orders.reduce(
+      (acc, order) => {
+        acc[order.status] = (acc[order.status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalOrders,
@@ -1163,7 +1272,8 @@ export class OrderManager {
       costVariance: Math.round(costVariance * 100) / 100,
       ordersByPriority,
       ordersByStatus,
-      averageAgeInHours: orders.reduce((sum, order) => sum + order.getAgeInHours(), 0) / orders.length
+      averageAgeInHours:
+        orders.reduce((sum, order) => sum + order.getAgeInHours(), 0) / orders.length,
     };
   }
 
@@ -1173,7 +1283,7 @@ export class OrderManager {
   static checkOrderConflicts(orders: OrderModel[]): string[] {
     const conflicts: string[] = [];
 
-    orders.forEach(order => {
+    orders.forEach((order) => {
       if (order.isOverdue()) {
         conflicts.push(`Order ${order.orderNumber} is overdue`);
       }
@@ -1183,7 +1293,7 @@ export class OrderManager {
       }
 
       const businessRuleErrors = order.validateBusinessRules();
-      conflicts.push(...businessRuleErrors.map(error => `${order.orderNumber}: ${error}`));
+      conflicts.push(...businessRuleErrors.map((error) => `${order.orderNumber}: ${error}`));
     });
 
     return conflicts;
@@ -1193,10 +1303,11 @@ export class OrderManager {
    * Get emergency orders requiring immediate attention
    */
   static getEmergencyOrders(orders: OrderModel[]): OrderModel[] {
-    return orders.filter(order =>
-      order.priority === 'emergency' ||
-      order.priority === 'critical' ||
-      (order.type === 'emergency' && order.status !== 'completed')
+    return orders.filter(
+      (order) =>
+        order.priority === 'emergency' ||
+        order.priority === 'critical' ||
+        (order.type === 'emergency' && order.status !== 'completed')
     );
   }
 }

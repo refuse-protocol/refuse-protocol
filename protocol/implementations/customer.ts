@@ -4,8 +4,9 @@
  * @version 1.0.0
  */
 
-import { Customer, Address, Contact } from '../specifications/entities';
+import { Customer, Address, Contact, BaseEntity } from '../specifications/entities';
 import { Event } from '../specifications/entities';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ValidationUtils,
   FormatUtils,
@@ -14,28 +15,28 @@ import {
   AuditUtils,
   MetadataUtils,
   ConcurrencyError,
-  ValidationError
+  ValidationError,
 } from './common';
 
 /**
  * Customer implementation with full validation and business logic
  */
 export class CustomerModel implements Customer {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  name: string;
-  type: 'residential' | 'commercial' | 'industrial' | 'municipal';
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
+  name!: string;
+  type!: 'residential' | 'commercial' | 'industrial' | 'municipal';
+  status!: 'active' | 'inactive' | 'suspended' | 'pending';
   taxId?: string;
   primaryContact?: Contact;
   billingContact?: Contact;
   serviceContacts?: Contact[];
-  serviceAddress: Address;
+  serviceAddress!: Address;
   billingAddress?: Address;
   serviceTypes?: string[];
   specialInstructions?: string;
@@ -52,7 +53,7 @@ export class CustomerModel implements Customer {
   /**
    * Create a new customer with validation
    */
-  static create(data: Omit<Customer, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): CustomerModel {
+  static create(data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'version'>): CustomerModel {
     const now = new Date();
     const customerData: Partial<Customer> = {
       id: uuidv4(),
@@ -63,8 +64,8 @@ export class CustomerModel implements Customer {
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'api'
-      }
+        source: 'api',
+      },
     };
 
     return new CustomerModel(customerData);
@@ -73,7 +74,10 @@ export class CustomerModel implements Customer {
   /**
    * Update customer with optimistic locking
    */
-  update(updates: Partial<Omit<Customer, keyof BaseEntity>>, expectedVersion: number): CustomerModel {
+  update(
+    updates: Partial<Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'version'>>,
+    expectedVersion: number
+  ): CustomerModel {
     if (this.version !== expectedVersion) {
       throw new ConcurrencyError('customer', this.id, expectedVersion, this.version);
     }
@@ -91,41 +95,70 @@ export class CustomerModel implements Customer {
    */
   private validateAndAssign(data: Partial<Customer>): void {
     // Validate required fields
-    const requiredErrors = ValidationUtils.validateRequired(data, ['name', 'type', 'status', 'serviceAddress']);
+    const requiredErrors = ValidationUtils.validateRequired(data, [
+      'name',
+      'type',
+      'status',
+      'serviceAddress',
+    ]);
     if (requiredErrors.length > 0) {
       throw new ValidationError(requiredErrors[0], 'customer', 'multiple');
     }
 
     // Validate enum values
-    const typeErrors = ValidationUtils.validateEnum(data.type, Constants.CUSTOMER_TYPES, 'Customer type');
+    const typeErrors = ValidationUtils.validateEnum(
+      data.type,
+      [...Constants.CUSTOMER_TYPES],
+      'Customer type'
+    );
     if (typeErrors.length > 0) {
       throw new ValidationError(typeErrors[0], 'customer', 'type');
     }
 
-    const statusErrors = ValidationUtils.validateEnum(data.status, Constants.CUSTOMER_STATUSES, 'Customer status');
+    const statusErrors = ValidationUtils.validateEnum(
+      data.status,
+      [...Constants.CUSTOMER_STATUSES],
+      'Customer status'
+    );
     if (statusErrors.length > 0) {
       throw new ValidationError(statusErrors[0], 'customer', 'status');
     }
 
     // Validate string length
-    const nameErrors = ValidationUtils.validateLength(data.name!, Constants.BUSINESS_RULES.MAX_NAME_LENGTH, 'Customer name');
+    const nameErrors = ValidationUtils.validateLength(
+      data.name!,
+      Constants.BUSINESS_RULES.MAX_NAME_LENGTH,
+      'Customer name'
+    );
     if (nameErrors.length > 0) {
       throw new ValidationError(nameErrors[0], 'customer', 'name');
     }
 
     // Validate contacts
     if (data.primaryContact?.email && !ValidationUtils.isValidEmail(data.primaryContact.email)) {
-      throw new ValidationError('Primary contact email is invalid', 'customer', 'primaryContact.email');
+      throw new ValidationError(
+        'Primary contact email is invalid',
+        'customer',
+        'primaryContact.email'
+      );
     }
 
     if (data.billingContact?.email && !ValidationUtils.isValidEmail(data.billingContact.email)) {
-      throw new ValidationError('Billing contact email is invalid', 'customer', 'billingContact.email');
+      throw new ValidationError(
+        'Billing contact email is invalid',
+        'customer',
+        'billingContact.email'
+      );
     }
 
     if (data.serviceContacts) {
       data.serviceContacts.forEach((contact, index) => {
         if (contact.email && !ValidationUtils.isValidEmail(contact.email)) {
-          throw new ValidationError(`Service contact ${index} email is invalid`, 'customer', `serviceContacts.${index}.email`);
+          throw new ValidationError(
+            `Service contact ${index} email is invalid`,
+            'customer',
+            `serviceContacts.${index}.email`
+          );
         }
       });
     }
@@ -138,7 +171,6 @@ export class CustomerModel implements Customer {
     // Assign validated data
     Object.assign(this, data);
   }
-
 
   /**
    * Check if customer is active
@@ -198,7 +230,7 @@ export class CustomerModel implements Customer {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -206,7 +238,7 @@ export class CustomerModel implements Customer {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Customer> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData } = this.toJSON();
     return eventData;
   }
 
@@ -214,12 +246,7 @@ export class CustomerModel implements Customer {
    * Create domain event for customer changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
-    return AuditUtils.generateEvent(
-      'customer',
-      this.id,
-      eventType,
-      this.toEventData()
-    ) as Event;
+    return AuditUtils.generateEvent('customer', this.id, eventType, this.toEventData()) as Event;
   }
 
   /**
@@ -239,7 +266,10 @@ export class CustomerModel implements Customer {
     }
 
     // Business rule: Industrial customers should have service contacts
-    if (this.type === 'industrial' && (!this.serviceContacts || this.serviceContacts.length === 0)) {
+    if (
+      this.type === 'industrial' &&
+      (!this.serviceContacts || this.serviceContacts.length === 0)
+    ) {
       errors.push('Industrial customers must have at least one service contact');
     }
 
@@ -260,10 +290,10 @@ export class CustomerModel implements Customer {
       contactCount: [
         this.primaryContact,
         this.billingContact,
-        ...(this.serviceContacts || [])
+        ...(this.serviceContacts || []),
       ].filter(Boolean).length,
       ageInDays: this.getAgeInDays(),
-      isActive: this.isActive()
+      isActive: this.isActive(),
     };
   }
 }
@@ -280,7 +310,9 @@ export class CustomerFactory {
     const mappedData: Partial<Customer> = {
       externalIds: [legacyData.customer_id || legacyData.CUSTOMER_ID || legacyData.id],
       name: legacyData.customer_name || legacyData.CUSTOMER_NAME || legacyData.name,
-      type: this.mapLegacyCustomerType(legacyData.customer_type || legacyData.CUSTOMER_TYPE || legacyData.type),
+      type: this.mapLegacyCustomerType(
+        legacyData.customer_type || legacyData.CUSTOMER_TYPE || legacyData.type
+      ),
       status: this.mapLegacyStatus(legacyData.status || legacyData.STATUS || 'active'),
       taxId: legacyData.tax_id || legacyData.TAX_ID || legacyData.ein,
       serviceAddress: this.mapLegacyAddress(legacyData),
@@ -289,8 +321,8 @@ export class CustomerFactory {
         originalFieldNames: Object.keys(legacyData),
         transformationNotes: 'Migrated from legacy waste management system',
         syncStatus: 'migrated',
-        lastSyncDate: new Date().toISOString()
-      }
+        lastSyncDate: new Date().toISOString(),
+      },
     };
 
     return CustomerModel.create(mappedData as any);
@@ -301,18 +333,18 @@ export class CustomerFactory {
    */
   private static mapLegacyCustomerType(legacyType: string): Customer['type'] {
     const typeMap: Record<string, Customer['type']> = {
-      'residential': 'residential',
-      'res': 'residential',
-      'r': 'residential',
-      'commercial': 'commercial',
-      'com': 'commercial',
-      'c': 'commercial',
-      'industrial': 'industrial',
-      'ind': 'industrial',
-      'i': 'industrial',
-      'municipal': 'municipal',
-      'muni': 'municipal',
-      'm': 'municipal'
+      residential: 'residential',
+      res: 'residential',
+      r: 'residential',
+      commercial: 'commercial',
+      com: 'commercial',
+      c: 'commercial',
+      industrial: 'industrial',
+      ind: 'industrial',
+      i: 'industrial',
+      municipal: 'municipal',
+      muni: 'municipal',
+      m: 'municipal',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'commercial';
@@ -323,14 +355,14 @@ export class CustomerFactory {
    */
   private static mapLegacyStatus(legacyStatus: string): Customer['status'] {
     const statusMap: Record<string, Customer['status']> = {
-      'active': 'active',
-      'a': 'active',
-      'inactive': 'inactive',
-      'i': 'inactive',
-      'suspended': 'suspended',
-      's': 'suspended',
-      'pending': 'pending',
-      'p': 'pending'
+      active: 'active',
+      a: 'active',
+      inactive: 'inactive',
+      i: 'inactive',
+      suspended: 'suspended',
+      s: 'suspended',
+      pending: 'pending',
+      p: 'pending',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'active';
@@ -346,7 +378,7 @@ export class CustomerFactory {
       city: legacyData.city || legacyData.CITY,
       state: legacyData.state || legacyData.STATE,
       zipCode: legacyData.zip || legacyData.ZIP || legacyData.zipcode,
-      country: legacyData.country || 'US'
+      country: legacyData.country || 'US',
     };
   }
 }
@@ -365,7 +397,7 @@ export class CustomerValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }

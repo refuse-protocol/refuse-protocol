@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Service entity implementation with scheduling logic
  * @description Complete Service model with scheduling, pricing, and compliance
@@ -12,20 +13,20 @@ import { Event } from '../specifications/entities';
  * Service implementation with comprehensive scheduling and pricing logic
  */
 export class ServiceModel implements Service {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  customerId: string;
-  siteId: string;
-  serviceType: 'waste' | 'recycling' | 'organics' | 'hazardous' | 'bulk';
-  containerType: 'cart' | 'dumpster' | 'bin' | 'rolloff' | 'compactor';
+  customerId!: string;
+  siteId!: string;
+  serviceType!: 'waste' | 'recycling' | 'organics' | 'hazardous' | 'bulk';
+  containerType!: 'cart' | 'dumpster' | 'bin' | 'rolloff' | 'compactor';
   containerSize?: string;
   quantity?: number;
-  schedule: {
+  schedule!: {
     frequency: 'weekly' | 'bi_weekly' | 'monthly' | 'on_call' | 'one_time';
     dayOfWeek?: string;
     startDate: string;
@@ -43,7 +44,7 @@ export class ServiceModel implements Service {
     disposalFee?: number;
     totalRate?: number;
   };
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
+  status!: 'active' | 'inactive' | 'suspended' | 'pending';
   serviceStartDate?: string;
   serviceEndDate?: string;
   contractId?: string;
@@ -67,16 +68,31 @@ export class ServiceModel implements Service {
   };
 
   private static readonly VALID_SERVICE_TYPES: Service['serviceType'][] = [
-    'waste', 'recycling', 'organics', 'hazardous', 'bulk'
+    'waste',
+    'recycling',
+    'organics',
+    'hazardous',
+    'bulk',
   ];
   private static readonly VALID_CONTAINER_TYPES: Service['containerType'][] = [
-    'cart', 'dumpster', 'bin', 'rolloff', 'compactor'
+    'cart',
+    'dumpster',
+    'bin',
+    'rolloff',
+    'compactor',
   ];
   private static readonly VALID_FREQUENCIES: Service['schedule']['frequency'][] = [
-    'weekly', 'bi_weekly', 'monthly', 'on_call', 'one_time'
+    'weekly',
+    'bi_weekly',
+    'monthly',
+    'on_call',
+    'one_time',
   ];
   private static readonly VALID_STATUSES: Service['status'][] = [
-    'active', 'inactive', 'suspended', 'pending'
+    'active',
+    'inactive',
+    'suspended',
+    'pending',
   ];
 
   constructor(data: Partial<Service>) {
@@ -86,7 +102,9 @@ export class ServiceModel implements Service {
   /**
    * Create a new service with validation
    */
-  static create(data: Omit<Service, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): ServiceModel {
+  static create(
+    data: Omit<Service, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>
+  ): ServiceModel {
     const now = new Date();
     const serviceData: Partial<Service> = {
       id: uuidv4(),
@@ -95,10 +113,9 @@ export class ServiceModel implements Service {
       updatedAt: now,
       version: 1,
       metadata: {
-        ...data.metadata,
         createdBy: 'system',
-        source: 'api'
-      }
+        source: 'api',
+      },
     };
 
     return new ServiceModel(serviceData);
@@ -119,10 +136,9 @@ export class ServiceModel implements Service {
       updatedAt: new Date(),
       metadata: {
         ...this.metadata,
-        ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new ServiceModel(updatedData);
@@ -142,19 +158,28 @@ export class ServiceModel implements Service {
     }
 
     if (!data.serviceType || !ServiceModel.VALID_SERVICE_TYPES.includes(data.serviceType)) {
-      throw new Error(`Service type must be one of: ${ServiceModel.VALID_SERVICE_TYPES.join(', ')}`);
+      throw new Error(
+        `Service type must be one of: ${ServiceModel.VALID_SERVICE_TYPES.join(', ')}`
+      );
     }
 
     if (!data.containerType || !ServiceModel.VALID_CONTAINER_TYPES.includes(data.containerType)) {
-      throw new Error(`Container type must be one of: ${ServiceModel.VALID_CONTAINER_TYPES.join(', ')}`);
+      throw new Error(
+        `Container type must be one of: ${ServiceModel.VALID_CONTAINER_TYPES.join(', ')}`
+      );
     }
 
     if (!data.schedule) {
       throw new Error('Schedule is required');
     }
 
-    if (!data.schedule.frequency || !ServiceModel.VALID_FREQUENCIES.includes(data.schedule.frequency)) {
-      throw new Error(`Schedule frequency must be one of: ${ServiceModel.VALID_FREQUENCIES.join(', ')}`);
+    if (
+      !data.schedule.frequency ||
+      !ServiceModel.VALID_FREQUENCIES.includes(data.schedule.frequency)
+    ) {
+      throw new Error(
+        `Schedule frequency must be one of: ${ServiceModel.VALID_FREQUENCIES.join(', ')}`
+      );
     }
 
     if (!data.schedule.startDate) {
@@ -188,7 +213,10 @@ export class ServiceModel implements Service {
         throw new Error('Base rate must be a non-negative number');
       }
 
-      if (data.pricing.fuelSurcharge && (data.pricing.fuelSurcharge < 0 || data.pricing.fuelSurcharge > 1)) {
+      if (
+        data.pricing.fuelSurcharge &&
+        (data.pricing.fuelSurcharge < 0 || data.pricing.fuelSurcharge > 1)
+      ) {
         throw new Error('Fuel surcharge must be between 0 and 1');
       }
     }
@@ -205,7 +233,7 @@ export class ServiceModel implements Service {
    */
   private isValidDate(dateString: string): boolean {
     const date = new Date(dateString);
-    return !isNaN(date.getTime()) && dateString.match(/^\d{4}-\d{2}-\d{2}$/);
+    return !isNaN(date.getTime()) && !!dateString.match(/^\d{4}-\d{2}-\d{2}$/);
   }
 
   /**
@@ -316,7 +344,9 @@ export class ServiceModel implements Service {
 
     const nextService = new Date(this.performance.nextServiceDate);
     const today = new Date();
-    const daysUntilService = Math.ceil((nextService.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const daysUntilService = Math.ceil(
+      (nextService.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     // Needs rescheduling if next service is within 24 hours or in the past
     return daysUntilService <= 1;
@@ -366,7 +396,7 @@ export class ServiceModel implements Service {
       isRecurring: this.isRecurring(),
       nextServiceDate: this.performance?.nextServiceDate,
       efficiencyScore: this.getEfficiencyScore(),
-      needsRescheduling: this.needsRescheduling()
+      needsRescheduling: this.needsRescheduling(),
     };
   }
 
@@ -397,7 +427,7 @@ export class ServiceModel implements Service {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -405,7 +435,7 @@ export class ServiceModel implements Service {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Service> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData } = this.toJSON();
     return eventData;
   }
 
@@ -413,13 +443,16 @@ export class ServiceModel implements Service {
    * Create domain event for service changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
+    const now = new Date();
     return {
       id: uuidv4(),
       entityType: 'service',
       eventType,
-      timestamp: new Date(),
+      timestamp: now,
       eventData: this.toEventData(),
-      version: 1
+      createdAt: now,
+      updatedAt: now,
+      version: 1,
     };
   }
 
@@ -440,7 +473,10 @@ export class ServiceModel implements Service {
     }
 
     // Business rule: Hazardous services require compliance information
-    if (this.serviceType === 'hazardous' && (!this.compliance || this.compliance.environmentalRequirements?.length === 0)) {
+    if (
+      this.serviceType === 'hazardous' &&
+      (!this.compliance || this.compliance.environmentalRequirements?.length === 0)
+    ) {
       errors.push('Hazardous services must have environmental compliance requirements');
     }
 
@@ -461,8 +497,12 @@ export class ServiceFactory {
       externalIds: [legacyData.service_id || legacyData.SERVICE_ID || legacyData.id],
       customerId: legacyData.customer_id || legacyData.CUSTOMER_ID,
       siteId: legacyData.site_id || legacyData.SITE_ID,
-      serviceType: this.mapLegacyServiceType(legacyData.service_type || legacyData.SERVICE_TYPE || legacyData.type),
-      containerType: this.mapLegacyContainerType(legacyData.container_type || legacyData.CONTAINER_TYPE || legacyData.container),
+      serviceType: this.mapLegacyServiceType(
+        legacyData.service_type || legacyData.SERVICE_TYPE || legacyData.type
+      ),
+      containerType: this.mapLegacyContainerType(
+        legacyData.container_type || legacyData.CONTAINER_TYPE || legacyData.container
+      ),
       containerSize: legacyData.container_size || legacyData.CONTAINER_SIZE,
       schedule: this.mapLegacySchedule(legacyData),
       pricing: this.mapLegacyPricing(legacyData),
@@ -473,8 +513,8 @@ export class ServiceFactory {
         originalFieldNames: Object.keys(legacyData),
         transformationNotes: 'Migrated from legacy waste management system',
         syncStatus: 'migrated',
-        lastSyncDate: new Date().toISOString()
-      }
+        lastSyncDate: new Date().toISOString(),
+      },
     };
 
     return ServiceModel.create(mappedData as any);
@@ -485,18 +525,18 @@ export class ServiceFactory {
    */
   private static mapLegacyServiceType(legacyType: string): Service['serviceType'] {
     const typeMap: Record<string, Service['serviceType']> = {
-      'waste': 'waste',
-      'trash': 'waste',
-      'garbage': 'waste',
-      'recycling': 'recycling',
-      'recycle': 'recycling',
-      'organics': 'organics',
-      'organic': 'organics',
-      'food_waste': 'organics',
-      'hazardous': 'hazardous',
-      'hazmat': 'hazardous',
-      'bulk': 'bulk',
-      'bulky': 'bulk'
+      waste: 'waste',
+      trash: 'waste',
+      garbage: 'waste',
+      recycling: 'recycling',
+      recycle: 'recycling',
+      organics: 'organics',
+      organic: 'organics',
+      food_waste: 'organics',
+      hazardous: 'hazardous',
+      hazmat: 'hazardous',
+      bulk: 'bulk',
+      bulky: 'bulk',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'waste';
@@ -507,13 +547,13 @@ export class ServiceFactory {
    */
   private static mapLegacyContainerType(legacyType: string): Service['containerType'] {
     const typeMap: Record<string, Service['containerType']> = {
-      'cart': 'cart',
-      'toter': 'cart',
-      'bin': 'bin',
-      'dumpster': 'dumpster',
-      'rolloff': 'rolloff',
-      'roll_off': 'rolloff',
-      'compactor': 'compactor'
+      cart: 'cart',
+      toter: 'cart',
+      bin: 'bin',
+      dumpster: 'dumpster',
+      rolloff: 'rolloff',
+      roll_off: 'rolloff',
+      compactor: 'compactor',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'dumpster';
@@ -526,12 +566,13 @@ export class ServiceFactory {
     return {
       frequency: this.mapLegacyFrequency(legacyData.frequency || legacyData.FREQUENCY),
       dayOfWeek: legacyData.day_of_week || legacyData.DAY_OF_WEEK,
-      startDate: legacyData.start_date || legacyData.START_DATE || new Date().toISOString().split('T')[0],
+      startDate:
+        legacyData.start_date || legacyData.START_DATE || new Date().toISOString().split('T')[0],
       endDate: legacyData.end_date || legacyData.END_DATE,
       startTime: legacyData.start_time || legacyData.START_TIME,
       endTime: legacyData.end_time || legacyData.END_TIME,
       holidays: legacyData.holidays || legacyData.HOLIDAYS,
-      specialInstructions: legacyData.schedule_notes || legacyData.SCHEDULE_NOTES
+      specialInstructions: legacyData.schedule_notes || legacyData.SCHEDULE_NOTES,
     };
   }
 
@@ -540,16 +581,16 @@ export class ServiceFactory {
    */
   private static mapLegacyFrequency(legacyFrequency: string): Service['schedule']['frequency'] {
     const freqMap: Record<string, Service['schedule']['frequency']> = {
-      'weekly': 'weekly',
-      'week': 'weekly',
-      'bi_weekly': 'bi_weekly',
-      'biweekly': 'bi_weekly',
-      'monthly': 'monthly',
-      'month': 'monthly',
-      'on_call': 'on_call',
-      'oncall': 'on_call',
-      'one_time': 'one_time',
-      'onetime': 'one_time'
+      weekly: 'weekly',
+      week: 'weekly',
+      bi_weekly: 'bi_weekly',
+      biweekly: 'bi_weekly',
+      monthly: 'monthly',
+      month: 'monthly',
+      on_call: 'on_call',
+      oncall: 'on_call',
+      one_time: 'one_time',
+      onetime: 'one_time',
     };
 
     return freqMap[legacyFrequency.toLowerCase()] || 'weekly';
@@ -568,7 +609,7 @@ export class ServiceFactory {
       rateUnit: legacyData.rate_unit || legacyData.RATE_UNIT || 'month',
       fuelSurcharge: legacyData.fuel_surcharge || legacyData.FUEL_SURCHARGE,
       environmentalFee: legacyData.environmental_fee || legacyData.ENVIRONMENTAL_FEE,
-      disposalFee: legacyData.disposal_fee || legacyData.DISPOSAL_FEE
+      disposalFee: legacyData.disposal_fee || legacyData.DISPOSAL_FEE,
     };
   }
 
@@ -577,14 +618,14 @@ export class ServiceFactory {
    */
   private static mapLegacyStatus(legacyStatus: string): Service['status'] {
     const statusMap: Record<string, Service['status']> = {
-      'active': 'active',
-      'a': 'active',
-      'inactive': 'inactive',
-      'i': 'inactive',
-      'suspended': 'suspended',
-      's': 'suspended',
-      'pending': 'pending',
-      'p': 'pending'
+      active: 'active',
+      a: 'active',
+      inactive: 'inactive',
+      i: 'inactive',
+      suspended: 'suspended',
+      s: 'suspended',
+      pending: 'pending',
+      p: 'pending',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'active';
@@ -605,7 +646,7 @@ export class ServiceValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }

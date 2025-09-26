@@ -3,62 +3,63 @@
  * @description Tests MUST FAIL initially - no implementation exists yet
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
-
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-
-// Load the customer-request schema
-const customerRequestSchema = JSON.parse(
-  readFileSync(join(__dirname, '../../specs/001-refuse-protocol-the/contracts/customer-request-schema.json'), 'utf8')
-);
-
-// Compile the schema validator
-const validateCustomerRequest = ajv.compile(customerRequestSchema);
+import { CustomerRequestModel } from '../../protocol/implementations/customer-request';
 
 describe('CustomerRequest Entity Schema Validation', () => {
   test('should validate basic customer request data structure', () => {
     const validCustomerRequest = {
       id: '123e4567-e89b-12d3-a456-426614174000',
       requestNumber: 'REQ-2024-001',
-      type: 'new_service',
-      status: 'pending',
+      type: 'new_service' as const,
+      status: 'pending' as const,
       customerId: '456e7890-e12b-34c5-b678-901234567890',
+      requestedBy: 'John Smith',
       serviceType: 'waste',
-      requestedDate: '2024-10-15',
-      approvalHistory: [{
-        step: 'submitted',
-        timestamp: new Date().toISOString(),
-        userId: 'user-123',
-        notes: 'Initial submission'
-      }],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      version: 1
+      serviceAddress: {
+        street1: '123 Main St',
+        city: 'Dallas',
+        state: 'TX',
+        zipCode: '75201',
+        country: 'US',
+      },
+      requestedDate: new Date('2024-10-15T09:00:00Z'),
+      approvalHistory: [
+        {
+          step: 'initial_submission',
+          timestamp: new Date(),
+          userId: '123e4567-e89b-12d3-a456-426614174001',
+          notes: 'Initial submission approved',
+        },
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      version: 1,
     };
 
-    const isValid = validateCustomerRequest(validCustomerRequest);
-    expect(isValid).toBe(true);
-
-    if (!isValid) {
-      console.error('Validation errors:', validateCustomerRequest.errors);
-    }
+    // Test that valid data can be used to create a CustomerRequestModel
+    expect(() => new CustomerRequestModel(validCustomerRequest)).not.toThrow();
   });
 
   test('should reject invalid customer request data', () => {
     const invalidCustomerRequest = {
       requestNumber: '', // Invalid: empty requestNumber
-      type: 'invalid_type', // Invalid: not in enum
-      status: 'invalid_status', // Invalid: not in enum
-      serviceType: 'invalid_service_type' // Invalid: not in enum
-      // Missing required id, customerId, requestedDate, createdAt, updatedAt, version
+      type: 'invalid_type' as any, // Invalid: not in enum
+      status: 'invalid_status' as any, // Invalid: not in enum
+      customerId: 'not-a-uuid', // Invalid: not a UUID
+      requestedBy: '', // Invalid: empty requestedBy
+      serviceType: 'invalid_service_type', // Invalid: not in enum
+      serviceAddress: {
+        street1: '', // Invalid: empty street1
+        city: '', // Invalid: empty city
+        state: 'X', // Invalid: too short
+        zipCode: 'invalid', // Invalid: not valid zip
+        country: 'USA', // Invalid: too long
+      },
+      requestedDate: new Date('invalid-date'), // Invalid: not valid date-time
+      // Missing required id, createdAt, updatedAt, version
     };
 
-    const isValid = validateCustomerRequest(invalidCustomerRequest);
-    expect(isValid).toBe(false);
-    expect(validateCustomerRequest.errors?.length).toBeGreaterThan(0);
+    // Test that invalid data throws an error when creating a CustomerRequestModel
+    expect(() => new CustomerRequestModel(invalidCustomerRequest)).toThrow();
   });
 });

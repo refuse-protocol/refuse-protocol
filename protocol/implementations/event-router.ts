@@ -6,6 +6,7 @@
 
 import { Event } from '../specifications/entities';
 import { EventRouter as BaseEventRouter, EventRoute, RoutingResult } from './event-system';
+import { LoggerFactory } from './logger';
 
 /**
  * Advanced Event Filtering and Routing Engine
@@ -20,7 +21,7 @@ export class AdvancedEventRouter extends BaseEventRouter {
     routedEvents: 0,
     filteredEvents: 0,
     failedRoutes: 0,
-    averageRoutingTime: 0
+    averageRoutingTime: 0,
   };
 
   constructor() {
@@ -47,7 +48,7 @@ export class AdvancedEventRouter extends BaseEventRouter {
           success: false,
           reason: 'filtered_by_pre_routing',
           timestamp: new Date(),
-          routingTime: Date.now() - startTime
+          routingTime: Date.now() - startTime,
         };
       }
 
@@ -60,7 +61,7 @@ export class AdvancedEventRouter extends BaseEventRouter {
           success: false,
           reason: 'no_applicable_routes',
           timestamp: new Date(),
-          routingTime: Date.now() - startTime
+          routingTime: Date.now() - startTime,
         };
       }
 
@@ -80,17 +81,18 @@ export class AdvancedEventRouter extends BaseEventRouter {
 
       // Update metrics
       this.metrics.averageRoutingTime =
-        (this.metrics.averageRoutingTime * (this.metrics.totalEvents - 1) + (Date.now() - startTime)) / this.metrics.totalEvents;
+        (this.metrics.averageRoutingTime * (this.metrics.totalEvents - 1) +
+          (Date.now() - startTime)) /
+        this.metrics.totalEvents;
 
       return {
         event,
-        success: routingResults.some(r => r.success),
+        success: routingResults.some((r) => r.success),
         routingResults,
         timestamp: new Date(),
         routingTime: Date.now() - startTime,
-        metrics: { ...this.metrics }
+        metrics: { ...this.metrics },
       };
-
     } catch (error) {
       this.metrics.failedRoutes++;
       return {
@@ -99,7 +101,7 @@ export class AdvancedEventRouter extends BaseEventRouter {
         reason: error instanceof Error ? error.message : 'routing_error',
         timestamp: new Date(),
         routingTime: Date.now() - startTime,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -147,8 +149,9 @@ export class AdvancedEventRouter extends BaseEventRouter {
       totalFilterChains: this.filterChains.size,
       totalRoutingRules: this.routingRules.length,
       destinationStats,
-      successRate: this.metrics.totalEvents > 0 ? this.metrics.routedEvents / this.metrics.totalEvents : 0,
-      averageRoutingTime: this.metrics.averageRoutingTime
+      successRate:
+        this.metrics.totalEvents > 0 ? this.metrics.routedEvents / this.metrics.totalEvents : 0,
+      averageRoutingTime: this.metrics.averageRoutingTime,
     };
   }
 
@@ -160,7 +163,7 @@ export class AdvancedEventRouter extends BaseEventRouter {
     const globalFilters = this.filterChains.get('global');
     if (globalFilters) {
       for (const filter of globalFilters.filters) {
-        if (!await this.applyFilter(event, filter)) {
+        if (!(await this.applyFilter(event, filter))) {
           return null;
         }
       }
@@ -170,7 +173,7 @@ export class AdvancedEventRouter extends BaseEventRouter {
     const entityFilters = this.filterChains.get(`entity-${event.entityType}`);
     if (entityFilters) {
       for (const filter of entityFilters.filters) {
-        if (!await this.applyFilter(event, filter)) {
+        if (!(await this.applyFilter(event, filter))) {
           return null;
         }
       }
@@ -216,7 +219,7 @@ export class AdvancedEventRouter extends BaseEventRouter {
    * Find applicable routing rules
    */
   private findApplicableRules(event: Event): RoutingRule[] {
-    return this.routingRules.filter(rule => {
+    return this.routingRules.filter((rule) => {
       // Check event type match
       if (rule.eventType && rule.eventType !== event.eventType) {
         return false;
@@ -247,8 +250,9 @@ export class AdvancedEventRouter extends BaseEventRouter {
     switch (condition.type) {
       case 'time_range':
         const eventTime = new Date(event.timestamp).getTime();
-        return eventTime >= condition.startTime.getTime() &&
-               eventTime <= condition.endTime.getTime();
+        return (
+          eventTime >= condition.startTime.getTime() && eventTime <= condition.endTime.getTime()
+        );
 
       case 'threshold':
         // Check if event data meets threshold
@@ -273,27 +277,37 @@ export class AdvancedEventRouter extends BaseEventRouter {
    */
   private compareValue(value: any, operator: string, target: any): boolean {
     switch (operator) {
-      case 'gt': return value > target;
-      case 'gte': return value >= target;
-      case 'lt': return value < target;
-      case 'lte': return value <= target;
-      case 'eq': return value === target;
-      case 'neq': return value !== target;
-      default: return false;
+      case 'gt':
+        return value > target;
+      case 'gte':
+        return value >= target;
+      case 'lt':
+        return value < target;
+      case 'lte':
+        return value <= target;
+      case 'eq':
+        return value === target;
+      case 'neq':
+        return value !== target;
+      default:
+        return false;
     }
   }
 
   /**
    * Route to specific destination
    */
-  private async routeToDestination(event: Event, rule: RoutingRule): Promise<RoutingDestinationResult> {
+  private async routeToDestination(
+    event: Event,
+    rule: RoutingRule
+  ): Promise<RoutingDestinationResult> {
     try {
       const handler = this.destinationHandlers.get(rule.destination);
       if (!handler) {
         return {
           destination: rule.destination,
           success: false,
-          error: `No handler found for destination: ${rule.destination}`
+          error: `No handler found for destination: ${rule.destination}`,
         };
       }
 
@@ -301,11 +315,11 @@ export class AdvancedEventRouter extends BaseEventRouter {
       const destinationFilters = this.filterChains.get(`destination-${rule.destination}`);
       if (destinationFilters) {
         for (const filter of destinationFilters.filters) {
-          if (!await this.applyFilter(event, filter)) {
+          if (!(await this.applyFilter(event, filter))) {
             return {
               destination: rule.destination,
               success: false,
-              error: 'Filtered out by destination filters'
+              error: 'Filtered out by destination filters',
             };
           }
         }
@@ -324,14 +338,13 @@ export class AdvancedEventRouter extends BaseEventRouter {
         destination: rule.destination,
         success: result.success,
         messageId: result.messageId,
-        error: result.error
+        error: result.error,
       };
-
     } catch (error) {
       return {
         destination: rule.destination,
         success: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -345,10 +358,16 @@ export class AdvancedEventRouter extends BaseEventRouter {
       name: 'Webhook Handler',
       handle: async (event: Event, options: any) => {
         // Simulate webhook delivery
-        console.log(`Sending webhook to ${options.url}:`, event);
+        const logger = LoggerFactory.getInstance().getLogger('webhook-handler');
+        logger.info('Sending webhook', {
+          url: options?.url,
+          eventId: event.id,
+          eventType: event.eventType,
+          entityType: event.entityType
+        });
         return { success: true, messageId: `webhook-${Date.now()}` };
       },
-      getStats: () => 0
+      getStats: () => 0,
     });
 
     // Database destination handler
@@ -356,10 +375,16 @@ export class AdvancedEventRouter extends BaseEventRouter {
       name: 'Database Handler',
       handle: async (event: Event, options: any) => {
         // Simulate database insert
-        console.log(`Storing event in database:`, event);
+        const logger = LoggerFactory.getInstance().getLogger('database-handler');
+        logger.info('Storing event in database', {
+          table: options?.table,
+          eventId: event.id,
+          eventType: event.eventType,
+          entityType: event.entityType
+        });
         return { success: true, messageId: `db-${Date.now()}` };
       },
-      getStats: () => 0
+      getStats: () => 0,
     });
 
     // Message queue destination handler
@@ -367,10 +392,16 @@ export class AdvancedEventRouter extends BaseEventRouter {
       name: 'Message Queue Handler',
       handle: async (event: Event, options: any) => {
         // Simulate queue message
-        console.log(`Queueing event to ${options.queueName}:`, event);
+        const logger = LoggerFactory.getInstance().getLogger('queue-handler');
+        logger.info('Queueing event', {
+          queueName: options?.queueName,
+          eventId: event.id,
+          eventType: event.eventType,
+          entityType: event.entityType
+        });
         return { success: true, messageId: `queue-${Date.now()}` };
       },
-      getStats: () => 0
+      getStats: () => 0,
     });
 
     // File destination handler
@@ -378,10 +409,16 @@ export class AdvancedEventRouter extends BaseEventRouter {
       name: 'File Handler',
       handle: async (event: Event, options: any) => {
         // Simulate file write
-        console.log(`Writing event to file ${options.filePath}:`, event);
+        const logger = LoggerFactory.getInstance().getLogger('file-handler');
+        logger.info('Writing event to file', {
+          filePath: options?.filePath,
+          eventId: event.id,
+          eventType: event.eventType,
+          entityType: event.entityType
+        });
         return { success: true, messageId: `file-${Date.now()}` };
       },
-      getStats: () => 0
+      getStats: () => 0,
     });
 
     // External API destination handler
@@ -389,10 +426,16 @@ export class AdvancedEventRouter extends BaseEventRouter {
       name: 'External API Handler',
       handle: async (event: Event, options: any) => {
         // Simulate API call
-        console.log(`Calling API ${options.endpoint}:`, event);
+        const logger = LoggerFactory.getInstance().getLogger('api-handler');
+        logger.info('Calling external API', {
+          endpoint: options?.endpoint,
+          eventId: event.id,
+          eventType: event.eventType,
+          entityType: event.entityType
+        });
         return { success: true, messageId: `api-${Date.now()}` };
       },
-      getStats: () => 0
+      getStats: () => 0,
     });
   }
 
@@ -408,14 +451,14 @@ export class AdvancedEventRouter extends BaseEventRouter {
           name: 'business_hours',
           timestampRange: {
             start: new Date('09:00'),
-            end: new Date('17:00')
+            end: new Date('17:00'),
           },
           customFilter: async (event: Event) => {
             // Only allow business-critical events outside hours
             return event.entityType === 'facility' || event.eventType === 'error';
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     // Entity-specific filters
@@ -425,12 +468,14 @@ export class AdvancedEventRouter extends BaseEventRouter {
         {
           name: 'capacity_events_only',
           customFilter: async (event: Event) => {
-            return event.eventType === 'capacity_update' ||
-                   event.eventType === 'warning' ||
-                   event.eventType === 'error';
-          }
-        }
-      ]
+            return (
+              event.eventType === 'capacity_update' ||
+              event.eventType === 'warning' ||
+              event.eventType === 'error'
+            );
+          },
+        },
+      ],
     });
 
     this.filterChains.set('entity-route', {
@@ -439,12 +484,14 @@ export class AdvancedEventRouter extends BaseEventRouter {
         {
           name: 'completion_events_only',
           customFilter: async (event: Event) => {
-            return event.eventType === 'completed' ||
-                   event.eventType === 'delayed' ||
-                   event.eventType === 'error';
-          }
-        }
-      ]
+            return (
+              event.eventType === 'completed' ||
+              event.eventType === 'delayed' ||
+              event.eventType === 'error'
+            );
+          },
+        },
+      ],
     });
   }
 
@@ -465,13 +512,13 @@ export class AdvancedEventRouter extends BaseEventRouter {
             type: 'threshold',
             field: 'severity',
             operator: 'gte',
-            value: 'high'
-          }
+            value: 'high',
+          },
         ],
         priority: 10,
         options: {
-          url: 'https://operations.example.com/webhooks/facility-alerts'
-        }
+          url: 'https://operations.example.com/webhooks/facility-alerts',
+        },
       },
       {
         id: 'route-delays-to-logistics',
@@ -485,13 +532,13 @@ export class AdvancedEventRouter extends BaseEventRouter {
             type: 'threshold',
             field: 'delayMinutes',
             operator: 'gt',
-            value: 30
-          }
+            value: 30,
+          },
         ],
         priority: 8,
         options: {
-          endpoint: 'https://logistics.example.com/api/route-delays'
-        }
+          endpoint: 'https://logistics.example.com/api/route-delays',
+        },
       },
       {
         id: 'error-events-to-monitoring',
@@ -501,8 +548,8 @@ export class AdvancedEventRouter extends BaseEventRouter {
         destination: 'database',
         priority: 10,
         options: {
-          table: 'error_events'
-        }
+          table: 'error_events',
+        },
       },
       {
         id: 'customer-events-to-crm',
@@ -512,8 +559,8 @@ export class AdvancedEventRouter extends BaseEventRouter {
         destination: 'api',
         priority: 5,
         options: {
-          endpoint: 'https://crm.example.com/api/customer-events'
-        }
+          endpoint: 'https://crm.example.com/api/customer-events',
+        },
       },
       {
         id: 'material-tickets-to-accounting',
@@ -527,14 +574,14 @@ export class AdvancedEventRouter extends BaseEventRouter {
             type: 'threshold',
             field: 'amount',
             operator: 'gt',
-            value: 1000
-          }
+            value: 1000,
+          },
         ],
         priority: 7,
         options: {
-          queueName: 'accounting-queue'
-        }
-      }
+          queueName: 'accounting-queue',
+        },
+      },
     ];
   }
 }
@@ -672,5 +719,5 @@ export type {
   AdvancedRoutingResult,
   RoutingDestinationResult,
   RoutingMetrics,
-  RoutingStats
+  RoutingStats,
 };

@@ -27,7 +27,11 @@ export class SiteModel implements Site {
   environmentalPermits?: EnvironmentalPermit[];
 
   private static readonly VALID_CONTAINER_TYPES = [
-    'cart', 'dumpster', 'bin', 'rolloff', 'compactor'
+    'cart',
+    'dumpster',
+    'bin',
+    'rolloff',
+    'compactor',
   ];
 
   constructor(data: Partial<Site>) {
@@ -37,8 +41,10 @@ export class SiteModel implements Site {
   /**
    * Create a new site with validation
    */
-  static create(data: Omit<Site, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): SiteModel {
-    const now = new Date();
+  static create(
+    data: Omit<Site, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>
+  ): SiteModel {
+    // REMOVED UNUSED:     const now = new Date();
     const siteData: Partial<Site> = {
       id: uuidv4(),
       ...data,
@@ -48,8 +54,8 @@ export class SiteModel implements Site {
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'customer_system'
-      }
+        source: 'customer_system',
+      },
     };
 
     return new SiteModel(siteData);
@@ -72,8 +78,8 @@ export class SiteModel implements Site {
         ...this.metadata,
         ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new SiteModel(updatedData);
@@ -128,7 +134,9 @@ export class SiteModel implements Site {
         }
 
         if (new Date(permit.validFrom) >= new Date(permit.validTo)) {
-          throw new Error(`Environmental permit ${index}: valid from date must be before valid to date`);
+          throw new Error(
+            `Environmental permit ${index}: valid from date must be before valid to date`
+          );
         }
       });
     }
@@ -141,10 +149,10 @@ export class SiteModel implements Site {
    * Validate date format (YYYY-MM-DD)
    */
   private isValidDate(dateString: string): boolean {
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    // REMOVED UNUSED:     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(dateString)) return false;
 
-    const date = new Date(dateString);
+    // REMOVED UNUSED:     const date = new Date(dateString);
     return !isNaN(date.getTime());
   }
 
@@ -163,7 +171,7 @@ export class SiteModel implements Site {
    * Remove service from site
    */
   removeService(serviceId: string): SiteModel {
-    const newServices = this.services.filter(id => id !== serviceId);
+    // REMOVED UNUSED:     const newServices = this.services.filter((id) => id !== serviceId);
 
     if (newServices.length === 0 && this.containers.length > 0) {
       throw new Error('Cannot remove all services from a site that has containers');
@@ -187,7 +195,7 @@ export class SiteModel implements Site {
    * Remove container from site
    */
   removeContainer(containerId: string): SiteModel {
-    const newContainers = this.containers.filter(id => id !== containerId);
+    // REMOVED UNUSED:     const newContainers = this.containers.filter((id) => id !== containerId);
     return this.update({ containers: newContainers }, this.version);
   }
 
@@ -197,10 +205,10 @@ export class SiteModel implements Site {
   addEnvironmentalPermit(permit: Omit<EnvironmentalPermit, 'id'>): SiteModel {
     const newPermit: EnvironmentalPermit = {
       id: uuidv4(),
-      ...permit
+      ...permit,
     };
 
-    const newPermits = [...(this.environmentalPermits || []), newPermit];
+    // REMOVED UNUSED:     const newPermits = [...(this.environmentalPermits || []), newPermit];
 
     return this.update({ environmentalPermits: newPermits }, this.version);
   }
@@ -209,7 +217,7 @@ export class SiteModel implements Site {
    * Remove environmental permit
    */
   removeEnvironmentalPermit(permitId: string): SiteModel {
-    const newPermits = (this.environmentalPermits || []).filter(permit => permit.id !== permitId);
+    // REMOVED UNUSED:     const newPermits = (this.environmentalPermits || []).filter((permit) => permit.id !== permitId);
     return this.update({ environmentalPermits: newPermits }, this.version);
   }
 
@@ -218,19 +226,20 @@ export class SiteModel implements Site {
    */
   hasRequiredPermits(serviceTypes: string[]): boolean {
     if (!this.environmentalPermits || this.environmentalPermits.length === 0) {
-      return serviceTypes.every(type => type !== 'hazardous');
+      return serviceTypes.every((type) => type !== 'hazardous');
     }
 
-    const now = new Date();
-    const activePermits = this.environmentalPermits.filter(permit =>
-      new Date(permit.validFrom) <= now && new Date(permit.validTo) >= now
+    // REMOVED UNUSED:     const now = new Date();
+    const activePermits = this.environmentalPermits.filter(
+      (permit) => new Date(permit.validFrom) <= now && new Date(permit.validTo) >= now
     );
 
     // Check if hazardous services have appropriate permits
-    const hasHazardousService = serviceTypes.includes('hazardous');
-    const hasHazardousPermit = activePermits.some(permit =>
-      permit.permitType.toLowerCase().includes('hazardous') ||
-      permit.permitType.toLowerCase().includes('hazmat')
+    // REMOVED UNUSED:     const hasHazardousService = serviceTypes.includes('hazardous');
+    const hasHazardousPermit = activePermits.some(
+      (permit) =>
+        permit.permitType.toLowerCase().includes('hazardous') ||
+        permit.permitType.toLowerCase().includes('hazmat')
     );
 
     if (hasHazardousService && !hasHazardousPermit) {
@@ -267,9 +276,9 @@ export class SiteModel implements Site {
    * Get site efficiency score
    */
   getEfficiencyScore(): number {
-    const utilizationScore = Math.max(0, 100 - this.getSiteUtilization());
-    const permitScore = this.hasRequiredPermits(this.services) ? 100 : 50;
-    const containerScore = this.containers.length > 0 ? 100 : 0;
+    // REMOVED UNUSED:     const utilizationScore = Math.max(0, 100 - this.getSiteUtilization());
+    // REMOVED UNUSED:     const permitScore = this.hasRequiredPermits(this.services) ? 100 : 50;
+    // REMOVED UNUSED:     const containerScore = this.containers.length > 0 ? 100 : 0;
 
     return (utilizationScore + permitScore + containerScore) / 3;
   }
@@ -278,8 +287,8 @@ export class SiteModel implements Site {
    * Get site summary for reporting
    */
   getSummary(): Record<string, any> {
-    const activePermits = (this.environmentalPermits || []).filter(permit =>
-      new Date(permit.validTo) > new Date()
+    const activePermits = (this.environmentalPermits || []).filter(
+      (permit) => new Date(permit.validTo) > new Date()
     ).length;
 
     return {
@@ -293,7 +302,7 @@ export class SiteModel implements Site {
       activePermits: activePermits,
       hasRequiredPermits: this.hasRequiredPermits(this.services),
       isAtCapacity: this.isAtCapacity(),
-      permitCompliance: this.getPermitCompliance()
+      permitCompliance: this.getPermitCompliance(),
     };
   }
 
@@ -305,14 +314,14 @@ export class SiteModel implements Site {
       return this.services.includes('hazardous') ? 'non_compliant' : 'compliant';
     }
 
-    const now = new Date();
-    const expiredPermits = this.environmentalPermits.filter(permit =>
-      new Date(permit.validTo) <= now
+    // REMOVED UNUSED:     const now = new Date();
+    const expiredPermits = this.environmentalPermits.filter(
+      (permit) => new Date(permit.validTo) <= now
     );
 
-    const expiringSoonPermits = this.environmentalPermits.filter(permit => {
-      const expiryDate = new Date(permit.validTo);
-      const thirtyDaysFromNow = new Date();
+    const expiringSoonPermits = this.environmentalPermits.filter((permit) => {
+      // REMOVED UNUSED:       const expiryDate = new Date(permit.validTo);
+      // REMOVED UNUSED:       const thirtyDaysFromNow = new Date();
       thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
       return expiryDate <= thirtyDaysFromNow && expiryDate > now;
     });
@@ -342,7 +351,7 @@ export class SiteModel implements Site {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -350,7 +359,7 @@ export class SiteModel implements Site {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Site> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 
@@ -364,7 +373,7 @@ export class SiteModel implements Site {
       eventType,
       timestamp: new Date(),
       eventData: this.toEventData(),
-      version: 1
+      version: 1,
     };
   }
 
@@ -424,9 +433,9 @@ export class SiteFactory {
         siteData: {
           siteType: legacyData.site_type || 'commercial',
           squareFootage: legacyData.square_footage,
-          zoning: legacyData.zoning
-        }
-      }
+          zoning: legacyData.zoning,
+        },
+      },
     };
 
     return SiteModel.create(mappedData as any);
@@ -442,7 +451,7 @@ export class SiteFactory {
       city: legacyData.city || legacyData.CITY || 'Unknown',
       state: legacyData.state || legacyData.STATE || 'Unknown',
       zipCode: legacyData.zip || legacyData.ZIP || legacyData.zipcode || '00000',
-      country: legacyData.country || 'US'
+      country: legacyData.country || 'US',
     };
   }
 
@@ -496,7 +505,7 @@ export class SiteFactory {
       return [];
     }
 
-    const permits = legacyData.permits || legacyData.environmental_permits || [];
+    // REMOVED UNUSED:     const permits = legacyData.permits || legacyData.environmental_permits || [];
 
     if (Array.isArray(permits)) {
       return permits.map((permit: any) => ({
@@ -505,19 +514,27 @@ export class SiteFactory {
         permitNumber: permit.permit_number || permit.number || 'Unknown',
         issuingAuthority: permit.issuing_authority || permit.authority || 'Unknown',
         validFrom: permit.valid_from || permit.from || new Date().toISOString().split('T')[0],
-        validTo: permit.valid_to || permit.to || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        validTo:
+          permit.valid_to ||
+          permit.to ||
+          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       }));
     }
 
     // Handle single permit object
-    return [{
-      id: uuidv4(),
-      permitType: permits.permit_type || permits.type || 'environmental',
-      permitNumber: permits.permit_number || permits.number || 'Unknown',
-      issuingAuthority: permits.issuing_authority || permits.authority || 'Unknown',
-      validFrom: permits.valid_from || permits.from || new Date().toISOString().split('T')[0],
-      validTo: permits.valid_to || permits.to || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    }];
+    return [
+      {
+        id: uuidv4(),
+        permitType: permits.permit_type || permits.type || 'environmental',
+        permitNumber: permits.permit_number || permits.number || 'Unknown',
+        issuingAuthority: permits.issuing_authority || permits.authority || 'Unknown',
+        validFrom: permits.valid_from || permits.from || new Date().toISOString().split('T')[0],
+        validTo:
+          permits.valid_to ||
+          permits.to ||
+          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      },
+    ];
   }
 }
 
@@ -535,7 +552,7 @@ export class SiteValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -556,21 +573,21 @@ export class SiteManager {
    * Optimize service distribution across multiple sites
    */
   static optimizeServiceDistribution(sites: SiteModel[], availableServices: string[]): SiteModel[] {
-    const optimizedSites = [...sites];
+    // REMOVED UNUSED:     const optimizedSites = [...sites];
 
     // Sort sites by current utilization (lowest first)
     optimizedSites.sort((a, b) => a.getSiteUtilization() - b.getSiteUtilization());
 
     // Distribute services to least utilized sites first
-    let serviceIndex = 0;
+    // REMOVED UNUSED:     let serviceIndex = 0;
     for (const service of availableServices) {
       // Find site that can accept this service and has lowest utilization
-      const availableSites = optimizedSites.filter(site =>
-        site.hasRequiredPermits([service]) && !site.isAtCapacity()
+      const availableSites = optimizedSites.filter(
+        (site) => site.hasRequiredPermits([service]) && !site.isAtCapacity()
       );
 
       if (availableSites.length > 0) {
-        const targetSite = availableSites[0];
+        // REMOVED UNUSED:         const targetSite = availableSites[0];
         targetSite.addService(service);
       }
 
@@ -586,7 +603,7 @@ export class SiteManager {
   static checkCapacityConflicts(sites: SiteModel[]): string[] {
     const conflicts: string[] = [];
 
-    sites.forEach(site => {
+    sites.forEach((site) => {
       if (site.isAtCapacity()) {
         conflicts.push(`Site ${site.name} (${site.id}) is at capacity`);
       }
@@ -611,15 +628,15 @@ export class SiteManager {
       permitCompliance: {
         compliant: 0,
         warning: 0,
-        nonCompliant: 0
-      }
+        nonCompliant: 0,
+      },
     };
 
-    let totalUtilization = 0;
+    // REMOVED UNUSED:     let totalUtilization = 0;
 
-    sites.forEach(site => {
-      const utilization = site.getSiteUtilization();
-      const permitStatus = site.getPermitCompliance();
+    sites.forEach((site) => {
+      // REMOVED UNUSED:       const utilization = site.getSiteUtilization();
+      // REMOVED UNUSED:       const permitStatus = site.getPermitCompliance();
 
       totalUtilization += utilization;
 

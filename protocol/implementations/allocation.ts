@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Allocation entity implementation with LEED compliance tracking
  * @description Complete Allocation model for managing material allocations with environmental compliance and LEED certification tracking
@@ -19,146 +20,139 @@ export class AllocationModel implements Allocation {
   updatedAt: Date;
   version: number;
 
-  allocationNumber: string;
+  // Core allocation properties from specification
   materialTicketId: string;
-  materialType: string;
-  allocationType: 'direct' | 'diverted' | 'processed' | 'transferred' | 'disposed' | 'recycled' | 'donated';
-
-  // Quantity and Measurement
-  allocatedQuantity: number;
+  leedCategory: string;
+  allocationType: 'weight' | 'volume' | 'percentage';
+  amount: number;
   unit: string;
-  allocatedPercentage: number; // Percentage of total material ticket
+  reportingPeriod: string;
+  verifiedBy?: string;
+  verificationDate?: string;
 
-  // Destination and Processing
-  destination: {
-    type: 'facility' | 'customer' | 'vendor' | 'landfill' | 'recycling_center' | 'donation_center';
-    id: string;
-    name: string;
-    licenseNumber?: string;
-    permitNumber?: string;
+  // Extended properties from specification
+  destination?: {
+    type: 'landfill' | 'mrf' | 'transfer' | 'composter' | 'export';
+    facilityId: string;
+    location: {
+      street1: string;
+      street2?: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      country: string;
+      coordinates?: {
+        latitude: number;
+        longitude: number;
+      };
+    };
+    capacity?: number;
+    restrictions?: string[];
   };
 
-  processingMethod: {
+  processingMethod?: {
     method: string;
-    efficiency: number; // Percentage
-    outputProduct?: string;
-    byproducts?: string[];
-    energyConsumption?: number; // kWh per ton
-    waterUsage?: number; // gallons per ton
+    efficiency: number;
+    quality: string;
+    certifications?: string[];
   };
 
-  // Environmental Impact
-  environmentalImpact: {
-    carbonFootprint: number; // kg CO2 equivalent per ton
-    waterImpact: number; // gallons of water used/saved
-    energyImpact: number; // kWh used/saved
-    landfillDiversion: number; // percentage diverted from landfill
-    recyclingRate: number; // percentage of material recycled
+  environmentalImpact?: {
+    carbonFootprint: number;
+    waterUsage: number;
+    energyConsumption: number;
+    emissions: Record<string, number>;
   };
 
-  // LEED Compliance Tracking
-  leedCompliance: {
-    creditsEarned: Array<{
-      category: string;
-      credit: string;
-      points: number;
-      maxPoints: number;
-      description: string;
-      documentation?: string[];
-    }>;
-
-    totalPoints: number;
-    certificationLevel: 'certified' | 'silver' | 'gold' | 'platinum' | 'none';
-    complianceScore: number; // 0-100
-    lastAuditDate?: string;
-    nextAuditDate?: string;
-    auditor?: string;
+  leedCompliance?: {
+    certificationLevel: 'certified' | 'silver' | 'gold' | 'platinum';
+    creditsEarned: number;
+    totalCredits: number;
+    categories: Record<string, number>;
   };
 
-  // Quality and Testing
-  qualityMetrics: Array<{
-    parameter: string;
+  qualityMetrics?: Array<{
+    metricType: string;
     value: number;
     unit: string;
-    testMethod: string;
-    complianceStatus: 'pass' | 'fail' | 'pending';
-    notes?: string;
+    complianceStatus: 'pass' | 'fail' | 'warning';
+    threshold?: number;
   }>;
 
-  // Transportation
-  transportation: {
-    method: string;
-    distance: number; // miles
-    fuelType?: string;
-    emissions: number; // kg CO2 equivalent
-    cost: number; // transportation cost
-    carrier?: string;
+  transportation?: {
+    distance: number;
+    fuelType: string;
+    fuelEfficiency: number;
+    routeId?: string;
+    vehicleType?: string;
   };
 
-  // Cost and Economics
-  costBreakdown: {
-    materialCost: number;
-    processingCost: number;
+  costBreakdown?: {
+    baseCost: number;
     transportationCost: number;
+    processingCost: number;
     disposalCost: number;
     totalCost: number;
-    revenue?: number;
-    netCost: number;
+    currency: string;
   };
 
-  // Compliance and Regulatory
-  regulatoryCompliance: Array<{
+  regulatoryCompliance?: Array<{
     regulation: string;
-    status: 'compliant' | 'non_compliant' | 'pending' | 'exempt';
-    lastCheckDate: string;
-    nextCheckDate: string;
-    notes?: string;
-    documentation?: string[];
+    status: 'pending' | 'compliant' | 'non_compliant' | 'exempt';
+    lastChecked: Date;
+    nextDue: Date;
+    violations?: string[];
   }>;
 
-  // Documentation and Audit
-  documentation: Array<{
-    type: string;
-    reference: string;
-    date: string;
-    status: 'submitted' | 'approved' | 'rejected' | 'pending';
-    notes?: string;
+  documentation?: Array<{
+    documentType: string;
+    documentId: string;
+    status: 'pending' | 'approved' | 'rejected' | 'submitted';
+    submittedDate: Date;
+    approvedDate?: Date;
+    url?: string;
   }>;
 
-  auditTrail: Array<{
+  auditTrail?: Array<{
     action: string;
-    timestamp: string;
-    userId?: string;
-    previousValue?: any;
-    newValue: any;
+    timestamp: Date;
+    userId: string;
+    changes: Record<string, any>;
     notes?: string;
   }>;
 
   private static readonly VALID_ALLOCATION_TYPES: Allocation['allocationType'][] = [
-    'direct', 'diverted', 'processed', 'transferred', 'disposed', 'recycled', 'donated'
+    'weight',
+    'volume',
+    'percentage',
   ];
 
   private static readonly VALID_DESTINATION_TYPES: Allocation['destination']['type'][] = [
-    'facility', 'customer', 'vendor', 'landfill', 'recycling_center', 'donation_center'
+    'landfill',
+    'mrf',
+    'transfer',
+    'composter',
+    'export',
   ];
 
   private static readonly LEED_CATEGORIES = [
-    'Sustainable Sites', 'Water Efficiency', 'Energy & Atmosphere',
-    'Materials & Resources', 'Indoor Environmental Quality', 'Innovation in Design',
-    'Regional Priority'
+    'Sustainable Sites',
+    'Water Efficiency',
+    'Energy & Atmosphere',
+    'Materials & Resources',
+    'Indoor Environmental Quality',
+    'Innovation in Design',
+    'Regional Priority',
   ];
 
-  private static readonly LEED_CERTIFICATION_LEVELS: Allocation['leedCompliance']['certificationLevel'][] = [
-    'certified', 'silver', 'gold', 'platinum', 'none'
-  ];
+  private static readonly LEED_CERTIFICATION_LEVELS: Allocation['leedCompliance']['certificationLevel'][] =
+    ['certified', 'silver', 'gold', 'platinum'];
 
-  private static readonly VALID_COMPLIANCE_STATUSES: Allocation['regulatoryCompliance'][0]['status'][] = [
-    'compliant', 'non_compliant', 'pending', 'exempt'
-  ];
+  private static readonly VALID_COMPLIANCE_STATUSES: Allocation['regulatoryCompliance'][0]['status'][] =
+    ['pending', 'compliant', 'non_compliant', 'exempt'];
 
-  private static readonly VALID_DOCUMENTATION_STATUSES: Allocation['documentation'][0]['status'][] = [
-    'submitted', 'approved', 'rejected', 'pending'
-  ];
+  private static readonly VALID_DOCUMENTATION_STATUSES: Allocation['documentation'][0]['status'][] =
+    ['pending', 'submitted', 'approved', 'rejected'];
 
   constructor(data: Partial<Allocation>) {
     this.validateAndAssign(data);
@@ -168,7 +162,9 @@ export class AllocationModel implements Allocation {
   /**
    * Create a new allocation with validation
    */
-  static create(data: Omit<Allocation, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): AllocationModel {
+  static create(
+    data: Omit<Allocation, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>
+  ): AllocationModel {
     const now = new Date();
     const allocationData: Partial<Allocation> = {
       id: uuidv4(),
@@ -179,8 +175,8 @@ export class AllocationModel implements Allocation {
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'allocation_system'
-      }
+        source: 'allocation_system',
+      },
     };
 
     return new AllocationModel(allocationData);
@@ -189,7 +185,10 @@ export class AllocationModel implements Allocation {
   /**
    * Update allocation with optimistic locking
    */
-  update(updates: Partial<Omit<Allocation, keyof BaseEntity>>, expectedVersion: number): AllocationModel {
+  update(
+    updates: Partial<Omit<Allocation, keyof BaseEntity>>,
+    expectedVersion: number
+  ): AllocationModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -203,8 +202,8 @@ export class AllocationModel implements Allocation {
         ...this.metadata,
         ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new AllocationModel(updatedData);
@@ -215,103 +214,97 @@ export class AllocationModel implements Allocation {
    */
   private validateAndAssign(data: Partial<Allocation>): void {
     // Required fields validation
-    if (!data.allocationNumber || typeof data.allocationNumber !== 'string') {
-      throw new Error('Allocation number is required and must be a string');
-    }
-
     if (!data.materialTicketId || typeof data.materialTicketId !== 'string') {
       throw new Error('Material ticket ID is required and must be a string');
     }
 
-    if (!data.materialType || typeof data.materialType !== 'string') {
-      throw new Error('Material type is required and must be a string');
+    if (!data.leedCategory || typeof data.leedCategory !== 'string') {
+      throw new Error('LEED category is required and must be a string');
     }
 
-    if (!data.allocationType || !AllocationModel.VALID_ALLOCATION_TYPES.includes(data.allocationType)) {
-      throw new Error(`Allocation type must be one of: ${AllocationModel.VALID_ALLOCATION_TYPES.join(', ')}`);
+    if (
+      !data.allocationType ||
+      !AllocationModel.VALID_ALLOCATION_TYPES.includes(data.allocationType)
+    ) {
+      throw new Error(
+        `Allocation type must be one of: ${AllocationModel.VALID_ALLOCATION_TYPES.join(', ')}`
+      );
     }
 
-    if (typeof data.allocatedQuantity !== 'number' || data.allocatedQuantity <= 0) {
-      throw new Error('Allocated quantity must be a positive number');
+    if (typeof data.amount !== 'number' || data.amount <= 0) {
+      throw new Error('Amount must be a positive number');
     }
 
     if (!data.unit || typeof data.unit !== 'string') {
       throw new Error('Unit is required and must be a string');
     }
 
-    if (typeof data.allocatedPercentage !== 'number' || data.allocatedPercentage < 0 || data.allocatedPercentage > 100) {
-      throw new Error('Allocated percentage must be between 0 and 100');
+    if (!data.reportingPeriod || typeof data.reportingPeriod !== 'string') {
+      throw new Error('Reporting period is required and must be a string');
     }
 
-    // Validate destination
-    if (!data.destination) {
-      throw new Error('Destination is required');
+    // Validate destination (optional)
+    if (data.destination) {
+      if (!AllocationModel.VALID_DESTINATION_TYPES.includes(data.destination.type)) {
+        throw new Error(
+          `Destination type must be one of: ${AllocationModel.VALID_DESTINATION_TYPES.join(', ')}`
+        );
+      }
+
+      if (!data.destination.facilityId || typeof data.destination.facilityId !== 'string') {
+        throw new Error('Destination facility ID is required when destination is provided');
+      }
     }
 
-    if (!AllocationModel.VALID_DESTINATION_TYPES.includes(data.destination.type)) {
-      throw new Error(`Destination type must be one of: ${AllocationModel.VALID_DESTINATION_TYPES.join(', ')}`);
+    // Validate processing method (optional)
+    if (data.processingMethod) {
+      if (!data.processingMethod.method || typeof data.processingMethod.method !== 'string') {
+        throw new Error('Processing method name is required when processing method is provided');
+      }
+
+      if (
+        typeof data.processingMethod.efficiency !== 'number' ||
+        data.processingMethod.efficiency < 0 ||
+        data.processingMethod.efficiency > 100
+      ) {
+        throw new Error(
+          'Processing efficiency must be between 0 and 100 when processing method is provided'
+        );
+      }
     }
 
-    if (!data.destination.id || typeof data.destination.id !== 'string') {
-      throw new Error('Destination ID is required');
+    // Validate environmental impact (optional)
+    if (data.environmentalImpact) {
+      if (typeof data.environmentalImpact.carbonFootprint !== 'number') {
+        throw new Error('Carbon footprint must be a number when environmental impact is provided');
+      }
     }
 
-    if (!data.destination.name || typeof data.destination.name !== 'string') {
-      throw new Error('Destination name is required');
-    }
+    // Validate LEED compliance (optional)
+    if (data.leedCompliance) {
+      if (
+        data.leedCompliance.certificationLevel &&
+        !AllocationModel.LEED_CERTIFICATION_LEVELS.includes(data.leedCompliance.certificationLevel)
+      ) {
+        throw new Error(
+          `LEED certification level must be one of: ${AllocationModel.LEED_CERTIFICATION_LEVELS.join(', ')}`
+        );
+      }
 
-    // Validate processing method
-    if (!data.processingMethod) {
-      throw new Error('Processing method is required');
-    }
-
-    if (!data.processingMethod.method || typeof data.processingMethod.method !== 'string') {
-      throw new Error('Processing method name is required');
-    }
-
-    if (typeof data.processingMethod.efficiency !== 'number' || data.processingMethod.efficiency < 0 || data.processingMethod.efficiency > 100) {
-      throw new Error('Processing efficiency must be between 0 and 100');
-    }
-
-    // Validate environmental impact
-    if (!data.environmentalImpact) {
-      throw new Error('Environmental impact information is required');
-    }
-
-    if (typeof data.environmentalImpact.carbonFootprint !== 'number') {
-      throw new Error('Carbon footprint must be a number');
-    }
-
-    if (typeof data.environmentalImpact.landfillDiversion !== 'number' || data.environmentalImpact.landfillDiversion < 0 || data.environmentalImpact.landfillDiversion > 100) {
-      throw new Error('Landfill diversion must be between 0 and 100');
-    }
-
-    if (typeof data.environmentalImpact.recyclingRate !== 'number' || data.environmentalImpact.recyclingRate < 0 || data.environmentalImpact.recyclingRate > 100) {
-      throw new Error('Recycling rate must be between 0 and 100');
-    }
-
-    // Validate LEED compliance
-    if (!data.leedCompliance) {
-      throw new Error('LEED compliance information is required');
-    }
-
-    if (!AllocationModel.LEED_CERTIFICATION_LEVELS.includes(data.leedCompliance.certificationLevel)) {
-      throw new Error(`LEED certification level must be one of: ${AllocationModel.LEED_CERTIFICATION_LEVELS.join(', ')}`);
-    }
-
-    if (typeof data.leedCompliance.totalPoints !== 'number' || data.leedCompliance.totalPoints < 0) {
-      throw new Error('Total LEED points must be a non-negative number');
-    }
-
-    if (typeof data.leedCompliance.complianceScore !== 'number' || data.leedCompliance.complianceScore < 0 || data.leedCompliance.complianceScore > 100) {
-      throw new Error('LEED compliance score must be between 0 and 100');
+      if (
+        data.leedCompliance.creditsEarned !== undefined &&
+        (typeof data.leedCompliance.creditsEarned !== 'number' ||
+          data.leedCompliance.creditsEarned < 0)
+      ) {
+        throw new Error('LEED credits earned must be a non-negative number when provided');
+      }
     }
 
     // Validate quality metrics if provided
     if (data.qualityMetrics) {
       data.qualityMetrics.forEach((metric, index) => {
-        if (!metric.parameter || typeof metric.parameter !== 'string') {
-          throw new Error(`Quality metric ${index}: parameter is required`);
+        if (!metric.metricType || typeof metric.metricType !== 'string') {
+          throw new Error(`Quality metric ${index}: metric type is required`);
         }
 
         if (typeof metric.value !== 'number') {
@@ -322,56 +315,40 @@ export class AllocationModel implements Allocation {
           throw new Error(`Quality metric ${index}: unit is required`);
         }
 
-        if (!metric.testMethod || typeof metric.testMethod !== 'string') {
-          throw new Error(`Quality metric ${index}: test method is required`);
-        }
-
-        if (!['pass', 'fail', 'pending'].includes(metric.complianceStatus)) {
-          throw new Error(`Quality metric ${index}: compliance status must be pass, fail, or pending`);
+        if (!['pass', 'fail', 'warning'].includes(metric.complianceStatus)) {
+          throw new Error(
+            `Quality metric ${index}: compliance status must be pass, fail, or warning`
+          );
         }
       });
     }
 
-    // Validate transportation
-    if (!data.transportation) {
-      throw new Error('Transportation information is required');
+    // Validate transportation (optional)
+    if (data.transportation) {
+      if (typeof data.transportation.distance !== 'number' || data.transportation.distance < 0) {
+        throw new Error(
+          'Transportation distance must be a non-negative number when transportation is provided'
+        );
+      }
+
+      if (!data.transportation.fuelType || typeof data.transportation.fuelType !== 'string') {
+        throw new Error('Transportation fuel type is required when transportation is provided');
+      }
     }
 
-    if (!data.transportation.method || typeof data.transportation.method !== 'string') {
-      throw new Error('Transportation method is required');
-    }
+    // Validate cost breakdown (optional)
+    if (data.costBreakdown) {
+      if (typeof data.costBreakdown.baseCost !== 'number' || data.costBreakdown.baseCost < 0) {
+        throw new Error('Base cost must be a non-negative number when cost breakdown is provided');
+      }
 
-    if (typeof data.transportation.distance !== 'number' || data.transportation.distance < 0) {
-      throw new Error('Transportation distance must be a non-negative number');
-    }
+      if (typeof data.costBreakdown.totalCost !== 'number' || data.costBreakdown.totalCost < 0) {
+        throw new Error('Total cost must be a non-negative number when cost breakdown is provided');
+      }
 
-    if (typeof data.transportation.emissions !== 'number' || data.transportation.emissions < 0) {
-      throw new Error('Transportation emissions must be a non-negative number');
-    }
-
-    if (typeof data.transportation.cost !== 'number' || data.transportation.cost < 0) {
-      throw new Error('Transportation cost must be a non-negative number');
-    }
-
-    // Validate cost breakdown
-    if (!data.costBreakdown) {
-      throw new Error('Cost breakdown is required');
-    }
-
-    if (typeof data.costBreakdown.materialCost !== 'number' || data.costBreakdown.materialCost < 0) {
-      throw new Error('Material cost must be a non-negative number');
-    }
-
-    if (typeof data.costBreakdown.processingCost !== 'number' || data.costBreakdown.processingCost < 0) {
-      throw new Error('Processing cost must be a non-negative number');
-    }
-
-    if (typeof data.costBreakdown.transportationCost !== 'number' || data.costBreakdown.transportationCost < 0) {
-      throw new Error('Transportation cost must be a non-negative number');
-    }
-
-    if (typeof data.costBreakdown.disposalCost !== 'number' || data.costBreakdown.disposalCost < 0) {
-      throw new Error('Disposal cost must be a non-negative number');
+      if (!data.costBreakdown.currency || typeof data.costBreakdown.currency !== 'string') {
+        throw new Error('Currency is required when cost breakdown is provided');
+      }
     }
 
     // Validate regulatory compliance if provided
@@ -385,12 +362,12 @@ export class AllocationModel implements Allocation {
           throw new Error(`Regulatory compliance ${index}: status must be valid`);
         }
 
-        if (!this.isValidDate(compliance.lastCheckDate)) {
-          throw new Error(`Regulatory compliance ${index}: last check date must be valid`);
+        if (!this.isValidDate(compliance.lastChecked)) {
+          throw new Error(`Regulatory compliance ${index}: last checked date must be valid`);
         }
 
-        if (!this.isValidDate(compliance.nextCheckDate)) {
-          throw new Error(`Regulatory compliance ${index}: next check date must be valid`);
+        if (!this.isValidDate(compliance.nextDue)) {
+          throw new Error(`Regulatory compliance ${index}: next due date must be valid`);
         }
       });
     }
@@ -398,16 +375,16 @@ export class AllocationModel implements Allocation {
     // Validate documentation if provided
     if (data.documentation) {
       data.documentation.forEach((doc, index) => {
-        if (!doc.type || typeof doc.type !== 'string') {
-          throw new Error(`Documentation ${index}: type is required`);
+        if (!doc.documentType || typeof doc.documentType !== 'string') {
+          throw new Error(`Documentation ${index}: document type is required`);
         }
 
-        if (!doc.reference || typeof doc.reference !== 'string') {
-          throw new Error(`Documentation ${index}: reference is required`);
+        if (!doc.documentId || typeof doc.documentId !== 'string') {
+          throw new Error(`Documentation ${index}: document ID is required`);
         }
 
-        if (!this.isValidDate(doc.date)) {
-          throw new Error(`Documentation ${index}: date must be valid`);
+        if (!this.isValidDate(doc.submittedDate)) {
+          throw new Error(`Documentation ${index}: submitted date must be valid`);
         }
 
         if (!AllocationModel.VALID_DOCUMENTATION_STATUSES.includes(doc.status)) {
@@ -435,35 +412,39 @@ export class AllocationModel implements Allocation {
    * Calculate totals and derived values
    */
   private calculateTotals(): void {
-    // Calculate total cost
-    this.costBreakdown.totalCost = this.costBreakdown.materialCost +
-                                  this.costBreakdown.processingCost +
-                                  this.costBreakdown.transportationCost +
-                                  this.costBreakdown.disposalCost;
+    // Calculate total cost if cost breakdown exists
+    if (this.costBreakdown) {
+      this.costBreakdown.totalCost =
+        this.costBreakdown.baseCost +
+        this.costBreakdown.transportationCost +
+        this.costBreakdown.processingCost +
+        this.costBreakdown.disposalCost;
+    }
 
-    // Calculate net cost
-    this.costBreakdown.netCost = this.costBreakdown.totalCost - (this.costBreakdown.revenue || 0);
-
-    // Calculate LEED compliance score
-    this.leedCompliance.complianceScore = this.calculateLEEDScore();
-
-    // Update metadata with calculated values
-    this.metadata = {
-      ...this.metadata,
-      calculatedTotals: {
-        totalCost: this.costBreakdown.totalCost,
-        netCost: this.costBreakdown.netCost,
-        leedScore: this.leedCompliance.complianceScore
-      }
-    };
+    // Update metadata with calculated values if available
+    if (this.metadata) {
+      this.metadata = {
+        ...this.metadata,
+        calculatedTotals: {
+          totalCost: this.costBreakdown?.totalCost,
+          leedCredits: this.leedCompliance?.creditsEarned,
+        },
+      };
+    }
   }
 
   /**
    * Calculate LEED compliance score
    */
   private calculateLEEDScore(): number {
-    const totalMaxPoints = this.leedCompliance.creditsEarned.reduce((sum, credit) => sum + credit.maxPoints, 0);
-    const totalEarnedPoints = this.leedCompliance.creditsEarned.reduce((sum, credit) => sum + credit.points, 0);
+    const totalMaxPoints = this.leedCompliance.creditsEarned.reduce(
+      (sum, credit) => sum + credit.maxPoints,
+      0
+    );
+    const totalEarnedPoints = this.leedCompliance.creditsEarned.reduce(
+      (sum, credit) => sum + credit.points,
+      0
+    );
 
     if (totalMaxPoints === 0) return 0;
 
@@ -488,14 +469,19 @@ export class AllocationModel implements Allocation {
   /**
    * Add LEED credit
    */
-  addLEEDCredit(credit: Omit<Allocation['leedCompliance']['creditsEarned'][0], 'category' | 'credit' | 'points'> & { category: string; credit: string; points: number }): AllocationModel {
+  addLEEDCredit(
+    credit: Omit<
+      Allocation['leedCompliance']['creditsEarned'][0],
+      'category' | 'credit' | 'points'
+    > & { category: string; credit: string; points: number }
+  ): AllocationModel {
     const newCredit = {
       category: credit.category,
       credit: credit.credit,
       points: credit.points,
       maxPoints: credit.maxPoints,
       description: credit.description,
-      documentation: credit.documentation
+      documentation: credit.documentation,
     };
 
     const newCredits = [...this.leedCompliance.creditsEarned, newCredit];
@@ -508,7 +494,7 @@ export class AllocationModel implements Allocation {
    * Update LEED credit points
    */
   updateLEEDCredit(category: string, credit: string, newPoints: number): AllocationModel {
-    const newCredits = this.leedCompliance.creditsEarned.map(c => {
+    const newCredits = this.leedCompliance.creditsEarned.map((c) => {
       if (c.category === category && c.credit === credit) {
         return { ...c, points: newPoints };
       }
@@ -522,14 +508,19 @@ export class AllocationModel implements Allocation {
   /**
    * Add quality metric
    */
-  addQualityMetric(metric: Omit<Allocation['qualityMetrics'][0], 'parameter' | 'value'> & { parameter: string; value: number }): AllocationModel {
+  addQualityMetric(
+    metric: Omit<Allocation['qualityMetrics'][0], 'parameter' | 'value'> & {
+      parameter: string;
+      value: number;
+    }
+  ): AllocationModel {
     const newMetric = {
       parameter: metric.parameter,
       value: metric.value,
       unit: metric.unit,
       testMethod: metric.testMethod,
       complianceStatus: metric.complianceStatus,
-      notes: metric.notes
+      notes: metric.notes,
     };
 
     const newMetrics = [...this.qualityMetrics, newMetric];
@@ -539,8 +530,12 @@ export class AllocationModel implements Allocation {
   /**
    * Update quality metric
    */
-  updateQualityMetric(parameter: string, complianceStatus: 'pass' | 'fail' | 'pending', notes?: string): AllocationModel {
-    const newMetrics = this.qualityMetrics.map(metric => {
+  updateQualityMetric(
+    parameter: string,
+    complianceStatus: 'pass' | 'fail' | 'pending',
+    notes?: string
+  ): AllocationModel {
+    const newMetrics = this.qualityMetrics.map((metric) => {
       if (metric.parameter === parameter) {
         return { ...metric, complianceStatus, notes };
       }
@@ -553,14 +548,19 @@ export class AllocationModel implements Allocation {
   /**
    * Add regulatory compliance check
    */
-  addRegulatoryCompliance(compliance: Omit<Allocation['regulatoryCompliance'][0], 'regulation' | 'status'> & { regulation: string; status: 'compliant' | 'non_compliant' | 'pending' | 'exempt' }): AllocationModel {
+  addRegulatoryCompliance(
+    compliance: Omit<Allocation['regulatoryCompliance'][0], 'regulation' | 'status'> & {
+      regulation: string;
+      status: 'compliant' | 'non_compliant' | 'pending' | 'exempt';
+    }
+  ): AllocationModel {
     const newCompliance = {
       regulation: compliance.regulation,
       status: compliance.status,
       lastCheckDate: compliance.lastCheckDate,
       nextCheckDate: compliance.nextCheckDate,
       notes: compliance.notes,
-      documentation: compliance.documentation
+      documentation: compliance.documentation,
     };
 
     const newComplianceList = [...this.regulatoryCompliance, newCompliance];
@@ -570,13 +570,19 @@ export class AllocationModel implements Allocation {
   /**
    * Add documentation
    */
-  addDocumentation(documentation: Omit<Allocation['documentation'][0], 'type' | 'reference' | 'status'> & { type: string; reference: string; status: 'submitted' | 'approved' | 'rejected' | 'pending' }): AllocationModel {
+  addDocumentation(
+    documentation: Omit<Allocation['documentation'][0], 'type' | 'reference' | 'status'> & {
+      type: string;
+      reference: string;
+      status: 'submitted' | 'approved' | 'rejected' | 'pending';
+    }
+  ): AllocationModel {
     const newDoc = {
       type: documentation.type,
       reference: documentation.reference,
       date: documentation.date,
       status: documentation.status,
-      notes: documentation.notes
+      notes: documentation.notes,
     };
 
     const newDocumentation = [...this.documentation, newDoc];
@@ -591,7 +597,7 @@ export class AllocationModel implements Allocation {
       action,
       timestamp: new Date().toISOString(),
       newValue,
-      notes
+      notes,
     };
 
     const newAuditTrail = [...this.auditTrail, auditEntry];
@@ -602,7 +608,9 @@ export class AllocationModel implements Allocation {
    * Check if allocation meets quality standards
    */
   meetsQualityStandards(): boolean {
-    const failedMetrics = this.qualityMetrics.filter(metric => metric.complianceStatus === 'fail');
+    const failedMetrics = this.qualityMetrics.filter(
+      (metric) => metric.complianceStatus === 'fail'
+    );
     return failedMetrics.length === 0;
   }
 
@@ -610,7 +618,9 @@ export class AllocationModel implements Allocation {
    * Check if allocation is compliant with regulations
    */
   isRegulatoryCompliant(): boolean {
-    const nonCompliant = this.regulatoryCompliance.filter(compliance => compliance.status === 'non_compliant');
+    const nonCompliant = this.regulatoryCompliance.filter(
+      (compliance) => compliance.status === 'non_compliant'
+    );
     return nonCompliant.length === 0;
   }
 
@@ -661,7 +671,8 @@ export class AllocationModel implements Allocation {
    */
   getCostEffectivenessScore(): number {
     const netCost = this.costBreakdown.netCost;
-    const divertedFromLandfill = this.allocatedQuantity * (this.environmentalImpact.landfillDiversion / 100);
+    const divertedFromLandfill =
+      this.allocatedQuantity * (this.environmentalImpact.landfillDiversion / 100);
 
     if (divertedFromLandfill === 0) return 0;
 
@@ -710,7 +721,7 @@ export class AllocationModel implements Allocation {
       leedCreditsCount: this.leedCompliance.creditsEarned.length,
       qualityMetricsCount: this.qualityMetrics.length,
       regulatoryComplianceCount: this.regulatoryCompliance.length,
-      documentationCount: this.documentation.length
+      documentationCount: this.documentation.length,
     };
   }
 
@@ -741,7 +752,7 @@ export class AllocationModel implements Allocation {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -749,7 +760,7 @@ export class AllocationModel implements Allocation {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Allocation> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData } = this.toJSON();
     return eventData;
   }
 
@@ -763,7 +774,7 @@ export class AllocationModel implements Allocation {
       eventType,
       timestamp: new Date(),
       eventData: this.toEventData(),
-      version: 1
+      version: 1,
     };
   }
 
@@ -795,8 +806,9 @@ export class AllocationModel implements Allocation {
 
     // Business rule: Documentation required for LEED credits
     if (this.isLEEDCertified()) {
-      const creditsWithoutDocs = this.leedCompliance.creditsEarned.filter(credit =>
-        credit.points > 0 && (!credit.documentation || credit.documentation.length === 0)
+      const creditsWithoutDocs = this.leedCompliance.creditsEarned.filter(
+        (credit) =>
+          credit.points > 0 && (!credit.documentation || credit.documentation.length === 0)
       );
 
       if (creditsWithoutDocs.length > 0) {
@@ -833,14 +845,28 @@ export class AllocationFactory {
   static fromLegacyData(legacyData: Record<string, any>): AllocationModel {
     // Data archaeology: Handle various legacy field names and formats
     const mappedData: Partial<Allocation> = {
-      externalIds: [legacyData.allocation_id || legacyData.ALLOCATION_ID || legacyData.ticket_allocation_id || legacyData.id],
-      allocationNumber: legacyData.allocation_number || legacyData.ALLOCATION_NUMBER || legacyData.allocation_no || `ALLOC-${Date.now()}`,
-      materialTicketId: legacyData.material_ticket_id || legacyData.MATERIAL_TICKET_ID || legacyData.ticket_id,
+      externalIds: [
+        legacyData.allocation_id ||
+          legacyData.ALLOCATION_ID ||
+          legacyData.ticket_allocation_id ||
+          legacyData.id,
+      ],
+      allocationNumber:
+        legacyData.allocation_number ||
+        legacyData.ALLOCATION_NUMBER ||
+        legacyData.allocation_no ||
+        `ALLOC-${Date.now()}`,
+      materialTicketId:
+        legacyData.material_ticket_id || legacyData.MATERIAL_TICKET_ID || legacyData.ticket_id,
       materialType: legacyData.material_type || legacyData.MATERIAL_TYPE || 'mixed_waste',
-      allocationType: this.mapLegacyAllocationType(legacyData.allocation_type || legacyData.type || 'processed'),
-      allocatedQuantity: legacyData.allocated_quantity || legacyData.ALLOCATED_QUANTITY || legacyData.quantity || 0,
+      allocationType: this.mapLegacyAllocationType(
+        legacyData.allocation_type || legacyData.type || 'processed'
+      ),
+      allocatedQuantity:
+        legacyData.allocated_quantity || legacyData.ALLOCATED_QUANTITY || legacyData.quantity || 0,
       unit: legacyData.unit || legacyData.UNIT || 'tons',
-      allocatedPercentage: legacyData.allocated_percentage || legacyData.ALLOCATED_PERCENTAGE || 100,
+      allocatedPercentage:
+        legacyData.allocated_percentage || legacyData.ALLOCATED_PERCENTAGE || 100,
       destination: this.mapLegacyDestination(legacyData),
       processingMethod: this.mapLegacyProcessingMethod(legacyData),
       environmentalImpact: this.mapLegacyEnvironmentalImpact(legacyData),
@@ -860,9 +886,9 @@ export class AllocationFactory {
         allocationData: {
           projectId: legacyData.project_id,
           batchId: legacyData.batch_id,
-          certificationId: legacyData.certification_id
-        }
-      }
+          certificationId: legacyData.certification_id,
+        },
+      },
     };
 
     return AllocationModel.create(mappedData as any);
@@ -873,16 +899,16 @@ export class AllocationFactory {
    */
   private static mapLegacyAllocationType(legacyType: string): Allocation['allocationType'] {
     const typeMap: Record<string, Allocation['allocationType']> = {
-      'direct': 'direct',
-      'diverted': 'diverted',
-      'processed': 'processed',
-      'transferred': 'transferred',
-      'disposed': 'disposed',
-      'recycled': 'recycled',
-      'donated': 'donated',
-      'disposal': 'disposed',
-      'recycling': 'recycled',
-      'transfer': 'transferred'
+      direct: 'direct',
+      diverted: 'diverted',
+      processed: 'processed',
+      transferred: 'transferred',
+      disposed: 'disposed',
+      recycled: 'recycled',
+      donated: 'donated',
+      disposal: 'disposed',
+      recycling: 'recycled',
+      transfer: 'transferred',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'processed';
@@ -893,11 +919,13 @@ export class AllocationFactory {
    */
   private static mapLegacyDestination(legacyData: Record<string, any>): Allocation['destination'] {
     return {
-      type: this.mapLegacyDestinationType(legacyData.destination_type || legacyData.destination || 'facility'),
+      type: this.mapLegacyDestinationType(
+        legacyData.destination_type || legacyData.destination || 'facility'
+      ),
       id: legacyData.destination_id || legacyData.DESTINATION_ID || 'unknown',
       name: legacyData.destination_name || legacyData.DESTINATION_NAME || 'Unknown Destination',
       licenseNumber: legacyData.license_number || legacyData.LICENSE_NUMBER,
-      permitNumber: legacyData.permit_number || legacyData.PERMIT_NUMBER
+      permitNumber: legacyData.permit_number || legacyData.PERMIT_NUMBER,
     };
   }
 
@@ -906,15 +934,14 @@ export class AllocationFactory {
    */
   private static mapLegacyDestinationType(legacyType: string): Allocation['destination']['type'] {
     const typeMap: Record<string, Allocation['destination']['type']> = {
-      'facility': 'facility',
-      'customer': 'customer',
-      'vendor': 'vendor',
-      'landfill': 'landfill',
-      'recycling_center': 'recycling_center',
-      'donation_center': 'donation_center',
-      'landfill': 'landfill',
-      'recycling': 'recycling_center',
-      'donation': 'donation_center'
+      facility: 'facility',
+      customer: 'customer',
+      vendor: 'vendor',
+      landfill: 'landfill',
+      recycling_center: 'recycling_center',
+      donation_center: 'donation_center',
+      recycling: 'recycling_center',
+      donation: 'donation_center',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'facility';
@@ -923,49 +950,61 @@ export class AllocationFactory {
   /**
    * Map legacy processing method
    */
-  private static mapLegacyProcessingMethod(legacyData: Record<string, any>): Allocation['processingMethod'] {
+  private static mapLegacyProcessingMethod(
+    legacyData: Record<string, any>
+  ): Allocation['processingMethod'] {
     return {
       method: legacyData.processing_method || legacyData.PROCESSING_METHOD || 'Unknown',
       efficiency: legacyData.processing_efficiency || legacyData.PROCESSING_EFFICIENCY || 75,
       outputProduct: legacyData.output_product || legacyData.OUTPUT_PRODUCT,
       byproducts: legacyData.byproducts || legacyData.BYPRODUCTS || [],
       energyConsumption: legacyData.energy_consumption || legacyData.ENERGY_CONSUMPTION,
-      waterUsage: legacyData.water_usage || legacyData.WATER_USAGE
+      waterUsage: legacyData.water_usage || legacyData.WATER_USAGE,
     };
   }
 
   /**
    * Map legacy environmental impact
    */
-  private static mapLegacyEnvironmentalImpact(legacyData: Record<string, any>): Allocation['environmentalImpact'] {
+  private static mapLegacyEnvironmentalImpact(
+    legacyData: Record<string, any>
+  ): Allocation['environmentalImpact'] {
     return {
       carbonFootprint: legacyData.carbon_footprint || legacyData.CARBON_FOOTPRINT || 0,
       waterImpact: legacyData.water_impact || legacyData.WATER_IMPACT || 0,
       energyImpact: legacyData.energy_impact || legacyData.ENERGY_IMPACT || 0,
       landfillDiversion: legacyData.landfill_diversion || legacyData.LANDFILL_DIVERSION || 0,
-      recyclingRate: legacyData.recycling_rate || legacyData.RECYCLING_RATE || 0
+      recyclingRate: legacyData.recycling_rate || legacyData.RECYCLING_RATE || 0,
     };
   }
 
   /**
    * Map legacy LEED compliance
    */
-  private static mapLegacyLEEDCompliance(legacyData: Record<string, any>): Allocation['leedCompliance'] {
+  private static mapLegacyLEEDCompliance(
+    legacyData: Record<string, any>
+  ): Allocation['leedCompliance'] {
     return {
-      creditsEarned: this.mapLegacyLEEDCredits(legacyData.leed_credits || legacyData.LEED_CREDITS || []),
+      creditsEarned: this.mapLegacyLEEDCredits(
+        legacyData.leed_credits || legacyData.LEED_CREDITS || []
+      ),
       totalPoints: legacyData.total_leed_points || legacyData.TOTAL_LEED_POINTS || 0,
-      certificationLevel: this.mapLegacyCertificationLevel(legacyData.leed_certification || legacyData.LEED_CERTIFICATION || 'none'),
+      certificationLevel: this.mapLegacyCertificationLevel(
+        legacyData.leed_certification || legacyData.LEED_CERTIFICATION || 'none'
+      ),
       complianceScore: legacyData.leed_score || legacyData.LEED_SCORE || 0,
       lastAuditDate: legacyData.last_audit_date || legacyData.LAST_AUDIT_DATE,
       nextAuditDate: legacyData.next_audit_date || legacyData.NEXT_AUDIT_DATE,
-      auditor: legacyData.auditor || legacyData.AUDITOR
+      auditor: legacyData.auditor || legacyData.AUDITOR,
     };
   }
 
   /**
    * Map legacy LEED credits
    */
-  private static mapLegacyLEEDCredits(credits: any[]): Allocation['leedCompliance']['creditsEarned'] {
+  private static mapLegacyLEEDCredits(
+    credits: any[]
+  ): Allocation['leedCompliance']['creditsEarned'] {
     if (!Array.isArray(credits)) return [];
 
     return credits.map((credit: any) => ({
@@ -974,22 +1013,24 @@ export class AllocationFactory {
       points: credit.points || 0,
       maxPoints: credit.max_points || credit.maxPoints || 1,
       description: credit.description || 'No description',
-      documentation: credit.documentation || []
+      documentation: credit.documentation || [],
     }));
   }
 
   /**
    * Map legacy certification level
    */
-  private static mapLegacyCertificationLevel(legacyLevel: string): Allocation['leedCompliance']['certificationLevel'] {
+  private static mapLegacyCertificationLevel(
+    legacyLevel: string
+  ): Allocation['leedCompliance']['certificationLevel'] {
     const levelMap: Record<string, Allocation['leedCompliance']['certificationLevel']> = {
-      'certified': 'certified',
-      'silver': 'silver',
-      'gold': 'gold',
-      'platinum': 'platinum',
-      'none': 'none',
-      'pending': 'none',
-      'cert': 'certified'
+      certified: 'certified',
+      silver: 'silver',
+      gold: 'gold',
+      platinum: 'platinum',
+      none: 'none',
+      pending: 'none',
+      cert: 'certified',
     };
 
     return levelMap[legacyLevel.toLowerCase()] || 'none';
@@ -998,7 +1039,9 @@ export class AllocationFactory {
   /**
    * Map legacy quality metrics
    */
-  private static mapLegacyQualityMetrics(legacyData: Record<string, any>): Allocation['qualityMetrics'] {
+  private static mapLegacyQualityMetrics(
+    legacyData: Record<string, any>
+  ): Allocation['qualityMetrics'] {
     if (!legacyData.quality_metrics && !legacyData.quality_tests) {
       return [];
     }
@@ -1011,8 +1054,10 @@ export class AllocationFactory {
         value: metric.value || metric.result || 0,
         unit: metric.unit || 'units',
         testMethod: metric.test_method || metric.method || 'Standard Test',
-        complianceStatus: this.mapLegacyComplianceStatus(metric.status || metric.compliance || 'pending'),
-        notes: metric.notes || metric.comments
+        complianceStatus: this.mapLegacyComplianceStatus(
+          metric.status || metric.compliance || 'pending'
+        ),
+        notes: metric.notes || metric.comments,
       }));
     }
 
@@ -1022,14 +1067,15 @@ export class AllocationFactory {
   /**
    * Map legacy compliance status
    */
-  private static mapLegacyComplianceStatus(legacyStatus: string): Allocation['qualityMetrics'][0]['complianceStatus'] {
+  private static mapLegacyComplianceStatus(
+    legacyStatus: string
+  ): Allocation['qualityMetrics'][0]['complianceStatus'] {
     const statusMap: Record<string, Allocation['qualityMetrics'][0]['complianceStatus']> = {
-      'pass': 'pass',
-      'fail': 'fail',
-      'pending': 'pending',
-      'passed': 'pass',
-      'failed': 'fail',
-      'pass': 'pass'
+      pass: 'pass',
+      fail: 'fail',
+      pending: 'pending',
+      passed: 'pass',
+      failed: 'fail',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'pending';
@@ -1038,21 +1084,25 @@ export class AllocationFactory {
   /**
    * Map legacy transportation
    */
-  private static mapLegacyTransportation(legacyData: Record<string, any>): Allocation['transportation'] {
+  private static mapLegacyTransportation(
+    legacyData: Record<string, any>
+  ): Allocation['transportation'] {
     return {
       method: legacyData.transportation_method || legacyData.TRANSPORTATION_METHOD || 'truck',
       distance: legacyData.transportation_distance || legacyData.TRANSPORTATION_DISTANCE || 0,
       fuelType: legacyData.fuel_type || legacyData.FUEL_TYPE,
       emissions: legacyData.transportation_emissions || legacyData.TRANSPORTATION_EMISSIONS || 0,
       cost: legacyData.transportation_cost || legacyData.TRANSPORTATION_COST || 0,
-      carrier: legacyData.carrier || legacyData.CARRIER
+      carrier: legacyData.carrier || legacyData.CARRIER,
     };
   }
 
   /**
    * Map legacy cost breakdown
    */
-  private static mapLegacyCostBreakdown(legacyData: Record<string, any>): Allocation['costBreakdown'] {
+  private static mapLegacyCostBreakdown(
+    legacyData: Record<string, any>
+  ): Allocation['costBreakdown'] {
     return {
       materialCost: legacyData.material_cost || legacyData.MATERIAL_COST || 0,
       processingCost: legacyData.processing_cost || legacyData.PROCESSING_COST || 0,
@@ -1060,14 +1110,16 @@ export class AllocationFactory {
       disposalCost: legacyData.disposal_cost || legacyData.DISPOSAL_COST || 0,
       totalCost: legacyData.total_cost || legacyData.TOTAL_COST || 0,
       revenue: legacyData.revenue || legacyData.REVENUE,
-      netCost: legacyData.net_cost || legacyData.NET_COST || 0
+      netCost: legacyData.net_cost || legacyData.NET_COST || 0,
     };
   }
 
   /**
    * Map legacy regulatory compliance
    */
-  private static mapLegacyRegulatoryCompliance(legacyData: Record<string, any>): Allocation['regulatoryCompliance'] {
+  private static mapLegacyRegulatoryCompliance(
+    legacyData: Record<string, any>
+  ): Allocation['regulatoryCompliance'] {
     if (!legacyData.regulatory_compliance && !legacyData.compliance_checks) {
       return [];
     }
@@ -1078,10 +1130,16 @@ export class AllocationFactory {
       return complianceData.map((compliance: any) => ({
         regulation: compliance.regulation || compliance.regulation_name || 'Unknown Regulation',
         status: this.mapLegacyRegulatoryStatus(compliance.status || 'pending'),
-        lastCheckDate: compliance.last_check_date || compliance.last_check || new Date().toISOString().split('T')[0],
-        nextCheckDate: compliance.next_check_date || compliance.next_check || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        lastCheckDate:
+          compliance.last_check_date ||
+          compliance.last_check ||
+          new Date().toISOString().split('T')[0],
+        nextCheckDate:
+          compliance.next_check_date ||
+          compliance.next_check ||
+          new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         notes: compliance.notes || compliance.comments,
-        documentation: compliance.documentation || compliance.docs || []
+        documentation: compliance.documentation || compliance.docs || [],
       }));
     }
 
@@ -1091,15 +1149,17 @@ export class AllocationFactory {
   /**
    * Map legacy regulatory status
    */
-  private static mapLegacyRegulatoryStatus(legacyStatus: string): Allocation['regulatoryCompliance'][0]['status'] {
+  private static mapLegacyRegulatoryStatus(
+    legacyStatus: string
+  ): string {
     const statusMap: Record<string, Allocation['regulatoryCompliance'][0]['status']> = {
-      'compliant': 'compliant',
-      'non_compliant': 'non_compliant',
-      'pending': 'pending',
-      'exempt': 'exempt',
-      'compliant': 'compliant',
+      compliant: 'compliant',
+      non_compliant: 'non_compliant',
+      pending: 'pending',
+      exempt: 'exempt',
+      compliant: 'compliant',
       'non-compliant': 'non_compliant',
-      'exempt': 'exempt'
+      exempt: 'exempt',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'pending';
@@ -1108,7 +1168,9 @@ export class AllocationFactory {
   /**
    * Map legacy documentation
    */
-  private static mapLegacyDocumentation(legacyData: Record<string, any>): Allocation['documentation'] {
+  private static mapLegacyDocumentation(
+    legacyData: Record<string, any>
+  ): Allocation['documentation'] {
     if (!legacyData.documentation && !legacyData.documents) {
       return [];
     }
@@ -1121,7 +1183,7 @@ export class AllocationFactory {
         reference: doc.reference || doc.reference_number || 'Unknown',
         date: doc.date || doc.submission_date || new Date().toISOString().split('T')[0],
         status: this.mapLegacyDocumentStatus(doc.status || 'pending'),
-        notes: doc.notes || doc.comments
+        notes: doc.notes || doc.comments,
       }));
     }
 
@@ -1131,15 +1193,17 @@ export class AllocationFactory {
   /**
    * Map legacy document status
    */
-  private static mapLegacyDocumentStatus(legacyStatus: string): Allocation['documentation'][0]['status'] {
+  private static mapLegacyDocumentStatus(
+    legacyStatus: string
+  ): Allocation['documentation'][0]['status'] {
     const statusMap: Record<string, Allocation['documentation'][0]['status']> = {
-      'submitted': 'submitted',
-      'approved': 'approved',
-      'rejected': 'rejected',
-      'pending': 'pending',
-      'submit': 'submitted',
-      'approve': 'approved',
-      'reject': 'rejected'
+      submitted: 'submitted',
+      approved: 'approved',
+      rejected: 'rejected',
+      pending: 'pending',
+      submit: 'submitted',
+      approve: 'approved',
+      reject: 'rejected',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'pending';
@@ -1162,7 +1226,7 @@ export class AllocationFactory {
         userId: entry.user_id || entry.user,
         previousValue: entry.previous_value || entry.old_value,
         newValue: entry.new_value || entry.value || 'unknown',
-        notes: entry.notes || entry.description
+        notes: entry.notes || entry.description,
       }));
     }
 
@@ -1184,7 +1248,7 @@ export class AllocationValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -1216,15 +1280,23 @@ export class AllocationManager {
   /**
    * Get allocations by LEED certification level
    */
-  static getAllocationsByLEEDLevel(allocations: AllocationModel[], level: 'certified' | 'silver' | 'gold' | 'platinum'): AllocationModel[] {
-    return allocations.filter(allocation => allocation.leedCompliance.certificationLevel === level);
+  static getAllocationsByLEEDLevel(
+    allocations: AllocationModel[],
+    level: 'certified' | 'silver' | 'gold' | 'platinum'
+  ): AllocationModel[] {
+    return allocations.filter(
+      (allocation) => allocation.leedCompliance.certificationLevel === level
+    );
   }
 
   /**
    * Get allocations by environmental impact
    */
-  static getAllocationsByImpactLevel(allocations: AllocationModel[], impactLevel: 'low' | 'medium' | 'high'): AllocationModel[] {
-    return allocations.filter(allocation => {
+  static getAllocationsByImpactLevel(
+    allocations: AllocationModel[],
+    impactLevel: 'low' | 'medium' | 'high'
+  ): AllocationModel[] {
+    return allocations.filter((allocation) => {
       const score = allocation.getEfficiencyScore();
       if (impactLevel === 'low') return score >= 80;
       if (impactLevel === 'medium') return score >= 60 && score < 80;
@@ -1235,15 +1307,21 @@ export class AllocationManager {
   /**
    * Get allocations requiring attention
    */
-  static getAllocationsRequiringAttention(allocations: AllocationModel[]): Array<{ allocation: AllocationModel; reason: string; priority: 'low' | 'medium' | 'high' }> {
-    const requiringAttention: Array<{ allocation: AllocationModel; reason: string; priority: 'low' | 'medium' | 'high' }> = [];
+  static getAllocationsRequiringAttention(
+    allocations: AllocationModel[]
+  ): Array<{ allocation: AllocationModel; reason: string; priority: 'low' | 'medium' | 'high' }> {
+    const requiringAttention: Array<{
+      allocation: AllocationModel;
+      reason: string;
+      priority: 'low' | 'medium' | 'high';
+    }> = [];
 
-    allocations.forEach(allocation => {
+    allocations.forEach((allocation) => {
       if (!allocation.meetsQualityStandards()) {
         requiringAttention.push({
           allocation,
           reason: 'Allocation does not meet quality standards',
-          priority: 'high'
+          priority: 'high',
         });
       }
 
@@ -1251,7 +1329,7 @@ export class AllocationManager {
         requiringAttention.push({
           allocation,
           reason: 'Allocation is not regulatory compliant',
-          priority: 'high'
+          priority: 'high',
         });
       }
 
@@ -1259,7 +1337,7 @@ export class AllocationManager {
         requiringAttention.push({
           allocation,
           reason: 'Allocation has low efficiency score',
-          priority: 'medium'
+          priority: 'medium',
         });
       }
 
@@ -1267,7 +1345,7 @@ export class AllocationManager {
         requiringAttention.push({
           allocation,
           reason: 'Allocation has low cost effectiveness',
-          priority: 'medium'
+          priority: 'medium',
         });
       }
 
@@ -1275,13 +1353,13 @@ export class AllocationManager {
         requiringAttention.push({
           allocation,
           reason: 'Allocation should pursue LEED certification',
-          priority: 'low'
+          priority: 'low',
         });
       }
     });
 
     return requiringAttention.sort((a, b) => {
-      const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
       return priorityOrder[b.priority] - priorityOrder[a.priority];
     });
   }
@@ -1290,36 +1368,72 @@ export class AllocationManager {
    * Get allocation performance report
    */
   static getPerformanceReport(allocations: AllocationModel[]): Record<string, any> {
-    const certifiedAllocations = allocations.filter(allocation => allocation.isLEEDCertified());
-    const qualityCompliantAllocations = allocations.filter(allocation => allocation.meetsQualityStandards());
-    const regulatoryCompliantAllocations = allocations.filter(allocation => allocation.isRegulatoryCompliant());
+    const certifiedAllocations = allocations.filter((allocation) => allocation.isLEEDCertified());
+    const qualityCompliantAllocations = allocations.filter((allocation) =>
+      allocation.meetsQualityStandards()
+    );
+    const regulatoryCompliantAllocations = allocations.filter((allocation) =>
+      allocation.isRegulatoryCompliant()
+    );
 
-    const totalQuantity = allocations.reduce((sum, allocation) => sum + allocation.allocatedQuantity, 0);
-    const totalCost = allocations.reduce((sum, allocation) => sum + allocation.costBreakdown.totalCost, 0);
-    const totalEmissions = allocations.reduce((sum, allocation) => sum + allocation.transportation.emissions, 0);
-    const totalDiversion = allocations.reduce((sum, allocation) => sum + (allocation.allocatedQuantity * allocation.environmentalImpact.landfillDiversion / 100), 0);
+    const totalQuantity = allocations.reduce(
+      (sum, allocation) => sum + allocation.allocatedQuantity,
+      0
+    );
+    const totalCost = allocations.reduce(
+      (sum, allocation) => sum + allocation.costBreakdown.totalCost,
+      0
+    );
+    const totalEmissions = allocations.reduce(
+      (sum, allocation) => sum + allocation.transportation.emissions,
+      0
+    );
+    const totalDiversion = allocations.reduce(
+      (sum, allocation) =>
+        sum +
+        (allocation.allocatedQuantity * allocation.environmentalImpact.landfillDiversion) / 100,
+      0
+    );
 
-    const averageEfficiency = allocations.reduce((sum, allocation) => sum + allocation.getEfficiencyScore(), 0) / allocations.length;
-    const averageCostEffectiveness = allocations.reduce((sum, allocation) => sum + allocation.getCostEffectivenessScore(), 0) / allocations.length;
+    const averageEfficiency =
+      allocations.reduce((sum, allocation) => sum + allocation.getEfficiencyScore(), 0) /
+      allocations.length;
+    const averageCostEffectiveness =
+      allocations.reduce((sum, allocation) => sum + allocation.getCostEffectivenessScore(), 0) /
+      allocations.length;
 
-    const allocationsByType = allocations.reduce((acc, allocation) => {
-      acc[allocation.allocationType] = (acc[allocation.allocationType] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const allocationsByType = allocations.reduce(
+      (acc, allocation) => {
+        acc[allocation.allocationType] = (acc[allocation.allocationType] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const leedCertificationBreakdown = allocations.reduce((acc, allocation) => {
-      acc[allocation.leedCompliance.certificationLevel] = (acc[allocation.leedCompliance.certificationLevel] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const leedCertificationBreakdown = allocations.reduce(
+      (acc, allocation) => {
+        acc[allocation.leedCompliance.certificationLevel] =
+          (acc[allocation.leedCompliance.certificationLevel] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalAllocations: allocations.length,
       certifiedAllocations: certifiedAllocations.length,
       qualityCompliantAllocations: qualityCompliantAllocations.length,
       regulatoryCompliantAllocations: regulatoryCompliantAllocations.length,
-      certificationRate: allocations.length > 0 ? (certifiedAllocations.length / allocations.length) * 100 : 0,
-      qualityComplianceRate: allocations.length > 0 ? (qualityCompliantAllocations.length / allocations.length) * 100 : 0,
-      regulatoryComplianceRate: allocations.length > 0 ? (regulatoryCompliantAllocations.length / allocations.length) * 100 : 0,
+      certificationRate:
+        allocations.length > 0 ? (certifiedAllocations.length / allocations.length) * 100 : 0,
+      qualityComplianceRate:
+        allocations.length > 0
+          ? (qualityCompliantAllocations.length / allocations.length) * 100
+          : 0,
+      regulatoryComplianceRate:
+        allocations.length > 0
+          ? (regulatoryCompliantAllocations.length / allocations.length) * 100
+          : 0,
       averageEfficiencyScore: Math.round(averageEfficiency * 100) / 100,
       averageCostEffectivenessScore: Math.round(averageCostEffectiveness * 100) / 100,
       totalQuantity: Math.round(totalQuantity * 100) / 100,
@@ -1328,7 +1442,11 @@ export class AllocationManager {
       totalLandfillDiversion: Math.round(totalDiversion * 100) / 100,
       allocationsByType,
       leedCertificationBreakdown,
-      averageLEEDScore: allocations.reduce((sum, allocation) => sum + allocation.leedCompliance.complianceScore, 0) / allocations.length
+      averageLEEDScore:
+        allocations.reduce(
+          (sum, allocation) => sum + allocation.leedCompliance.complianceScore,
+          0
+        ) / allocations.length,
     };
   }
 
@@ -1338,7 +1456,7 @@ export class AllocationManager {
   static checkAllocationConflicts(allocations: AllocationModel[]): string[] {
     const conflicts: string[] = [];
 
-    allocations.forEach(allocation => {
+    allocations.forEach((allocation) => {
       if (!allocation.meetsQualityStandards()) {
         conflicts.push(`Allocation ${allocation.allocationNumber} does not meet quality standards`);
       }
@@ -1348,7 +1466,9 @@ export class AllocationManager {
       }
 
       const businessRuleErrors = allocation.validateBusinessRules();
-      conflicts.push(...businessRuleErrors.map(error => `${allocation.allocationNumber}: ${error}`));
+      conflicts.push(
+        ...businessRuleErrors.map((error) => `${allocation.allocationNumber}: ${error}`)
+      );
     });
 
     return conflicts;

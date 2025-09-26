@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://json-schema.org/draft-07/schema#",
   "$id": "https://refuse-protocol.org/schemas/route.json",
   "title": "REFUSE Protocol - Route Entity",
   "description": "Standardized route data structure for waste management operations",

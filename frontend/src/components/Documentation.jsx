@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react'
+import { logger } from '../utils/logger.js'
 
 function Documentation() {
-  console.log('Documentation component initializing')
+  logger.info('Documentation component initializing')
 
   const [protocolData, setProtocolData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    console.log('Documentation useEffect running')
+    logger.info('Documentation useEffect running')
     loadProtocolDocumentation()
   }, [])
 
   const loadProtocolDocumentation = async () => {
     try {
-      console.log('Starting to load protocol documentation')
+      logger.info('Starting to load protocol documentation')
       setLoading(true)
 
       // Load generated documentation data
-      console.log('Fetching documentation files...')
+      logger.info('Fetching documentation files...')
       const [overviewRes, entitiesRes, guideRes, toolsRes] = await Promise.all([
         fetch('/data/protocol-overview.json'),
         fetch('/data/entities.json'),
@@ -26,7 +27,12 @@ function Documentation() {
         fetch('/data/tool-reference.json')
       ])
 
-      console.log('Fetch responses:', { overviewRes: overviewRes.ok, entitiesRes: entitiesRes.ok, guideRes: guideRes.ok, toolsRes: toolsRes.ok })
+      logger.info('Fetch responses', {
+        overviewRes: overviewRes.ok,
+        entitiesRes: entitiesRes.ok,
+        guideRes: guideRes.ok,
+        toolsRes: toolsRes.ok
+      })
 
       if (!overviewRes.ok) {
         throw new Error('Protocol documentation not yet generated. Run: npm run build:protocol-docs')
@@ -39,13 +45,13 @@ function Documentation() {
         toolsRes.json()
       ])
 
-      console.log('Data loaded successfully, setting state')
+      logger.info('Data loaded successfully, setting state')
       setProtocolData({ overview, entities, guide, tools })
     } catch (err) {
-      console.log('Error loading documentation:', err.message)
+      logger.error('Error loading documentation', { error: err.message }, err)
       setError(err.message)
     } finally {
-      console.log('Loading state set to false')
+      logger.info('Loading state set to false')
       setLoading(false)
     }
   }

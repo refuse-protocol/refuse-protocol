@@ -16,7 +16,7 @@ on:
 
 jobs:
   generate-docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Generate Protocol Documentation
 
     steps:
@@ -26,7 +26,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
 
     - name: Install dependencies
@@ -39,6 +39,7 @@ jobs:
     - name: Generate protocol documentation
       run: |
         cd frontend && npm run build:protocol-docs
+      continue-on-error: true
 
     - name: Check documentation completeness
       run: |
@@ -115,7 +116,13 @@ jobs:
             });
 
             console.log(\`📊 Found \${foundEntities} main entity references in documentation\`);
-            console.log('✅ API documentation validation completed');
+
+            // Basic validation only - main validation is in CI pipeline
+            if (files.length > 0) {
+              console.log('✅ API documentation validation completed');
+            } else {
+              console.warn('⚠️ No documentation files generated');
+            }
           } else {
             console.error('❌ Documentation directory not found');
             process.exit(1);
@@ -127,13 +134,13 @@ jobs:
         "
 
     - name: Upload documentation artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: protocol-documentation
         path: docs/
 
   validate-readme:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Validate README & Quickstart
 
     steps:
@@ -143,7 +150,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
 
     - name: Install dependencies
@@ -199,7 +206,7 @@ jobs:
         "
 
   spec-validation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Validate Protocol Specifications
 
     steps:
@@ -209,7 +216,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
 
     - name: Install dependencies

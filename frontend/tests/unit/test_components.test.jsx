@@ -5,6 +5,7 @@
 
 test('basic build verification', () => {
   // This test verifies that the test framework is working
+  // Using console.log for test verification - this is intentional for test output
   console.log('✅ Test framework is working')
 })
 

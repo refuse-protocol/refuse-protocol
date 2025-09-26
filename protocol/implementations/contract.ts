@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Contract entity implementation with guaranteed pricing logic
  * @description Complete Contract model for managing customer agreements with pricing guarantees and terms
@@ -12,24 +13,23 @@ import { Event } from '../specifications/entities';
  * Contract implementation with comprehensive guaranteed pricing logic and contract management
  */
 export class ContractModel implements Contract {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  customerId: string;
-  contractNumber: string;
-  term: {
-    startDate: string;
-    endDate: string;
-    autoRenewal?: boolean;
-    renewalTerms?: string;
-  };
-  pricing: {
+  customerId!: string;
+  siteId?: string;
+  contractNumber!: string;
+  serviceTypes!: string[];
+  guaranteedServices!: string[];
+  contractStatus!: 'draft' | 'active' | 'expired' | 'cancelled' | 'renewed' | 'pending_approval';
+  pricing!: {
     baseRate: number;
     rateUnit: string;
+    escalationClause?: number;
     fuelSurcharge?: number;
     environmentalFee?: number;
     disposalFee?: number;
@@ -41,21 +41,36 @@ export class ContractModel implements Contract {
       reason: string;
     }>;
   };
+  term!: {
+    startDate: string;
+    endDate: string;
+    autoRenewal?: boolean;
+    renewalTerms?: string;
+    renewalOptions?: number;
+    noticePeriod?: number;
+  };
+  status!: 'active' | 'expired' | 'cancelled' | 'pending' | 'draft';
   specialTerms?: string[];
-  serviceTypes: string[];
-  guaranteedServices: string[];
-  contractStatus: 'draft' | 'active' | 'expired' | 'cancelled' | 'renewed' | 'pending_approval';
+  serviceType!: string;
 
-  private static readonly VALID_SERVICE_TYPES = [
-    'waste', 'recycling', 'organics', 'hazardous', 'bulk'
-  ];
+  static readonly VALID_SERVICE_TYPES = ['waste', 'recycling', 'organics', 'hazardous', 'bulk'];
 
   private static readonly VALID_RATE_UNITS = [
-    'month', 'quarter', 'year', 'per_ton', 'per_cubic_yard', 'per_pickup'
+    'month',
+    'quarter',
+    'year',
+    'per_ton',
+    'per_cubic_yard',
+    'per_pickup',
   ];
 
   private static readonly VALID_CONTRACT_STATUSES: Contract['contractStatus'][] = [
-    'draft', 'active', 'expired', 'cancelled', 'renewed', 'pending_approval'
+    'draft',
+    'active',
+    'expired',
+    'cancelled',
+    'renewed',
+    'pending_approval',
   ];
 
   constructor(data: Partial<Contract>) {
@@ -66,19 +81,19 @@ export class ContractModel implements Contract {
   /**
    * Create a new contract with validation
    */
-  static create(data: Omit<Contract, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): ContractModel {
+  static create(data: Omit<Contract, 'id' | 'createdAt' | 'updatedAt' | 'version'>): ContractModel {
     const now = new Date();
     const contractData: Partial<Contract> = {
-      id: uuidv4(),
       ...data,
+      id: uuidv4(),
       createdAt: now,
       updatedAt: now,
       version: 1,
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'contract_system'
-      }
+        source: 'contract_system',
+      },
     };
 
     return new ContractModel(contractData);
@@ -87,7 +102,7 @@ export class ContractModel implements Contract {
   /**
    * Update contract with optimistic locking
    */
-  update(updates: Partial<Omit<Contract, keyof BaseEntity>>, expectedVersion: number): ContractModel {
+  update(updates: Partial<Contract>, expectedVersion: number): ContractModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -101,8 +116,8 @@ export class ContractModel implements Contract {
         ...this.metadata,
         ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new ContractModel(updatedData);
@@ -155,7 +170,9 @@ export class ContractModel implements Contract {
 
     data.serviceTypes.forEach((serviceType, index) => {
       if (!ContractModel.VALID_SERVICE_TYPES.includes(serviceType)) {
-        throw new Error(`Service type ${index} must be one of: ${ContractModel.VALID_SERVICE_TYPES.join(', ')}`);
+        throw new Error(
+          `Service type ${index} must be one of: ${ContractModel.VALID_SERVICE_TYPES.join(', ')}`
+        );
       }
     });
 
@@ -163,15 +180,40 @@ export class ContractModel implements Contract {
       throw new Error('Guaranteed services must be a non-empty array');
     }
 
-    if (!data.contractStatus || !ContractModel.VALID_CONTRACT_STATUSES.includes(data.contractStatus)) {
-      throw new Error(`Contract status must be one of: ${ContractModel.VALID_CONTRACT_STATUSES.join(', ')}`);
+    if (
+      !data.contractStatus ||
+      !ContractModel.VALID_CONTRACT_STATUSES.includes(data.contractStatus)
+    ) {
+      throw new Error(
+        `Contract status must be one of: ${ContractModel.VALID_CONTRACT_STATUSES.join(', ')}`
+      );
+    }
+
+    // Set status to match contractStatus if not provided
+    if (!data.status) {
+      const statusMap: Record<string, 'active' | 'expired' | 'cancelled' | 'pending' | 'draft'> = {
+        active: 'active',
+        expired: 'expired',
+        cancelled: 'cancelled',
+        renewed: 'active',
+        pending_approval: 'pending',
+        draft: 'draft',
+      };
+      data.status = statusMap[data.contractStatus] || 'draft';
+    }
+
+    // Set serviceType from serviceTypes if not provided
+    if (!data.serviceType && data.serviceTypes && data.serviceTypes.length > 0) {
+      data.serviceType = data.serviceTypes[0];
     }
 
     // Validate pricing adjustments if provided
     if (data.pricing.priceAdjustments) {
       data.pricing.priceAdjustments.forEach((adjustment, index) => {
         if (!adjustment.type || !['increase', 'decrease', 'fixed'].includes(adjustment.type)) {
-          throw new Error(`Price adjustment ${index}: type must be 'increase', 'decrease', or 'fixed'`);
+          throw new Error(
+            `Price adjustment ${index}: type must be 'increase', 'decrease', or 'fixed'`
+          );
         }
 
         if (typeof adjustment.amount !== 'number') {
@@ -260,7 +302,12 @@ export class ContractModel implements Contract {
   /**
    * Add price adjustment
    */
-  addPriceAdjustment(adjustment: Omit<Contract['pricing']['priceAdjustments'][0], 'effectiveDate'> & { effectiveDate: string }): ContractModel {
+  addPriceAdjustment(adjustment: {
+    type: string;
+    amount: number;
+    effectiveDate: string;
+    reason: string;
+  }): ContractModel {
     if (!['increase', 'decrease', 'fixed'].includes(adjustment.type)) {
       throw new Error('Adjustment type must be increase, decrease, or fixed');
     }
@@ -278,7 +325,10 @@ export class ContractModel implements Contract {
     }
 
     const newAdjustments = [...(this.pricing.priceAdjustments || []), adjustment];
-    return this.update({ pricing: { ...this.pricing, priceAdjustments: newAdjustments } }, this.version);
+    return this.update(
+      { pricing: { ...this.pricing, priceAdjustments: newAdjustments } },
+      this.version
+    );
   }
 
   /**
@@ -289,8 +339,13 @@ export class ContractModel implements Contract {
       throw new Error('Invalid price adjustment index');
     }
 
-    const newAdjustments = (this.pricing.priceAdjustments || []).filter((_, index) => index !== adjustmentIndex);
-    return this.update({ pricing: { ...this.pricing, priceAdjustments: newAdjustments } }, this.version);
+    const newAdjustments = (this.pricing.priceAdjustments || []).filter(
+      (_, index) => index !== adjustmentIndex
+    );
+    return this.update(
+      { pricing: { ...this.pricing, priceAdjustments: newAdjustments } },
+      this.version
+    );
   }
 
   /**
@@ -312,9 +367,7 @@ export class ContractModel implements Contract {
     const startDate = new Date(this.term.startDate);
     const endDate = new Date(this.term.endDate);
 
-    return this.contractStatus === 'active' &&
-           startDate <= now &&
-           endDate >= now;
+    return this.contractStatus === 'active' && startDate <= now && endDate >= now;
   }
 
   /**
@@ -350,8 +403,9 @@ export class ContractModel implements Contract {
     const endDate = new Date(this.term.endDate);
 
     // Calculate duration in months
-    const months = (endDate.getFullYear() - startDate.getFullYear()) * 12 +
-                   (endDate.getMonth() - startDate.getMonth());
+    const months =
+      (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+      (endDate.getMonth() - startDate.getMonth());
 
     const monthlyValue = this.pricing.totalRate || this.pricing.baseRate;
 
@@ -372,8 +426,8 @@ export class ContractModel implements Contract {
     if (now >= endDate) return 0;
 
     // Calculate remaining months
-    const remainingMonths = (endDate.getFullYear() - now.getFullYear()) * 12 +
-                           (endDate.getMonth() - now.getMonth());
+    const remainingMonths =
+      (endDate.getFullYear() - now.getFullYear()) * 12 + (endDate.getMonth() - now.getMonth());
 
     const monthlyValue = this.pricing.totalRate || this.pricing.baseRate;
 
@@ -418,10 +472,11 @@ export class ContractModel implements Contract {
       totalRate: this.pricing.totalRate,
       contractValue: Math.round(contractValue * 100) / 100,
       remainingValue: Math.round(remainingValue * 100) / 100,
-      utilizationRate: contractValue > 0 ? Math.round((remainingValue / contractValue) * 10000) / 100 : 0,
+      utilizationRate:
+        contractValue > 0 ? Math.round((remainingValue / contractValue) * 10000) / 100 : 0,
       specialTermsCount: this.specialTerms?.length || 0,
       priceAdjustmentsCount: this.pricing.priceAdjustments?.length || 0,
-      autoRenewal: this.term.autoRenewal || false
+      autoRenewal: this.term.autoRenewal || false,
     };
   }
 
@@ -433,17 +488,20 @@ export class ContractModel implements Contract {
       id: this.id,
       externalIds: this.externalIds,
       customerId: this.customerId,
+      siteId: this.siteId,
       contractNumber: this.contractNumber,
-      term: this.term,
-      pricing: this.pricing,
-      specialTerms: this.specialTerms,
       serviceTypes: this.serviceTypes,
       guaranteedServices: this.guaranteedServices,
       contractStatus: this.contractStatus,
+      pricing: this.pricing,
+      term: this.term,
+      status: this.status,
+      specialTerms: this.specialTerms,
+      serviceType: this.serviceType,
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -451,7 +509,7 @@ export class ContractModel implements Contract {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Contract> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 
@@ -459,13 +517,16 @@ export class ContractModel implements Contract {
    * Create domain event for contract changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
+    const now = new Date();
     return {
       id: uuidv4(),
       entityType: 'contract',
       eventType,
-      timestamp: new Date(),
+      timestamp: now,
       eventData: this.toEventData(),
-      version: 1
+      version: 1,
+      createdAt: now,
+      updatedAt: now,
     };
   }
 
@@ -478,8 +539,9 @@ export class ContractModel implements Contract {
     // Business rule: Contract should have reasonable duration (1-5 years)
     const startDate = new Date(this.term.startDate);
     const endDate = new Date(this.term.endDate);
-    const durationMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12 +
-                          (endDate.getMonth() - startDate.getMonth());
+    const durationMonths =
+      (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+      (endDate.getMonth() - startDate.getMonth());
 
     if (durationMonths < 1) {
       errors.push('Contract duration must be at least 1 month');
@@ -494,8 +556,8 @@ export class ContractModel implements Contract {
     }
 
     // Business rule: Contracts with guaranteed services should cover all service types
-    const uncoveredServices = this.serviceTypes.filter(service =>
-      !this.guaranteedServices.includes(service)
+    const uncoveredServices = this.serviceTypes.filter(
+      (service) => !this.guaranteedServices.includes(service)
     );
 
     if (uncoveredServices.length > 0) {
@@ -508,7 +570,10 @@ export class ContractModel implements Contract {
     }
 
     // Business rule: Contract should have price adjustments for long-term agreements
-    if (durationMonths > 24 && (!this.pricing.priceAdjustments || this.pricing.priceAdjustments.length === 0)) {
+    if (
+      durationMonths > 24 &&
+      (!this.pricing.priceAdjustments || this.pricing.priceAdjustments.length === 0)
+    ) {
       errors.push('Long-term contracts (>2 years) should include price adjustments');
     }
 
@@ -528,13 +593,17 @@ export class ContractFactory {
     const mappedData: Partial<Contract> = {
       externalIds: [legacyData.contract_id || legacyData.CONTRACT_ID || legacyData.id],
       customerId: legacyData.customer_id || legacyData.CUSTOMER_ID,
-      contractNumber: legacyData.contract_number || legacyData.CONTRACT_NUMBER || legacyData.contract_no,
-      term: this.mapLegacyTerm(legacyData),
-      pricing: this.mapLegacyPricing(legacyData),
-      specialTerms: this.mapLegacySpecialTerms(legacyData),
+      siteId: legacyData.site_id || legacyData.SITE_ID,
+      contractNumber:
+        legacyData.contract_number || legacyData.CONTRACT_NUMBER || legacyData.contract_no,
       serviceTypes: this.mapLegacyServiceTypes(legacyData),
       guaranteedServices: this.mapLegacyGuaranteedServices(legacyData),
       contractStatus: this.mapLegacyStatus(legacyData),
+      pricing: this.mapLegacyPricing(legacyData),
+      term: this.mapLegacyTerm(legacyData),
+      status: this.mapLegacyStatusToStatus(this.mapLegacyStatus(legacyData)),
+      specialTerms: this.mapLegacySpecialTerms(legacyData),
+      serviceType: this.mapLegacyServiceTypes(legacyData)[0] || 'waste',
       metadata: {
         legacySystemId: legacyData.system_id || 'legacy',
         originalFieldNames: Object.keys(legacyData),
@@ -544,9 +613,9 @@ export class ContractFactory {
         contractData: {
           contractType: legacyData.contract_type || 'standard',
           paymentTerms: legacyData.payment_terms || 'net_30',
-          billingCycle: legacyData.billing_cycle || 'monthly'
-        }
-      }
+          billingCycle: legacyData.billing_cycle || 'monthly',
+        },
+      },
     };
 
     return ContractModel.create(mappedData as any);
@@ -557,10 +626,18 @@ export class ContractFactory {
    */
   private static mapLegacyTerm(legacyData: Record<string, any>): Contract['term'] {
     return {
-      startDate: legacyData.start_date || legacyData.START_DATE || legacyData.effective_date || new Date().toISOString().split('T')[0],
-      endDate: legacyData.end_date || legacyData.END_DATE || legacyData.expiration_date || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      startDate:
+        legacyData.start_date ||
+        legacyData.START_DATE ||
+        legacyData.effective_date ||
+        new Date().toISOString().split('T')[0],
+      endDate:
+        legacyData.end_date ||
+        legacyData.END_DATE ||
+        legacyData.expiration_date ||
+        new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       autoRenewal: legacyData.auto_renewal !== undefined ? legacyData.auto_renewal : true,
-      renewalTerms: legacyData.renewal_terms || legacyData.RENEWAL_TERMS
+      renewalTerms: legacyData.renewal_terms || legacyData.RENEWAL_TERMS,
     };
   }
 
@@ -573,7 +650,7 @@ export class ContractFactory {
       rateUnit: legacyData.rate_unit || legacyData.RATE_UNIT || 'month',
       fuelSurcharge: legacyData.fuel_surcharge || legacyData.FUEL_SURCHARGE,
       environmentalFee: legacyData.environmental_fee || legacyData.ENVIRONMENTAL_FEE,
-      disposalFee: legacyData.disposal_fee || legacyData.DISPOSAL_FEE
+      disposalFee: legacyData.disposal_fee || legacyData.DISPOSAL_FEE,
     };
 
     // Handle legacy price adjustments
@@ -589,14 +666,17 @@ export class ContractFactory {
   /**
    * Map legacy price adjustments
    */
-  private static mapLegacyPriceAdjustments(legacyAdjustments: any[]): Contract['pricing']['priceAdjustments'] {
+  private static mapLegacyPriceAdjustments(
+    legacyAdjustments: any[]
+  ): Contract['pricing']['priceAdjustments'] {
     if (!Array.isArray(legacyAdjustments)) return [];
 
     return legacyAdjustments.map((adjustment: any) => ({
       type: adjustment.adjustment_type || adjustment.type || 'increase',
       amount: adjustment.amount || adjustment.percentage || 0,
-      effectiveDate: adjustment.effective_date || adjustment.date || new Date().toISOString().split('T')[0],
-      reason: adjustment.reason || adjustment.description || 'Legacy adjustment'
+      effectiveDate:
+        adjustment.effective_date || adjustment.date || new Date().toISOString().split('T')[0],
+      reason: adjustment.reason || adjustment.description || 'Legacy adjustment',
     }));
   }
 
@@ -642,9 +722,10 @@ export class ContractFactory {
 
     // Handle comma-separated string
     if (typeof legacyData.service_types === 'string') {
-      return legacyData.service_types.split(',').map((s: string) => s.trim()).filter((type: string) =>
-        ContractModel.VALID_SERVICE_TYPES.includes(type)
-      );
+      return legacyData.service_types
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter((type: string) => ContractModel.VALID_SERVICE_TYPES.includes(type));
     }
 
     // Default fallback
@@ -672,19 +753,42 @@ export class ContractFactory {
    */
   private static mapLegacyStatus(legacyData: Record<string, any>): Contract['contractStatus'] {
     const statusMap: Record<string, Contract['contractStatus']> = {
-      'draft': 'draft',
-      'active': 'active',
-      'expired': 'expired',
-      'cancelled': 'cancelled',
-      'renewed': 'renewed',
-      'pending': 'pending_approval',
-      'pending_approval': 'pending_approval',
-      'approved': 'active',
-      'terminated': 'cancelled'
+      draft: 'draft',
+      active: 'active',
+      expired: 'expired',
+      cancelled: 'cancelled',
+      renewed: 'renewed',
+      pending: 'pending_approval',
+      pending_approval: 'pending_approval',
+      approved: 'active',
+      terminated: 'cancelled',
     };
 
-    const legacyStatus = (legacyData.contract_status || legacyData.CONTRACT_STATUS || legacyData.status || 'active').toLowerCase();
+    const legacyStatus = (
+      legacyData.contract_status ||
+      legacyData.CONTRACT_STATUS ||
+      legacyData.status ||
+      'active'
+    ).toLowerCase();
     return statusMap[legacyStatus] || 'active';
+  }
+
+  /**
+   * Map legacy contract status to status
+   */
+  private static mapLegacyStatusToStatus(
+    contractStatus: Contract['contractStatus']
+  ): Contract['status'] {
+    const statusMap: Record<Contract['contractStatus'], Contract['status']> = {
+      draft: 'draft',
+      active: 'active',
+      expired: 'expired',
+      cancelled: 'cancelled',
+      renewed: 'active',
+      pending_approval: 'pending',
+    };
+
+    return statusMap[contractStatus] || 'draft';
   }
 }
 
@@ -702,7 +806,7 @@ export class ContractValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -733,7 +837,7 @@ export class ContractManager {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() + days);
 
-    return contracts.filter(contract => {
+    return contracts.filter((contract) => {
       const endDate = new Date(contract.term.endDate);
       return endDate <= cutoffDate && endDate > new Date();
     });
@@ -743,7 +847,7 @@ export class ContractManager {
    * Get renewable contracts
    */
   static getRenewableContracts(contracts: ContractModel[]): ContractModel[] {
-    return contracts.filter(contract => contract.isRenewable());
+    return contracts.filter((contract) => contract.isRenewable());
   }
 
   /**
@@ -760,30 +864,33 @@ export class ContractManager {
 
     return {
       customerId: contract.customerId,
+      siteId: contract.siteId,
       contractNumber: `${contract.contractNumber}-R1`,
-      term: {
-        startDate: renewalDate.toISOString().split('T')[0],
-        endDate: newEndDate.toISOString().split('T')[0],
-        autoRenewal: contract.term.autoRenewal,
-        renewalTerms: contract.term.renewalTerms
-      },
+      serviceTypes: contract.serviceTypes,
+      guaranteedServices: contract.guaranteedServices,
+      contractStatus: 'draft',
       pricing: {
         ...contract.pricing,
         baseRate: contract.pricing.baseRate * 1.05, // 5% increase for renewal
         priceAdjustments: [
           ...(contract.pricing.priceAdjustments || []),
           {
-            type: 'increase' as const,
+            type: 'increase',
             amount: contract.pricing.baseRate * 0.05,
             effectiveDate: renewalDate.toISOString().split('T')[0],
-            reason: 'Annual renewal adjustment'
-          }
-        ]
+            reason: 'Annual renewal adjustment',
+          },
+        ],
       },
+      term: {
+        startDate: renewalDate.toISOString().split('T')[0],
+        endDate: newEndDate.toISOString().split('T')[0],
+        autoRenewal: contract.term.autoRenewal,
+        renewalTerms: contract.term.renewalTerms,
+      },
+      status: 'draft',
       specialTerms: contract.specialTerms,
-      serviceTypes: contract.serviceTypes,
-      guaranteedServices: contract.guaranteedServices,
-      contractStatus: 'draft'
+      serviceType: contract.serviceType,
     };
   }
 
@@ -793,7 +900,7 @@ export class ContractManager {
   static checkContractConflicts(contracts: ContractModel[]): string[] {
     const conflicts: string[] = [];
 
-    contracts.forEach(contract => {
+    contracts.forEach((contract) => {
       if (contract.isExpired()) {
         conflicts.push(`Contract ${contract.contractNumber} has expired`);
       }
@@ -803,7 +910,7 @@ export class ContractManager {
       }
 
       const businessRuleErrors = contract.validateBusinessRules();
-      conflicts.push(...businessRuleErrors.map(error => `${contract.contractNumber}: ${error}`));
+      conflicts.push(...businessRuleErrors.map((error) => `${contract.contractNumber}: ${error}`));
     });
 
     return conflicts;
@@ -813,10 +920,13 @@ export class ContractManager {
    * Get contract performance report
    */
   static getPerformanceReport(contracts: ContractModel[]): Record<string, any> {
-    const activeContracts = contracts.filter(c => c.isActive());
-    const expiredContracts = contracts.filter(c => c.isExpired());
+    const activeContracts = contracts.filter((c) => c.isActive());
+    const expiredContracts = contracts.filter((c) => c.isExpired());
     const totalValue = this.getPortfolioValue(contracts);
-    const remainingValue = contracts.reduce((total, contract) => total + contract.getRemainingValue(), 0);
+    const remainingValue = contracts.reduce(
+      (total, contract) => total + contract.getRemainingValue(),
+      0
+    );
 
     return {
       totalContracts: contracts.length,
@@ -827,7 +937,8 @@ export class ContractManager {
       totalPortfolioValue: Math.round(totalValue * 100) / 100,
       remainingPortfolioValue: Math.round(remainingValue * 100) / 100,
       utilizationRate: totalValue > 0 ? Math.round((remainingValue / totalValue) * 10000) / 100 : 0,
-      averageContractValue: contracts.length > 0 ? Math.round((totalValue / contracts.length) * 100) / 100 : 0
+      averageContractValue:
+        contracts.length > 0 ? Math.round((totalValue / contracts.length) * 100) / 100 : 0,
     };
   }
 }

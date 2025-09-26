@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Yard entity implementation with facility management
  * @description Complete Yard model for managing waste management facilities and operations
@@ -74,16 +75,33 @@ export class YardModel implements Yard {
   };
 
   private static readonly VALID_YARD_TYPES: Yard['type'][] = [
-    'main', 'satellite', 'transfer', 'storage', 'maintenance', 'administrative'
+    'main',
+    'satellite',
+    'transfer',
+    'storage',
+    'maintenance',
+    'administrative',
   ];
 
   private static readonly VALID_STATUSES: Yard['status'][] = [
-    'operational', 'maintenance', 'closed', 'planned', 'limited'
+    'operational',
+    'maintenance',
+    'closed',
+    'planned',
+    'limited',
   ];
 
   private static readonly VALID_FACILITY_TYPES = [
-    'office', 'warehouse', 'garage', 'maintenance_bay', 'fuel_station',
-    'wash_bay', 'parking_lot', 'storage_yard', 'scale_house', 'administrative'
+    'office',
+    'warehouse',
+    'garage',
+    'maintenance_bay',
+    'fuel_station',
+    'wash_bay',
+    'parking_lot',
+    'storage_yard',
+    'scale_house',
+    'administrative',
   ];
 
   constructor(data: Partial<Yard>) {
@@ -94,7 +112,9 @@ export class YardModel implements Yard {
   /**
    * Create a new yard with validation
    */
-  static create(data: Omit<Yard, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): YardModel {
+  static create(
+    data: Omit<Yard, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>
+  ): YardModel {
     const now = new Date();
     const yardData: Partial<Yard> = {
       id: uuidv4(),
@@ -105,8 +125,8 @@ export class YardModel implements Yard {
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'facility_system'
-      }
+        source: 'facility_system',
+      },
     };
 
     return new YardModel(yardData);
@@ -129,8 +149,8 @@ export class YardModel implements Yard {
         ...this.metadata,
         ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new YardModel(updatedData);
@@ -235,7 +255,10 @@ export class YardModel implements Yard {
         throw new Error('Next inspection date must be valid');
       }
 
-      if (data.environmentalCompliance.complianceScore < 0 || data.environmentalCompliance.complianceScore > 100) {
+      if (
+        data.environmentalCompliance.complianceScore < 0 ||
+        data.environmentalCompliance.complianceScore > 100
+      ) {
         throw new Error('Compliance score must be between 0 and 100');
       }
     }
@@ -267,8 +290,7 @@ export class YardModel implements Yard {
    * Update capacity utilization
    */
   private updateCapacityUtilization(): void {
-    this.capacity.availableArea = this.capacity.totalArea -
-      (this.storedContainers.length * 100); // Assume each container takes 100 sq ft
+    this.capacity.availableArea = this.capacity.totalArea - this.storedContainers.length * 100; // Assume each container takes 100 sq ft
   }
 
   /**
@@ -291,7 +313,7 @@ export class YardModel implements Yard {
    * Remove fleet asset from yard
    */
   removeFleetAsset(fleetId: string): YardModel {
-    const newFleet = this.assignedFleet.filter(id => id !== fleetId);
+    const newFleet = this.assignedFleet.filter((id) => id !== fleetId);
     return this.update({ assignedFleet: newFleet }, this.version);
   }
 
@@ -310,29 +332,37 @@ export class YardModel implements Yard {
     const newContainers = [...this.storedContainers, containerId];
     const updatedCapacity = {
       ...this.capacity,
-      currentContainers: this.capacity.currentContainers + 1
+      currentContainers: this.capacity.currentContainers + 1,
     };
 
-    return this.update({ storedContainers: newContainers, capacity: updatedCapacity }, this.version);
+    return this.update(
+      { storedContainers: newContainers, capacity: updatedCapacity },
+      this.version
+    );
   }
 
   /**
    * Remove container from yard storage
    */
   removeContainer(containerId: string): YardModel {
-    const newContainers = this.storedContainers.filter(id => id !== containerId);
+    const newContainers = this.storedContainers.filter((id) => id !== containerId);
     const updatedCapacity = {
       ...this.capacity,
-      currentContainers: Math.max(0, this.capacity.currentContainers - 1)
+      currentContainers: Math.max(0, this.capacity.currentContainers - 1),
     };
 
-    return this.update({ storedContainers: newContainers, capacity: updatedCapacity }, this.version);
+    return this.update(
+      { storedContainers: newContainers, capacity: updatedCapacity },
+      this.version
+    );
   }
 
   /**
    * Add facility to yard
    */
-  addFacility(facility: Omit<Yard['facilities'][0], 'currentUsage'> & { currentUsage?: number }): YardModel {
+  addFacility(
+    facility: Omit<Yard['facilities'][0], 'currentUsage'> & { currentUsage?: number }
+  ): YardModel {
     if (!YardModel.VALID_FACILITY_TYPES.includes(facility.type)) {
       throw new Error('Invalid facility type');
     }
@@ -344,7 +374,7 @@ export class YardModel implements Yard {
     const currentUsage = facility.currentUsage || 0;
     const newFacility = {
       ...facility,
-      currentUsage
+      currentUsage,
     };
 
     const newFacilities = [...this.facilities, newFacility];
@@ -401,7 +431,7 @@ export class YardModel implements Yard {
    * Remove certification
    */
   removeCertification(certification: string): YardModel {
-    const newCertifications = this.certifications.filter(cert => cert !== certification);
+    const newCertifications = this.certifications.filter((cert) => cert !== certification);
     return this.update({ certifications: newCertifications }, this.version);
   }
 
@@ -416,15 +446,18 @@ export class YardModel implements Yard {
    * Check if yard is at capacity
    */
   isAtCapacity(): boolean {
-    return this.capacity.currentContainers >= this.capacity.maxContainers ||
-           this.capacity.currentVehicles >= this.capacity.maxVehicles;
+    return (
+      this.capacity.currentContainers >= this.capacity.maxContainers ||
+      this.capacity.currentVehicles >= this.capacity.maxVehicles
+    );
   }
 
   /**
    * Get yard utilization rate
    */
   getUtilizationRate(): number {
-    const containerUtilization = (this.capacity.currentContainers / this.capacity.maxContainers) * 100;
+    const containerUtilization =
+      (this.capacity.currentContainers / this.capacity.maxContainers) * 100;
     const vehicleUtilization = (this.capacity.currentVehicles / this.capacity.maxVehicles) * 100;
     return (containerUtilization + vehicleUtilization) / 2;
   }
@@ -490,9 +523,15 @@ export class YardModel implements Yard {
    * Get yard summary for reporting
    */
   getSummary(): Record<string, any> {
-    const activeFacilities = this.facilities.filter(facility => facility.operational);
-    const totalFacilityCapacity = this.facilities.reduce((sum, facility) => sum + facility.capacity, 0);
-    const totalFacilityUsage = this.facilities.reduce((sum, facility) => sum + facility.currentUsage, 0);
+    const activeFacilities = this.facilities.filter((facility) => facility.operational);
+    const totalFacilityCapacity = this.facilities.reduce(
+      (sum, facility) => sum + facility.capacity,
+      0
+    );
+    const totalFacilityUsage = this.facilities.reduce(
+      (sum, facility) => sum + facility.currentUsage,
+      0
+    );
 
     return {
       id: this.id,
@@ -517,7 +556,7 @@ export class YardModel implements Yard {
       certificationsCount: this.certifications.length,
       complianceScore: this.environmentalCompliance?.complianceScore || 0,
       lastInspection: this.environmentalCompliance?.lastInspection || null,
-      nextInspection: this.environmentalCompliance?.nextInspection || null
+      nextInspection: this.environmentalCompliance?.nextInspection || null,
     };
   }
 
@@ -545,7 +584,7 @@ export class YardModel implements Yard {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -553,7 +592,7 @@ export class YardModel implements Yard {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Yard> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 
@@ -567,7 +606,7 @@ export class YardModel implements Yard {
       eventType,
       timestamp: new Date(),
       eventData: this.toEventData(),
-      version: 1
+      version: 1,
     };
   }
 
@@ -589,16 +628,16 @@ export class YardModel implements Yard {
 
     // Business rule: Yards should have required certifications
     const requiredCertifications = ['OSHA', 'Environmental'];
-    requiredCertifications.forEach(cert => {
-      if (!this.certifications.some(c => c.toLowerCase().includes(cert.toLowerCase()))) {
+    requiredCertifications.forEach((cert) => {
+      if (!this.certifications.some((c) => c.toLowerCase().includes(cert.toLowerCase()))) {
         errors.push(`Yard should have ${cert} certification`);
       }
     });
 
     // Business rule: Maintenance yards should have adequate facilities
     if (this.type === 'maintenance') {
-      const hasMaintenanceBay = this.facilities.some(f => f.type === 'maintenance_bay');
-      const hasGarage = this.facilities.some(f => f.type === 'garage');
+      const hasMaintenanceBay = this.facilities.some((f) => f.type === 'maintenance_bay');
+      const hasGarage = this.facilities.some((f) => f.type === 'garage');
 
       if (!hasMaintenanceBay) {
         errors.push('Maintenance yards should have maintenance bay facilities');
@@ -611,7 +650,7 @@ export class YardModel implements Yard {
 
     // Business rule: Transfer yards should have scale facilities
     if (this.type === 'transfer') {
-      const hasScaleHouse = this.facilities.some(f => f.type === 'scale_house');
+      const hasScaleHouse = this.facilities.some((f) => f.type === 'scale_house');
       if (!hasScaleHouse) {
         errors.push('Transfer yards should have scale house facilities');
       }
@@ -621,7 +660,9 @@ export class YardModel implements Yard {
     if (this.environmentalCompliance) {
       const nextInspection = new Date(this.environmentalCompliance.nextInspection);
       const now = new Date();
-      const daysUntilInspection = Math.ceil((nextInspection.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntilInspection = Math.ceil(
+        (nextInspection.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      );
 
       if (daysUntilInspection < 0) {
         errors.push('Yard environmental inspection is overdue');
@@ -653,9 +694,13 @@ export class YardFactory {
   static fromLegacyData(legacyData: Record<string, any>): YardModel {
     // Data archaeology: Handle various legacy field names and formats
     const mappedData: Partial<Yard> = {
-      externalIds: [legacyData.yard_id || legacyData.YARD_ID || legacyData.facility_id || legacyData.id],
-      name: legacyData.yard_name || legacyData.YARD_NAME || legacyData.facility_name || legacyData.name,
-      code: legacyData.yard_code || legacyData.YARD_CODE || legacyData.facility_code || legacyData.code,
+      externalIds: [
+        legacyData.yard_id || legacyData.YARD_ID || legacyData.facility_id || legacyData.id,
+      ],
+      name:
+        legacyData.yard_name || legacyData.YARD_NAME || legacyData.facility_name || legacyData.name,
+      code:
+        legacyData.yard_code || legacyData.YARD_CODE || legacyData.facility_code || legacyData.code,
       type: this.mapLegacyYardType(legacyData.yard_type || legacyData.type || 'main'),
       address: this.mapLegacyAddress(legacyData),
       contactInformation: this.mapLegacyContact(legacyData),
@@ -677,9 +722,9 @@ export class YardFactory {
         yardData: {
           establishedDate: legacyData.established_date,
           lastRenovation: legacyData.last_renovation,
-          utilityProviders: legacyData.utility_providers
-        }
-      }
+          utilityProviders: legacyData.utility_providers,
+        },
+      },
     };
 
     return YardModel.create(mappedData as any);
@@ -690,15 +735,15 @@ export class YardFactory {
    */
   private static mapLegacyYardType(legacyType: string): Yard['type'] {
     const typeMap: Record<string, Yard['type']> = {
-      'main': 'main',
-      'primary': 'main',
-      'satellite': 'satellite',
-      'transfer': 'transfer',
-      'storage': 'storage',
-      'maintenance': 'maintenance',
-      'admin': 'administrative',
-      'administrative': 'administrative',
-      'yard': 'storage'
+      main: 'main',
+      primary: 'main',
+      satellite: 'satellite',
+      transfer: 'transfer',
+      storage: 'storage',
+      maintenance: 'maintenance',
+      admin: 'administrative',
+      administrative: 'administrative',
+      yard: 'storage',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'main';
@@ -714,7 +759,7 @@ export class YardFactory {
       city: legacyData.city || legacyData.CITY || 'Unknown',
       state: legacyData.state || legacyData.STATE || 'Unknown',
       zipCode: legacyData.zip || legacyData.ZIP || legacyData.zipcode || '00000',
-      country: legacyData.country || 'US'
+      country: legacyData.country || 'US',
     };
   }
 
@@ -723,11 +768,16 @@ export class YardFactory {
    */
   private static mapLegacyContact(legacyData: Record<string, any>): Yard['contactInformation'] {
     return {
-      name: legacyData.contact_name || legacyData.CONTACT_NAME || legacyData.manager_name || 'Unknown',
+      name:
+        legacyData.contact_name || legacyData.CONTACT_NAME || legacyData.manager_name || 'Unknown',
       title: legacyData.contact_title || legacyData.CONTACT_TITLE,
-      email: legacyData.contact_email || legacyData.CONTACT_EMAIL || legacyData.email || 'unknown@example.com',
+      email:
+        legacyData.contact_email ||
+        legacyData.CONTACT_EMAIL ||
+        legacyData.email ||
+        'unknown@example.com',
       phone: legacyData.contact_phone || legacyData.CONTACT_PHONE || legacyData.phone,
-      mobile: legacyData.contact_mobile || legacyData.CONTACT_MOBILE || legacyData.mobile
+      mobile: legacyData.contact_mobile || legacyData.CONTACT_MOBILE || legacyData.mobile,
     };
   }
 
@@ -743,7 +793,7 @@ export class YardFactory {
         // Parse string format like "Mon-Fri: 8AM-5PM, Sat: 8AM-12PM"
         // This is a simplified parser - production would be more robust
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
-        days.forEach(day => {
+        days.forEach((day) => {
           operatingHours[day] = { open: '08:00', close: '17:00' };
         });
         operatingHours.saturday = { open: '08:00', close: '12:00' };
@@ -765,7 +815,7 @@ export class YardFactory {
       maxContainers: legacyData.max_containers || legacyData.MAX_CONTAINERS || 0,
       maxVehicles: legacyData.max_vehicles || legacyData.MAX_VEHICLES || 0,
       currentContainers: legacyData.current_containers || legacyData.CURRENT_CONTAINERS || 0,
-      currentVehicles: legacyData.current_vehicles || legacyData.CURRENT_VEHICLES || 0
+      currentVehicles: legacyData.current_vehicles || legacyData.CURRENT_VEHICLES || 0,
     };
   }
 
@@ -814,7 +864,7 @@ export class YardFactory {
         type: facility.type || facility.facility_type || 'warehouse',
         capacity: facility.capacity || 0,
         currentUsage: facility.current_usage || facility.usage || 0,
-        operational: facility.operational !== undefined ? facility.operational : true
+        operational: facility.operational !== undefined ? facility.operational : true,
       }));
     }
 
@@ -839,12 +889,20 @@ export class YardFactory {
   /**
    * Map legacy environmental compliance
    */
-  private static mapLegacyEnvironmentalCompliance(legacyData: Record<string, any>): Yard['environmentalCompliance'] {
+  private static mapLegacyEnvironmentalCompliance(
+    legacyData: Record<string, any>
+  ): Yard['environmentalCompliance'] {
     return {
       permits: this.mapLegacyPermits(legacyData.permits || legacyData.environmental_permits || []),
-      lastInspection: legacyData.last_inspection || legacyData.LAST_INSPECTION || new Date().toISOString().split('T')[0],
-      nextInspection: legacyData.next_inspection || legacyData.NEXT_INSPECTION || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      complianceScore: legacyData.compliance_score || legacyData.COMPLIANCE_SCORE || 85
+      lastInspection:
+        legacyData.last_inspection ||
+        legacyData.LAST_INSPECTION ||
+        new Date().toISOString().split('T')[0],
+      nextInspection:
+        legacyData.next_inspection ||
+        legacyData.NEXT_INSPECTION ||
+        new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      complianceScore: legacyData.compliance_score || legacyData.COMPLIANCE_SCORE || 85,
     };
   }
 
@@ -859,8 +917,11 @@ export class YardFactory {
       number: permit.number || permit.permit_number || 'Unknown',
       issuingAuthority: permit.authority || permit.issuing_authority || 'Unknown',
       validFrom: permit.valid_from || permit.from || new Date().toISOString().split('T')[0],
-      validTo: permit.valid_to || permit.to || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      status: permit.status || 'active'
+      validTo:
+        permit.valid_to ||
+        permit.to ||
+        new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: permit.status || 'active',
     }));
   }
 
@@ -869,12 +930,12 @@ export class YardFactory {
    */
   private static mapLegacyStatus(legacyStatus: string): Yard['status'] {
     const statusMap: Record<string, Yard['status']> = {
-      'operational': 'operational',
-      'active': 'operational',
-      'maintenance': 'maintenance',
-      'closed': 'closed',
-      'planned': 'planned',
-      'limited': 'limited'
+      operational: 'operational',
+      active: 'operational',
+      maintenance: 'maintenance',
+      closed: 'closed',
+      planned: 'planned',
+      limited: 'limited',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'operational';
@@ -895,7 +956,7 @@ export class YardValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -928,16 +989,20 @@ export class YardManager {
    * Get yard utilization report
    */
   static getUtilizationReport(yards: YardModel[]): Record<string, any> {
-    const operationalYards = yards.filter(yard => yard.isOperational());
+    const operationalYards = yards.filter((yard) => yard.isOperational());
     const totalYards = yards.length;
 
     const totalUtilization = yards.reduce((sum, yard) => sum + yard.getUtilizationRate(), 0);
     const averageUtilization = yards.length > 0 ? totalUtilization / yards.length : 0;
 
-    const totalFacilityUtilization = yards.reduce((sum, yard) => sum + yard.getFacilityUtilization(), 0);
-    const averageFacilityUtilization = yards.length > 0 ? totalFacilityUtilization / yards.length : 0;
+    const totalFacilityUtilization = yards.reduce(
+      (sum, yard) => sum + yard.getFacilityUtilization(),
+      0
+    );
+    const averageFacilityUtilization =
+      yards.length > 0 ? totalFacilityUtilization / yards.length : 0;
 
-    const yardsRequiringMaintenance = yards.filter(yard => yard.requiresMaintenance()).length;
+    const yardsRequiringMaintenance = yards.filter((yard) => yard.requiresMaintenance()).length;
     const maintenanceRate = totalYards > 0 ? (yardsRequiringMaintenance / totalYards) * 100 : 0;
 
     const totalArea = yards.reduce((sum, yard) => sum + yard.capacity.totalArea, 0);
@@ -951,10 +1016,12 @@ export class YardManager {
       maintenanceRate: Math.round(maintenanceRate * 100) / 100,
       totalArea: Math.round(totalArea),
       availableArea: Math.round(availableArea),
-      spaceUtilization: totalArea > 0 ? Math.round(((totalArea - availableArea) / totalArea) * 10000) / 100 : 0,
-      averageEfficiency: yards.reduce((sum, yard) => sum + yard.getEfficiencyScore(), 0) / yards.length,
-      yardsAtCapacity: yards.filter(yard => yard.isAtCapacity()).length,
-      yardsRequiringMaintenance
+      spaceUtilization:
+        totalArea > 0 ? Math.round(((totalArea - availableArea) / totalArea) * 10000) / 100 : 0,
+      averageEfficiency:
+        yards.reduce((sum, yard) => sum + yard.getEfficiencyScore(), 0) / yards.length,
+      yardsAtCapacity: yards.filter((yard) => yard.isAtCapacity()).length,
+      yardsRequiringMaintenance,
     };
   }
 
@@ -964,7 +1031,7 @@ export class YardManager {
   static checkYardConflicts(yards: YardModel[]): string[] {
     const conflicts: string[] = [];
 
-    yards.forEach(yard => {
+    yards.forEach((yard) => {
       if (yard.isOperational() && yard.requiresMaintenance()) {
         conflicts.push(`Yard ${yard.name} (${yard.code}) requires maintenance`);
       }
@@ -974,7 +1041,7 @@ export class YardManager {
       }
 
       const businessRuleErrors = yard.validateBusinessRules();
-      conflicts.push(...businessRuleErrors.map(error => `${yard.name} (${yard.code}): ${error}`));
+      conflicts.push(...businessRuleErrors.map((error) => `${yard.name} (${yard.code}): ${error}`));
     });
 
     return conflicts;
@@ -983,10 +1050,16 @@ export class YardManager {
   /**
    * Get maintenance schedule for yards
    */
-  static getMaintenanceSchedule(yards: YardModel[]): Array<{ yard: YardModel; priority: 'low' | 'medium' | 'high'; reason: string }> {
-    const schedule: Array<{ yard: YardModel; priority: 'low' | 'medium' | 'high'; reason: string }> = [];
+  static getMaintenanceSchedule(
+    yards: YardModel[]
+  ): Array<{ yard: YardModel; priority: 'low' | 'medium' | 'high'; reason: string }> {
+    const schedule: Array<{
+      yard: YardModel;
+      priority: 'low' | 'medium' | 'high';
+      reason: string;
+    }> = [];
 
-    yards.forEach(yard => {
+    yards.forEach((yard) => {
       if (yard.requiresMaintenance()) {
         const utilization = yard.getUtilizationRate();
         let priority: 'low' | 'medium' | 'high' = 'low';
@@ -1005,7 +1078,7 @@ export class YardManager {
     });
 
     return schedule.sort((a, b) => {
-      const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
       return priorityOrder[b.priority] - priorityOrder[a.priority];
     });
   }

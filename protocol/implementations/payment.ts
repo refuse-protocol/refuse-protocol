@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Payment entity implementation with reconciliation logic
  * @description Complete Payment model for managing financial transactions with reconciliation and audit capabilities
@@ -12,29 +13,50 @@ import { Event } from '../specifications/entities';
  * Payment implementation with comprehensive reconciliation logic and financial audit capabilities
  */
 export class PaymentModel implements Payment {
-  id: string;
+  id!: string;
   externalIds?: string[];
   metadata?: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
+  createdAt!: Date;
+  updatedAt!: Date;
+  version!: number;
 
-  paymentNumber: string;
-  type: 'invoice_payment' | 'advance_payment' | 'refund' | 'adjustment' | 'deposit' | 'final_payment';
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'disputed' | 'refunded' | 'partial';
+  paymentNumber!: string;
+  type!:
+    | 'invoice_payment'
+    | 'advance_payment'
+    | 'refund'
+    | 'adjustment'
+    | 'deposit'
+    | 'final_payment';
+  status!:
+    | 'pending'
+    | 'processing'
+    | 'completed'
+    | 'failed'
+    | 'cancelled'
+    | 'disputed'
+    | 'refunded'
+    | 'partial';
 
   // Financial Information
-  amount: number;
-  currency: string;
-  paymentMethod: 'check' | 'wire' | 'ach' | 'credit_card' | 'cash' | 'bank_transfer' | 'digital_wallet';
-  paymentDate: string;
-  dueDate: string;
+  amount!: number;
+  currency!: string;
+  paymentMethod!:
+    | 'check'
+    | 'wire'
+    | 'ach'
+    | 'credit_card'
+    | 'cash'
+    | 'bank_transfer'
+    | 'digital_wallet';
+  paymentDate!: string;
+  dueDate!: string;
   processedDate?: string;
 
   // Customer and Billing Information
-  customerId: string;
-  customerName: string;
-  billingAddress: {
+  customerId!: string;
+  customerName!: string;
+  billingAddress!: {
     street1: string;
     street2?: string;
     city: string;
@@ -44,9 +66,9 @@ export class PaymentModel implements Payment {
   };
 
   // Invoice and Order References
-  invoiceIds: string[];
-  orderIds: string[];
-  contractIds: string[];
+  invoiceIds!: string[];
+  orderIds!: string[];
+  contractIds!: string[];
 
   // Transaction Details
   transactionReference?: string;
@@ -55,14 +77,14 @@ export class PaymentModel implements Payment {
   bankReference?: string;
 
   // Fee and Adjustment Information
-  fees: Array<{
+  fees!: Array<{
     type: string;
     amount: number;
     description: string;
     taxable: boolean;
   }>;
 
-  adjustments: Array<{
+  adjustments!: Array<{
     type: 'discount' | 'surcharge' | 'tax_adjustment' | 'fee_waiver' | 'penalty' | 'credit';
     amount: number;
     reason: string;
@@ -71,14 +93,19 @@ export class PaymentModel implements Payment {
   }>;
 
   // Reconciliation Information
-  reconciliationStatus: 'unreconciled' | 'matched' | 'partially_matched' | 'disputed' | 'reconciled';
+  reconciliationStatus!:
+    | 'unreconciled'
+    | 'matched'
+    | 'partially_matched'
+    | 'disputed'
+    | 'reconciled';
   reconciledAmount?: number;
   reconciliationDate?: string;
   reconciledBy?: string;
   reconciliationNotes?: string;
 
   // Bank and Processing Information
-  bankInformation: {
+  bankInformation!: {
     bankName: string;
     accountNumber: string; // Masked for security
     routingNumber?: string;
@@ -87,7 +114,7 @@ export class PaymentModel implements Payment {
   };
 
   // Audit and Compliance
-  auditTrail: Array<{
+  auditTrail!: Array<{
     action: string;
     timestamp: string;
     userId?: string;
@@ -97,7 +124,7 @@ export class PaymentModel implements Payment {
     ipAddress?: string;
   }>;
 
-  complianceChecks: Array<{
+  complianceChecks!: Array<{
     checkType: string;
     status: 'passed' | 'failed' | 'pending' | 'waived';
     checkedDate: string;
@@ -107,7 +134,7 @@ export class PaymentModel implements Payment {
   }>;
 
   // Payment Processing Details
-  processingDetails: {
+  processingDetails!: {
     processor: string;
     gatewayTransactionId?: string;
     processingFee?: number;
@@ -117,19 +144,41 @@ export class PaymentModel implements Payment {
   };
 
   private static readonly VALID_PAYMENT_TYPES: Payment['type'][] = [
-    'invoice_payment', 'advance_payment', 'refund', 'adjustment', 'deposit', 'final_payment'
+    'invoice_payment',
+    'advance_payment',
+    'refund',
+    'adjustment',
+    'deposit',
+    'final_payment',
   ];
 
   private static readonly VALID_STATUSES: Payment['status'][] = [
-    'pending', 'processing', 'completed', 'failed', 'cancelled', 'disputed', 'refunded', 'partial'
+    'pending',
+    'processing',
+    'completed',
+    'failed',
+    'cancelled',
+    'disputed',
+    'refunded',
+    'partial',
   ];
 
   private static readonly VALID_PAYMENT_METHODS: Payment['paymentMethod'][] = [
-    'check', 'wire', 'ach', 'credit_card', 'cash', 'bank_transfer', 'digital_wallet'
+    'check',
+    'wire',
+    'ach',
+    'credit_card',
+    'cash',
+    'bank_transfer',
+    'digital_wallet',
   ];
 
   private static readonly VALID_RECONCILIATION_STATUSES: Payment['reconciliationStatus'][] = [
-    'unreconciled', 'matched', 'partially_matched', 'disputed', 'reconciled'
+    'unreconciled',
+    'matched',
+    'partially_matched',
+    'disputed',
+    'reconciled',
   ];
 
   constructor(data: Partial<Payment>) {
@@ -140,19 +189,19 @@ export class PaymentModel implements Payment {
   /**
    * Create a new payment with validation
    */
-  static create(data: Omit<Payment, keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version'>): PaymentModel {
+  static create(data: Omit<Payment, 'id' | 'createdAt' | 'updatedAt' | 'version'>): PaymentModel {
     const now = new Date();
     const paymentData: Partial<Payment> = {
       id: uuidv4(),
-      ...data,
       createdAt: now,
       updatedAt: now,
       version: 1,
       metadata: {
         ...data.metadata,
         createdBy: 'system',
-        source: 'payment_system'
-      }
+        source: 'payment_system',
+      },
+      ...data,
     };
 
     return new PaymentModel(paymentData);
@@ -161,7 +210,7 @@ export class PaymentModel implements Payment {
   /**
    * Update payment with optimistic locking
    */
-  update(updates: Partial<Omit<Payment, keyof BaseEntity>>, expectedVersion: number): PaymentModel {
+  update(updates: Partial<Payment>, expectedVersion: number): PaymentModel {
     if (this.version !== expectedVersion) {
       throw new Error(`Version conflict. Expected: ${expectedVersion}, Current: ${this.version}`);
     }
@@ -175,8 +224,8 @@ export class PaymentModel implements Payment {
         ...this.metadata,
         ...updates.metadata,
         lastModifiedBy: 'system',
-        previousVersion: this.version
-      }
+        previousVersion: this.version,
+      },
     };
 
     return new PaymentModel(updatedData);
@@ -192,7 +241,9 @@ export class PaymentModel implements Payment {
     }
 
     if (!data.type || !PaymentModel.VALID_PAYMENT_TYPES.includes(data.type)) {
-      throw new Error(`Payment type must be one of: ${PaymentModel.VALID_PAYMENT_TYPES.join(', ')}`);
+      throw new Error(
+        `Payment type must be one of: ${PaymentModel.VALID_PAYMENT_TYPES.join(', ')}`
+      );
     }
 
     if (!data.status || !PaymentModel.VALID_STATUSES.includes(data.status)) {
@@ -215,19 +266,21 @@ export class PaymentModel implements Payment {
       throw new Error('Currency is required and must be a string');
     }
 
-    if (!PaymentModel.VALID_PAYMENT_METHODS.includes(data.paymentMethod)) {
-      throw new Error(`Payment method must be one of: ${PaymentModel.VALID_PAYMENT_METHODS.join(', ')}`);
+    if (!data.paymentMethod || !PaymentModel.VALID_PAYMENT_METHODS.includes(data.paymentMethod)) {
+      throw new Error(
+        `Payment method must be one of: ${PaymentModel.VALID_PAYMENT_METHODS.join(', ')}`
+      );
     }
 
-    if (!this.isValidDate(data.paymentDate)) {
+    if (data.paymentDate && !this.isValidDate(data.paymentDate)) {
       throw new Error('Payment date must be a valid date');
     }
 
-    if (!this.isValidDate(data.dueDate)) {
+    if (data.dueDate && !this.isValidDate(data.dueDate)) {
       throw new Error('Due date must be a valid date');
     }
 
-    if (new Date(data.paymentDate) > new Date(data.dueDate)) {
+    if (data.paymentDate && data.dueDate && new Date(data.paymentDate) > new Date(data.dueDate)) {
       throw new Error('Payment date cannot be after due date');
     }
 
@@ -263,7 +316,11 @@ export class PaymentModel implements Payment {
     // Validate adjustments if provided
     if (data.adjustments) {
       data.adjustments.forEach((adjustment, index) => {
-        if (!['discount', 'surcharge', 'tax_adjustment', 'fee_waiver', 'penalty', 'credit'].includes(adjustment.type)) {
+        if (
+          !['discount', 'surcharge', 'tax_adjustment', 'fee_waiver', 'penalty', 'credit'].includes(
+            adjustment.type
+          )
+        ) {
           throw new Error(`Adjustment ${index}: type must be valid`);
         }
 
@@ -282,8 +339,13 @@ export class PaymentModel implements Payment {
     }
 
     // Validate reconciliation status if provided
-    if (data.reconciliationStatus && !PaymentModel.VALID_RECONCILIATION_STATUSES.includes(data.reconciliationStatus)) {
-      throw new Error(`Reconciliation status must be one of: ${PaymentModel.VALID_RECONCILIATION_STATUSES.join(', ')}`);
+    if (
+      data.reconciliationStatus &&
+      !PaymentModel.VALID_RECONCILIATION_STATUSES.includes(data.reconciliationStatus)
+    ) {
+      throw new Error(
+        `Reconciliation status must be one of: ${PaymentModel.VALID_RECONCILIATION_STATUSES.join(', ')}`
+      );
     }
 
     // Validate bank information
@@ -295,7 +357,10 @@ export class PaymentModel implements Payment {
       throw new Error('Bank name is required');
     }
 
-    if (!data.bankInformation.accountNumber || typeof data.bankInformation.accountNumber !== 'string') {
+    if (
+      !data.bankInformation.accountNumber ||
+      typeof data.bankInformation.accountNumber !== 'string'
+    ) {
       throw new Error('Account number is required');
     }
 
@@ -330,13 +395,17 @@ export class PaymentModel implements Payment {
     let totalAmount = this.amount;
 
     // Add fees
-    this.fees.forEach(fee => {
+    this.fees.forEach((fee) => {
       totalAmount += fee.amount;
     });
 
     // Apply adjustments
-    this.adjustments.forEach(adjustment => {
-      if (adjustment.type === 'discount' || adjustment.type === 'fee_waiver' || adjustment.type === 'credit') {
+    this.adjustments.forEach((adjustment) => {
+      if (
+        adjustment.type === 'discount' ||
+        adjustment.type === 'fee_waiver' ||
+        adjustment.type === 'credit'
+      ) {
         totalAmount -= adjustment.amount;
       } else {
         totalAmount += adjustment.amount;
@@ -346,7 +415,7 @@ export class PaymentModel implements Payment {
     // Ensure total amount is not negative
     this.metadata = {
       ...this.metadata,
-      calculatedTotalAmount: Math.max(0, totalAmount)
+      calculatedTotalAmount: Math.max(0, totalAmount),
     };
   }
 
@@ -372,7 +441,7 @@ export class PaymentModel implements Payment {
     const now = new Date().toISOString();
     const updateData: Partial<Payment> = {
       status: 'completed',
-      processedDate: now
+      processedDate: now,
     };
 
     if (transactionReference) {
@@ -391,7 +460,7 @@ export class PaymentModel implements Payment {
     }
 
     const updateData: Partial<Payment> = {
-      status: 'failed'
+      status: 'failed',
     };
 
     return this.update(updateData, this.version);
@@ -406,7 +475,7 @@ export class PaymentModel implements Payment {
     }
 
     const updateData: Partial<Payment> = {
-      status: 'cancelled'
+      status: 'cancelled',
     };
 
     return this.update(updateData, this.version);
@@ -417,7 +486,7 @@ export class PaymentModel implements Payment {
    */
   disputePayment(reason: string): PaymentModel {
     const updateData: Partial<Payment> = {
-      status: 'disputed'
+      status: 'disputed',
     };
 
     return this.update(updateData, this.version);
@@ -426,12 +495,14 @@ export class PaymentModel implements Payment {
   /**
    * Add fee
    */
-  addFee(fee: Omit<Payment['fees'][0], 'type' | 'amount'> & { type: string; amount: number }): PaymentModel {
+  addFee(
+    fee: Omit<Payment['fees'][0], 'type' | 'amount'> & { type: string; amount: number }
+  ): PaymentModel {
     const newFee = {
       type: fee.type,
       amount: fee.amount,
       description: fee.description,
-      taxable: fee.taxable
+      taxable: fee.taxable,
     };
 
     const newFees = [...this.fees, newFee];
@@ -453,10 +524,12 @@ export class PaymentModel implements Payment {
   /**
    * Add adjustment
    */
-  addAdjustment(adjustment: Omit<Payment['adjustments'][0], 'appliedDate'> & { appliedDate: string }): PaymentModel {
+  addAdjustment(
+    adjustment: Omit<Payment['adjustments'][0], 'appliedDate'> & { appliedDate: string }
+  ): PaymentModel {
     const newAdjustment = {
       ...adjustment,
-      appliedDate: adjustment.appliedDate
+      appliedDate: adjustment.appliedDate,
     };
 
     const newAdjustments = [...this.adjustments, newAdjustment];
@@ -482,10 +555,11 @@ export class PaymentModel implements Payment {
     const now = new Date().toISOString();
 
     let reconciliationStatus: Payment['reconciliationStatus'] = 'reconciled';
-    let reconciledAmountValue = reconciledAmount || this.amount;
+    const reconciledAmountValue = reconciledAmount || this.amount;
 
     // Determine reconciliation status based on amounts
-    if (Math.abs(reconciledAmountValue - this.amount) > 0.01) { // Allow for small rounding differences
+    if (Math.abs(reconciledAmountValue - this.amount) > 0.01) {
+      // Allow for small rounding differences
       reconciliationStatus = 'partially_matched';
     }
 
@@ -493,7 +567,7 @@ export class PaymentModel implements Payment {
       reconciliationStatus,
       reconciledAmount: reconciledAmountValue,
       reconciliationDate: now,
-      reconciliationNotes: notes
+      reconciliationNotes: notes,
     };
 
     return this.update(updateData, this.version);
@@ -504,7 +578,7 @@ export class PaymentModel implements Payment {
    */
   markReconciliationDisputed(reason: string): PaymentModel {
     const updateData: Partial<Payment> = {
-      reconciliationStatus: 'disputed'
+      reconciliationStatus: 'disputed',
     };
 
     return this.update(updateData, this.version);
@@ -519,7 +593,7 @@ export class PaymentModel implements Payment {
       timestamp: new Date().toISOString(),
       previousStatus: this.status,
       newStatus,
-      notes
+      notes,
     };
 
     const newAuditTrail = [...this.auditTrail, auditEntry];
@@ -529,12 +603,16 @@ export class PaymentModel implements Payment {
   /**
    * Add compliance check
    */
-  addComplianceCheck(checkType: string, status: 'passed' | 'failed' | 'pending' | 'waived', notes?: string): PaymentModel {
+  addComplianceCheck(
+    checkType: string,
+    status: 'passed' | 'failed' | 'pending' | 'waived',
+    notes?: string
+  ): PaymentModel {
     const complianceCheck = {
       checkType,
       status,
       checkedDate: new Date().toISOString(),
-      notes
+      notes,
     };
 
     const newComplianceChecks = [...this.complianceChecks, complianceCheck];
@@ -651,7 +729,7 @@ export class PaymentModel implements Payment {
       feesCount: this.fees.length,
       adjustmentsCount: this.adjustments.length,
       auditTrailCount: this.auditTrail.length,
-      complianceChecksCount: this.complianceChecks.length
+      complianceChecksCount: this.complianceChecks.length,
     };
   }
 
@@ -695,7 +773,7 @@ export class PaymentModel implements Payment {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      version: this.version
+      version: this.version,
     };
   }
 
@@ -703,7 +781,7 @@ export class PaymentModel implements Payment {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Payment> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 
@@ -711,13 +789,16 @@ export class PaymentModel implements Payment {
    * Create domain event for payment changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
+    const now = new Date();
     return {
       id: uuidv4(),
       entityType: 'payment',
       eventType,
-      timestamp: new Date(),
+      timestamp: now,
       eventData: this.toEventData(),
-      version: 1
+      createdAt: now,
+      updatedAt: now,
+      version: 1,
     };
   }
 
@@ -738,7 +819,11 @@ export class PaymentModel implements Payment {
     }
 
     // Business rule: Completed payments should be reconciled
-    if (this.status === 'completed' && this.reconciliationStatus === 'unreconciled' && this.getAgeInDays() > 7) {
+    if (
+      this.status === 'completed' &&
+      this.reconciliationStatus === 'unreconciled' &&
+      this.getAgeInDays() > 7
+    ) {
       errors.push('Completed payments should be reconciled within 7 days');
     }
 
@@ -758,8 +843,13 @@ export class PaymentModel implements Payment {
     }
 
     // Business rule: Large adjustments should be audited
-    const largeAdjustments = this.adjustments.filter(adj => Math.abs(adj.amount) > this.amount * 0.1);
-    if (largeAdjustments.length > 0 && !this.auditTrail.some(entry => entry.action.includes('adjustment'))) {
+    const largeAdjustments = this.adjustments.filter(
+      (adj) => Math.abs(adj.amount) > this.amount * 0.1
+    );
+    if (
+      largeAdjustments.length > 0 &&
+      !this.auditTrail.some((entry) => entry.action.includes('adjustment'))
+    ) {
       errors.push('Large adjustments should be audited');
     }
 
@@ -782,29 +872,51 @@ export class PaymentFactory {
   static fromLegacyData(legacyData: Record<string, any>): PaymentModel {
     // Data archaeology: Handle various legacy field names and formats
     const mappedData: Partial<Payment> = {
-      externalIds: [legacyData.payment_id || legacyData.PAYMENT_ID || legacyData.transaction_id || legacyData.id],
-      paymentNumber: legacyData.payment_number || legacyData.PAYMENT_NUMBER || legacyData.reference_number || `PAY-${Date.now()}`,
-      type: this.mapLegacyPaymentType(legacyData.payment_type || legacyData.type || 'invoice_payment'),
+      externalIds: [
+        legacyData.payment_id ||
+          legacyData.PAYMENT_ID ||
+          legacyData.transaction_id ||
+          legacyData.id,
+      ],
+      paymentNumber:
+        legacyData.payment_number ||
+        legacyData.PAYMENT_NUMBER ||
+        legacyData.reference_number ||
+        `PAY-${Date.now()}`,
+      type: this.mapLegacyPaymentType(
+        legacyData.payment_type || legacyData.type || 'invoice_payment'
+      ),
       status: this.mapLegacyStatus(legacyData.status || legacyData.STATUS || 'pending'),
       amount: legacyData.amount || legacyData.AMOUNT || legacyData.payment_amount || 0,
       currency: legacyData.currency || legacyData.CURRENCY || 'USD',
-      paymentMethod: this.mapLegacyPaymentMethod(legacyData.payment_method || legacyData.method || 'check'),
-      paymentDate: legacyData.payment_date || legacyData.PAYMENT_DATE || new Date().toISOString().split('T')[0],
+      paymentMethod: this.mapLegacyPaymentMethod(
+        legacyData.payment_method || legacyData.method || 'check'
+      ),
+      paymentDate:
+        legacyData.payment_date ||
+        legacyData.PAYMENT_DATE ||
+        new Date().toISOString().split('T')[0],
       dueDate: legacyData.due_date || legacyData.DUE_DATE || new Date().toISOString().split('T')[0],
       processedDate: legacyData.processed_date || legacyData.PROCESSED_DATE,
       customerId: legacyData.customer_id || legacyData.CUSTOMER_ID,
-      customerName: legacyData.customer_name || legacyData.CUSTOMER_NAME || legacyData.customer || 'Unknown',
+      customerName:
+        legacyData.customer_name || legacyData.CUSTOMER_NAME || legacyData.customer || 'Unknown',
       billingAddress: this.mapLegacyBillingAddress(legacyData),
       invoiceIds: this.mapLegacyInvoiceIds(legacyData),
       orderIds: this.mapLegacyOrderIds(legacyData),
       contractIds: this.mapLegacyContractIds(legacyData),
-      transactionReference: legacyData.transaction_reference || legacyData.TRANSACTION_REFERENCE || legacyData.reference,
+      transactionReference:
+        legacyData.transaction_reference ||
+        legacyData.TRANSACTION_REFERENCE ||
+        legacyData.reference,
       authorizationCode: legacyData.authorization_code || legacyData.AUTHORIZATION_CODE,
       confirmationNumber: legacyData.confirmation_number || legacyData.CONFIRMATION_NUMBER,
       bankReference: legacyData.bank_reference || legacyData.BANK_REFERENCE,
       fees: this.mapLegacyFees(legacyData),
       adjustments: this.mapLegacyAdjustments(legacyData),
-      reconciliationStatus: this.mapLegacyReconciliationStatus(legacyData.reconciliation_status || legacyData.RECONCILIATION_STATUS || 'unreconciled'),
+      reconciliationStatus: this.mapLegacyReconciliationStatus(
+        legacyData.reconciliation_status || legacyData.RECONCILIATION_STATUS || 'unreconciled'
+      ),
       reconciledAmount: legacyData.reconciled_amount || legacyData.RECONCILED_AMOUNT,
       reconciliationDate: legacyData.reconciliation_date || legacyData.RECONCILIATION_DATE,
       reconciledBy: legacyData.reconciled_by || legacyData.RECONCILED_BY,
@@ -823,9 +935,9 @@ export class PaymentFactory {
           department: legacyData.department || 'accounts_receivable',
           costCenter: legacyData.cost_center,
           projectCode: legacyData.project_code,
-          batchId: legacyData.batch_id
-        }
-      }
+          batchId: legacyData.batch_id,
+        },
+      },
     };
 
     return PaymentModel.create(mappedData as any);
@@ -836,16 +948,16 @@ export class PaymentFactory {
    */
   private static mapLegacyPaymentType(legacyType: string): Payment['type'] {
     const typeMap: Record<string, Payment['type']> = {
-      'invoice_payment': 'invoice_payment',
-      'advance_payment': 'advance_payment',
-      'refund': 'refund',
-      'adjustment': 'adjustment',
-      'deposit': 'deposit',
-      'final_payment': 'final_payment',
-      'payment': 'invoice_payment',
-      'invoice': 'invoice_payment',
-      'advance': 'advance_payment',
-      'deposit_payment': 'deposit'
+      invoice_payment: 'invoice_payment',
+      advance_payment: 'advance_payment',
+      refund: 'refund',
+      adjustment: 'adjustment',
+      deposit: 'deposit',
+      final_payment: 'final_payment',
+      payment: 'invoice_payment',
+      invoice: 'invoice_payment',
+      advance: 'advance_payment',
+      deposit_payment: 'deposit',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'invoice_payment';
@@ -856,17 +968,17 @@ export class PaymentFactory {
    */
   private static mapLegacyStatus(legacyStatus: string): Payment['status'] {
     const statusMap: Record<string, Payment['status']> = {
-      'pending': 'pending',
-      'processing': 'processing',
-      'completed': 'completed',
-      'failed': 'failed',
-      'cancelled': 'cancelled',
-      'disputed': 'disputed',
-      'refunded': 'refunded',
-      'partial': 'partial',
-      'paid': 'completed',
-      'declined': 'failed',
-      'canceled': 'cancelled'
+      pending: 'pending',
+      processing: 'processing',
+      completed: 'completed',
+      failed: 'failed',
+      cancelled: 'cancelled',
+      disputed: 'disputed',
+      refunded: 'refunded',
+      partial: 'partial',
+      paid: 'completed',
+      declined: 'failed',
+      canceled: 'cancelled',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'pending';
@@ -877,17 +989,17 @@ export class PaymentFactory {
    */
   private static mapLegacyPaymentMethod(legacyMethod: string): Payment['paymentMethod'] {
     const methodMap: Record<string, Payment['paymentMethod']> = {
-      'check': 'check',
-      'wire': 'wire',
-      'ach': 'ach',
-      'credit_card': 'credit_card',
-      'cash': 'cash',
-      'bank_transfer': 'bank_transfer',
-      'digital_wallet': 'digital_wallet',
-      'cheque': 'check',
-      'card': 'credit_card',
-      'bank': 'bank_transfer',
-      'wallet': 'digital_wallet'
+      check: 'check',
+      wire: 'wire',
+      ach: 'ach',
+      credit_card: 'credit_card',
+      cash: 'cash',
+      bank_transfer: 'bank_transfer',
+      digital_wallet: 'digital_wallet',
+      cheque: 'check',
+      card: 'credit_card',
+      bank: 'bank_transfer',
+      wallet: 'digital_wallet',
     };
 
     return methodMap[legacyMethod.toLowerCase()] || 'check';
@@ -896,14 +1008,21 @@ export class PaymentFactory {
   /**
    * Map legacy billing address
    */
-  private static mapLegacyBillingAddress(legacyData: Record<string, any>): Payment['billingAddress'] {
+  private static mapLegacyBillingAddress(
+    legacyData: Record<string, any>
+  ): Payment['billingAddress'] {
     return {
-      street1: legacyData.billing_street1 || legacyData.BILLING_STREET1 || legacyData.address1 || 'Unknown',
+      street1:
+        legacyData.billing_street1 ||
+        legacyData.BILLING_STREET1 ||
+        legacyData.address1 ||
+        'Unknown',
       street2: legacyData.billing_street2 || legacyData.BILLING_STREET2 || legacyData.address2,
       city: legacyData.billing_city || legacyData.BILLING_CITY || legacyData.city || 'Unknown',
       state: legacyData.billing_state || legacyData.BILLING_STATE || legacyData.state || 'Unknown',
       zipCode: legacyData.billing_zip || legacyData.BILLING_ZIP || legacyData.zipcode || '00000',
-      country: legacyData.billing_country || legacyData.BILLING_COUNTRY || legacyData.country || 'US'
+      country:
+        legacyData.billing_country || legacyData.BILLING_COUNTRY || legacyData.country || 'US',
     };
   }
 
@@ -967,7 +1086,7 @@ export class PaymentFactory {
         type: fee.type || fee.fee_type || 'processing_fee',
         amount: fee.amount || 0,
         description: fee.description || fee.fee_description || 'Fee',
-        taxable: fee.taxable !== undefined ? fee.taxable : true
+        taxable: fee.taxable !== undefined ? fee.taxable : true,
       }));
     }
 
@@ -986,11 +1105,14 @@ export class PaymentFactory {
 
     if (Array.isArray(adjustmentsData)) {
       return adjustmentsData.map((adjustment: any) => ({
-        type: this.mapLegacyAdjustmentType(adjustment.type || adjustment.adjustment_type || 'discount'),
+        type: this.mapLegacyAdjustmentType(
+          adjustment.type || adjustment.adjustment_type || 'discount'
+        ),
         amount: adjustment.amount || 0,
         reason: adjustment.reason || adjustment.description || 'Adjustment',
-        appliedDate: adjustment.applied_date || adjustment.date || new Date().toISOString().split('T')[0],
-        approvedBy: adjustment.approved_by || adjustment.approver
+        appliedDate:
+          adjustment.applied_date || adjustment.date || new Date().toISOString().split('T')[0],
+        approvedBy: adjustment.approved_by || adjustment.approver,
       }));
     }
 
@@ -1002,14 +1124,14 @@ export class PaymentFactory {
    */
   private static mapLegacyAdjustmentType(legacyType: string): Payment['adjustments'][0]['type'] {
     const typeMap: Record<string, Payment['adjustments'][0]['type']> = {
-      'discount': 'discount',
-      'surcharge': 'surcharge',
-      'tax_adjustment': 'tax_adjustment',
-      'fee_waiver': 'fee_waiver',
-      'penalty': 'penalty',
-      'credit': 'credit',
-      'tax': 'tax_adjustment',
-      'waiver': 'fee_waiver'
+      discount: 'discount',
+      surcharge: 'surcharge',
+      tax_adjustment: 'tax_adjustment',
+      fee_waiver: 'fee_waiver',
+      penalty: 'penalty',
+      credit: 'credit',
+      tax: 'tax_adjustment',
+      waiver: 'fee_waiver',
     };
 
     return typeMap[legacyType.toLowerCase()] || 'discount';
@@ -1018,15 +1140,17 @@ export class PaymentFactory {
   /**
    * Map legacy reconciliation status
    */
-  private static mapLegacyReconciliationStatus(legacyStatus: string): Payment['reconciliationStatus'] {
+  private static mapLegacyReconciliationStatus(
+    legacyStatus: string
+  ): Payment['reconciliationStatus'] {
     const statusMap: Record<string, Payment['reconciliationStatus']> = {
-      'unreconciled': 'unreconciled',
-      'matched': 'matched',
-      'partially_matched': 'partially_matched',
-      'disputed': 'disputed',
-      'reconciled': 'reconciled',
-      'pending': 'unreconciled',
-      'matched_partially': 'partially_matched'
+      unreconciled: 'unreconciled',
+      matched: 'matched',
+      partially_matched: 'partially_matched',
+      disputed: 'disputed',
+      reconciled: 'reconciled',
+      pending: 'unreconciled',
+      matched_partially: 'partially_matched',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'unreconciled';
@@ -1035,13 +1159,16 @@ export class PaymentFactory {
   /**
    * Map legacy bank information
    */
-  private static mapLegacyBankInformation(legacyData: Record<string, any>): Payment['bankInformation'] {
+  private static mapLegacyBankInformation(
+    legacyData: Record<string, any>
+  ): Payment['bankInformation'] {
     return {
       bankName: legacyData.bank_name || legacyData.BANK_NAME || 'Unknown Bank',
-      accountNumber: legacyData.account_number || legacyData.ACCOUNT_NUMBER || '**** **** **** ****',
+      accountNumber:
+        legacyData.account_number || legacyData.ACCOUNT_NUMBER || '**** **** **** ****',
       routingNumber: legacyData.routing_number || legacyData.ROUTING_NUMBER,
       checkNumber: legacyData.check_number || legacyData.CHECK_NUMBER,
-      depositReference: legacyData.deposit_reference || legacyData.DEPOSIT_REFERENCE
+      depositReference: legacyData.deposit_reference || legacyData.DEPOSIT_REFERENCE,
     };
   }
 
@@ -1063,7 +1190,7 @@ export class PaymentFactory {
         previousStatus: entry.previous_status || entry.from_status,
         newStatus: entry.new_status || entry.to_status || 'unknown',
         notes: entry.notes || entry.description,
-        ipAddress: entry.ip_address || entry.ip
+        ipAddress: entry.ip_address || entry.ip,
       }));
     }
 
@@ -1073,7 +1200,9 @@ export class PaymentFactory {
   /**
    * Map legacy compliance checks
    */
-  private static mapLegacyComplianceChecks(legacyData: Record<string, any>): Payment['complianceChecks'] {
+  private static mapLegacyComplianceChecks(
+    legacyData: Record<string, any>
+  ): Payment['complianceChecks'] {
     if (!legacyData.compliance_checks && !legacyData.checks) {
       return [];
     }
@@ -1087,7 +1216,7 @@ export class PaymentFactory {
         checkedDate: check.checked_date || check.date || new Date().toISOString(),
         checkedBy: check.checked_by || check.user,
         notes: check.notes || check.description,
-        referenceId: check.reference_id || check.reference
+        referenceId: check.reference_id || check.reference,
       }));
     }
 
@@ -1097,16 +1226,17 @@ export class PaymentFactory {
   /**
    * Map legacy compliance status
    */
-  private static mapLegacyComplianceStatus(legacyStatus: string): Payment['complianceChecks'][0]['status'] {
+  private static mapLegacyComplianceStatus(
+    legacyStatus: string
+  ): Payment['complianceChecks'][0]['status'] {
     const statusMap: Record<string, Payment['complianceChecks'][0]['status']> = {
-      'passed': 'passed',
-      'failed': 'failed',
-      'pending': 'pending',
-      'waived': 'waived',
-      'pass': 'passed',
-      'fail': 'failed',
-      'pending': 'pending',
-      'waive': 'waived'
+      passed: 'passed',
+      failed: 'failed',
+      pending: 'pending',
+      waived: 'waived',
+      pass: 'passed',
+      fail: 'failed',
+      waive: 'waived',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'pending';
@@ -1115,14 +1245,16 @@ export class PaymentFactory {
   /**
    * Map legacy processing details
    */
-  private static mapLegacyProcessingDetails(legacyData: Record<string, any>): Payment['processingDetails'] {
+  private static mapLegacyProcessingDetails(
+    legacyData: Record<string, any>
+  ): Payment['processingDetails'] {
     return {
       processor: legacyData.processor || legacyData.PROCESSOR || 'Unknown Processor',
       gatewayTransactionId: legacyData.gateway_transaction_id || legacyData.GATEWAY_TRANSACTION_ID,
       processingFee: legacyData.processing_fee || legacyData.PROCESSING_FEE,
       exchangeRate: legacyData.exchange_rate || legacyData.EXCHANGE_RATE,
       originalCurrency: legacyData.original_currency || legacyData.ORIGINAL_CURRENCY,
-      metadata: legacyData.processing_metadata || legacyData.PROCESSING_METADATA || {}
+      metadata: legacyData.processing_metadata || legacyData.PROCESSING_METADATA || {},
     };
   }
 }
@@ -1141,7 +1273,7 @@ export class PaymentValidator {
     } catch (error) {
       return {
         isValid: false,
-        errors: [error instanceof Error ? error.message : 'Unknown validation error']
+        errors: [error instanceof Error ? error.message : 'Unknown validation error'],
       };
     }
   }
@@ -1179,16 +1311,15 @@ export class PaymentManager {
    * Get overdue payments
    */
   static getOverduePayments(payments: PaymentModel[]): PaymentModel[] {
-    return payments.filter(payment => payment.isOverdue());
+    return payments.filter((payment) => payment.isOverdue());
   }
 
   /**
    * Get payments requiring reconciliation
    */
   static getPaymentsRequiringReconciliation(payments: PaymentModel[]): PaymentModel[] {
-    return payments.filter(payment =>
-      payment.status === 'completed' &&
-      payment.reconciliationStatus === 'unreconciled'
+    return payments.filter(
+      (payment) => payment.status === 'completed' && payment.reconciliationStatus === 'unreconciled'
     );
   }
 
@@ -1196,33 +1327,40 @@ export class PaymentManager {
    * Get disputed payments
    */
   static getDisputedPayments(payments: PaymentModel[]): PaymentModel[] {
-    return payments.filter(payment => payment.status === 'disputed');
+    return payments.filter((payment) => payment.status === 'disputed');
   }
 
   /**
    * Get payment performance report
    */
   static getPerformanceReport(payments: PaymentModel[]): Record<string, any> {
-    const completedPayments = payments.filter(payment => payment.status === 'completed');
+    const completedPayments = payments.filter((payment) => payment.status === 'completed');
     const overduePayments = this.getOverduePayments(payments);
     const disputedPayments = this.getDisputedPayments(payments);
-    const failedPayments = payments.filter(payment => payment.status === 'failed');
+    const failedPayments = payments.filter((payment) => payment.status === 'failed');
 
     const totalAmount = payments.reduce((sum, payment) => sum + payment.amount, 0);
     const completedAmount = completedPayments.reduce((sum, payment) => sum + payment.amount, 0);
     const overdueAmount = overduePayments.reduce((sum, payment) => sum + payment.amount, 0);
 
-    const averageEfficiency = payments.reduce((sum, payment) => sum + payment.getEfficiencyScore(), 0) / payments.length;
+    const averageEfficiency =
+      payments.reduce((sum, payment) => sum + payment.getEfficiencyScore(), 0) / payments.length;
 
-    const paymentsByMethod = payments.reduce((acc, payment) => {
-      acc[payment.paymentMethod] = (acc[payment.paymentMethod] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const paymentsByMethod = payments.reduce(
+      (acc, payment) => {
+        acc[payment.paymentMethod] = (acc[payment.paymentMethod] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const paymentsByStatus = payments.reduce((acc, payment) => {
-      acc[payment.status] = (acc[payment.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const paymentsByStatus = payments.reduce(
+      (acc, payment) => {
+        acc[payment.status] = (acc[payment.status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalPayments: payments.length,
@@ -1236,10 +1374,12 @@ export class PaymentManager {
       totalAmount: Math.round(totalAmount * 100) / 100,
       completedAmount: Math.round(completedAmount * 100) / 100,
       overdueAmount: Math.round(overdueAmount * 100) / 100,
-      averagePaymentAmount: payments.length > 0 ? Math.round((totalAmount / payments.length) * 100) / 100 : 0,
+      averagePaymentAmount:
+        payments.length > 0 ? Math.round((totalAmount / payments.length) * 100) / 100 : 0,
       paymentsByMethod,
       paymentsByStatus,
-      averageAgeInDays: payments.reduce((sum, payment) => sum + payment.getAgeInDays(), 0) / payments.length
+      averageAgeInDays:
+        payments.reduce((sum, payment) => sum + payment.getAgeInDays(), 0) / payments.length,
     };
   }
 
@@ -1249,7 +1389,7 @@ export class PaymentManager {
   static checkPaymentConflicts(payments: PaymentModel[]): string[] {
     const conflicts: string[] = [];
 
-    payments.forEach(payment => {
+    payments.forEach((payment) => {
       if (payment.isOverdue()) {
         conflicts.push(`Payment ${payment.paymentNumber} is overdue`);
       }
@@ -1263,7 +1403,7 @@ export class PaymentManager {
       }
 
       const businessRuleErrors = payment.validateBusinessRules();
-      conflicts.push(...businessRuleErrors.map(error => `${payment.paymentNumber}: ${error}`));
+      conflicts.push(...businessRuleErrors.map((error) => `${payment.paymentNumber}: ${error}`));
     });
 
     return conflicts;
@@ -1272,15 +1412,21 @@ export class PaymentManager {
   /**
    * Get payments requiring immediate attention
    */
-  static getPaymentsRequiringAttention(payments: PaymentModel[]): Array<{ payment: PaymentModel; reason: string; priority: 'low' | 'medium' | 'high' }> {
-    const requiringAttention: Array<{ payment: PaymentModel; reason: string; priority: 'low' | 'medium' | 'high' }> = [];
+  static getPaymentsRequiringAttention(
+    payments: PaymentModel[]
+  ): Array<{ payment: PaymentModel; reason: string; priority: 'low' | 'medium' | 'high' }> {
+    const requiringAttention: Array<{
+      payment: PaymentModel;
+      reason: string;
+      priority: 'low' | 'medium' | 'high';
+    }> = [];
 
-    payments.forEach(payment => {
+    payments.forEach((payment) => {
       if (payment.isOverdue()) {
         requiringAttention.push({
           payment,
           reason: 'Payment is overdue',
-          priority: 'high'
+          priority: 'high',
         });
       }
 
@@ -1288,7 +1434,7 @@ export class PaymentManager {
         requiringAttention.push({
           payment,
           reason: 'Payment failed and requires investigation',
-          priority: 'high'
+          priority: 'high',
         });
       }
 
@@ -1296,7 +1442,7 @@ export class PaymentManager {
         requiringAttention.push({
           payment,
           reason: 'Payment is disputed and requires resolution',
-          priority: 'medium'
+          priority: 'medium',
         });
       }
 
@@ -1304,23 +1450,25 @@ export class PaymentManager {
         requiringAttention.push({
           payment,
           reason: 'High-value payment is pending processing',
-          priority: 'medium'
+          priority: 'medium',
         });
       }
 
-      if (payment.reconciliationStatus === 'unreconciled' &&
-          payment.status === 'completed' &&
-          payment.getAgeInDays() > 7) {
+      if (
+        payment.reconciliationStatus === 'unreconciled' &&
+        payment.status === 'completed' &&
+        payment.getAgeInDays() > 7
+      ) {
         requiringAttention.push({
           payment,
           reason: 'Completed payment requires reconciliation',
-          priority: 'low'
+          priority: 'low',
         });
       }
     });
 
     return requiringAttention.sort((a, b) => {
-      const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
       return priorityOrder[b.priority] - priorityOrder[a.priority];
     });
   }
