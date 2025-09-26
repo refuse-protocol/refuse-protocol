@@ -1,3 +1,9 @@
+import { mkdirSync } from 'fs';
+import { existsSync } from 'fs';
+import { writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { resolve } from 'path';
 /**
  * @fileoverview Data transformation utilities for REFUSE Protocol legacy system migration
  * @description Comprehensive tools for transforming legacy waste management data into REFUSE Protocol format
@@ -984,7 +990,7 @@ export class DataTransformerCLI {
 
   private async transformCommand(args: string[]): Promise<void> {
     if (args.length < 2) {
-      console.error('Usage: transform <entity-type> <input-file> [output-file]');
+//       console.error('Usage: transform <entity-type> <input-file> [output-file]');
       process.exit(1);
     }
 
@@ -1020,7 +1026,7 @@ export class DataTransformerCLI {
 
   private async batchTransformCommand(args: string[]): Promise<void> {
     if (args.length < 2) {
-      console.error('Usage: batch <config-file> <input-directory>');
+//       console.error('Usage: batch <config-file> <input-directory>');
       process.exit(1);
     }
 
@@ -1101,7 +1107,7 @@ export class DataTransformerCLI {
 
   private validateCommand(args: string[]): void {
     if (args.length < 2) {
-      console.error('Usage: validate <mapping-file> <sample-data>');
+//       console.error('Usage: validate <mapping-file> <sample-data>');
       process.exit(1);
     }
 
@@ -1139,32 +1145,32 @@ export class DataTransformerCLI {
     console.log(chalk.gray('Usage: data-transformer <command> [options]\n'));
 
     console.log(chalk.green('Commands:'));
-    console.log(
+//     console.log(
       '  transform <entity-type> <input-file> [output-file]    Transform single entity type'
     );
-    console.log(
+//     console.log(
       '  batch <config-file> <input-directory>                 Batch transform multiple entities'
     );
-    console.log(
+//     console.log(
       '  report                                                Show transformation metrics'
     );
-    console.log(
+//     console.log(
       '  validate <mapping-file> <sample-data>                 Validate transformation setup\n'
     );
 
     console.log(chalk.green('Examples:'));
-    console.log(
+//     console.log(
       '  data-transformer transform customer ./data/customers.csv customers-transformed.json'
     );
-    console.log('  data-transformer batch ./batch-config.json ./legacy-data/');
-    console.log('  data-transformer report');
-    console.log(
+//     console.log('  data-transformer batch ./batch-config.json ./legacy-data/');
+//     console.log('  data-transformer report');
+//     console.log(
       '  data-transformer validate ./mappings/customer-mappings.json ./sample-customer.json\n'
     );
 
     console.log(chalk.green('Configuration Files:'));
-    console.log('  Field mappings: JSON file with source->target field mappings');
-    console.log('  Batch config: JSON file specifying files and options for each entity type\n');
+//     console.log('  Field mappings: JSON file with source->target field mappings');
+//     console.log('  Batch config: JSON file specifying files and options for each entity type\n');
   }
 }
 

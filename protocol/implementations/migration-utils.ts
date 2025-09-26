@@ -87,11 +87,11 @@ export class MigrationUtilities {
       startedAt: new Date(),
       completedAt: new Date(),
     };
-
+// 
     console.log(`Starting migration: ${plan.id}`);
 
     for (const phase of plan.phases) {
-      console.log(`Executing phase: ${phase.name}`);
+//       console.log(`Executing phase: ${phase.name}`);
 
       const phaseResult = await this.executeMigrationPhase(phase, plan);
 
@@ -112,13 +112,13 @@ export class MigrationUtilities {
     result.completedAt = new Date();
 
     if (!result.success) {
-      console.log(`Migration failed: ${plan.id}`);
+//       console.log(`Migration failed: ${plan.id}`);
       // Execute rollback if configured
       if (plan.options.enableRollback) {
         await this.executeRollback(plan.id);
       }
     } else {
-      console.log(`Migration completed successfully: ${plan.id}`);
+//       console.log(`Migration completed successfully: ${plan.id}`);
     }
 
     return result;
@@ -214,7 +214,7 @@ export class MigrationUtilities {
    */
   private async extractSourceData(phase: MigrationPhase, plan: MigrationPlan): Promise<any> {
     // This would connect to the source system and extract data
-    console.log(`Extracting data for phase: ${phase.name} from ${plan.sourceSystem}`);
+//     console.log(`Extracting data for phase: ${phase.name} from ${plan.sourceSystem}`);
 
     // Simulate data extraction
     return {
@@ -241,7 +241,7 @@ export class MigrationUtilities {
     if (!transformer) {
       throw new Error(`No transformer found for target system: ${plan.targetSystem}`);
     }
-
+// 
     console.log(`Transforming data for phase: ${phase.name} to ${plan.targetSystem}`);
 
     return await transformer.transform(sourceData);
@@ -288,7 +288,7 @@ export class MigrationUtilities {
     phase: MigrationPhase,
     plan: MigrationPlan
   ): Promise<LoadResult> {
-    console.log(`Loading data for phase: ${phase.name} to ${plan.targetSystem}`);
+//     console.log(`Loading data for phase: ${phase.name} to ${plan.targetSystem}`);
 
     // Simulate loading to target system
     return {
@@ -309,7 +309,7 @@ export class MigrationUtilities {
     if (!rollbackStrategy) {
       throw new Error(`No rollback strategy found for migration: ${migrationId}`);
     }
-
+// 
     console.log(`Executing rollback for migration: ${migrationId}`);
 
     const result: RollbackResult = {
@@ -341,22 +341,22 @@ export class MigrationUtilities {
    * Execute rollback phase
    */
   private async executeRollbackPhase(phase: RollbackPhase): Promise<void> {
-    console.log(`Rolling back phase: ${phase.name}`);
+//     console.log(`Rolling back phase: ${phase.name}`);
 
     switch (phase.type) {
       case 'data_removal':
         // Remove migrated data
-        console.log(`Removing data for entity: ${phase.entity}`);
+//         console.log(`Removing data for entity: ${phase.entity}`);
         break;
 
       case 'state_restoration':
         // Restore previous state
-        console.log(`Restoring state for entity: ${phase.entity}`);
+//         console.log(`Restoring state for entity: ${phase.entity}`);
         break;
 
       case 'notification':
         // Send rollback notifications
-        console.log(`Sending rollback notification: ${phase.description}`);
+//         console.log(`Sending rollback notification: ${phase.description}`);
         break;
     }
   }

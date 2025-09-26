@@ -368,7 +368,7 @@ export class LegacySystemBridge {
 
       connect: async (options: ConnectionOptions) => {
         // Simulate connection to WasteWorks system
-        console.log(`Connecting to WasteWorks at ${options.host}:${options.port}`);
+//         console.log(`Connecting to WasteWorks at ${options.host}:${options.port}`);
 
         return {
           connectionId: `wasteworks-${Date.now()}`,
@@ -378,7 +378,7 @@ export class LegacySystemBridge {
 
       fetchData: async (syncOptions: SyncOptions) => {
         // Simulate data fetching from WasteWorks
-        console.log(`Fetching data from WasteWorks with options:`, syncOptions);
+//         console.log(`Fetching data from WasteWorks with options:`, syncOptions);
 
         return {
           customers: [
@@ -421,7 +421,7 @@ export class LegacySystemBridge {
 
       connect: async (options: ConnectionOptions) => {
         // Simulate connection to TrashFlow system
-        console.log(`Connecting to TrashFlow at ${options.host}:${options.port}`);
+//         console.log(`Connecting to TrashFlow at ${options.host}:${options.port}`);
 
         return {
           connectionId: `trashflow-${Date.now()}`,
@@ -431,7 +431,7 @@ export class LegacySystemBridge {
 
       fetchData: async (syncOptions: SyncOptions) => {
         // Simulate data fetching from TrashFlow
-        console.log(`Fetching data from TrashFlow with options:`, syncOptions);
+//         console.log(`Fetching data from TrashFlow with options:`, syncOptions);
 
         return {
           routes: [

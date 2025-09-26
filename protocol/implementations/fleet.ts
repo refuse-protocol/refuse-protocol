@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Fleet entity implementation with vehicle tracking capabilities
  * @description Complete Fleet model for managing vehicles, equipment, and containers with GPS tracking
@@ -479,7 +480,7 @@ export class FleetModel implements Fleet {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Fleet> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 

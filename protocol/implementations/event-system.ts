@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Real-time event streaming system with guaranteed delivery
  * @description High-performance event streaming system for waste management operations
@@ -8,6 +9,7 @@ import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { Event, BaseEntity } from '../specifications/entities';
 import { EventStreamer } from '../tools/event-streamer';
+import { LoggerFactory } from './logger';
 
 /**
  * REFUSE Protocol Event Streaming System
@@ -351,9 +353,12 @@ export class EventStreamingSystem extends EventEmitter {
 
       if (filteredQueue.length < initialLength) {
         this.eventQueue.set(queueKey, filteredQueue);
-        console.log(
-          `Cleaned up ${initialLength - filteredQueue.length} old events from ${queueKey} queue`
-        );
+        const logger = LoggerFactory.getInstance().getLogger('event-system');
+        logger.info('Cleaned up old events', {
+          queueKey,
+          cleanedCount: initialLength - filteredQueue.length,
+          remainingCount: filteredQueue.length
+        });
       }
     }
   }
@@ -679,8 +684,13 @@ export class EventRouter {
     // - Databases
     // - External APIs
     // - File systems
-
-    console.log(`Delivering event to ${destination}:`, event.id);
+    const logger = LoggerFactory.getInstance().getLogger('event-router');
+    logger.info('Delivering event to destination', {
+      destination,
+      eventId: event.id,
+      eventType: event.eventType,
+      entityType: event.entityType
+    });
 
     // Simulate delivery
     return {
@@ -841,7 +851,12 @@ export class EventSourcingSystem {
       try {
         projection.state = projection.handler(projection.state, event);
       } catch (error) {
-        console.error(`Error updating projection ${name}:`, error);
+        const logger = LoggerFactory.getInstance().getLogger('event-sourcing');
+        logger.error('Error updating projection', {
+          projectionName: name,
+          eventId: event.id,
+          eventType: event.eventType
+        }, error instanceof Error ? error : new Error(String(error)));
       }
     }
   }

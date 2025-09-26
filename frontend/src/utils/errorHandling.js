@@ -2,10 +2,15 @@
 // Provides robust error handling for production environments
 import React from 'react'
 import PropTypes from 'prop-types'
+import { logger } from './logger.js'
 
 export class ErrorHandler {
   static handleError(error, errorInfo = {}) {
-    console.error('Application Error:', error, errorInfo)
+    logger.error('Application Error', {
+      error: error.message,
+      stack: error.stack,
+      ...errorInfo
+    }, error)
 
     // Log to external service in production
     if (process.env.NODE_ENV === 'production') {
@@ -28,7 +33,7 @@ export class ErrorHandler {
     }
 
     // Example: Send to console for now (replace with actual service)
-    console.log('Error logged to service:', errorData)
+    logger.info('Error logged to service', errorData)
   }
 
   static getUserFriendlyMessage(error) {

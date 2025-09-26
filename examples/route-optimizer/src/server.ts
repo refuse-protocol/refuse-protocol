@@ -8,6 +8,15 @@ import { errorHandler } from './middleware/errorHandler'
 import { validateRequest } from './middleware/validation'
 import { optimizationRequestSchema } from './models/schemas'
 
+// Simple logger for Node.js environment
+const createLogger = () => ({
+  info: (msg: string, data?: any) => console.log(`[INFO] ${msg}`, data || ''),
+  error: (msg: string, data?: any, err?: Error) => console.error(`[ERROR] ${msg}`, data || '', err || ''),
+  warn: (msg: string, data?: any) => console.warn(`[WARN] ${msg}`, data || '')
+})
+
+const logger = createLogger()
+
 // Load environment variables
 dotenv.config()
 
@@ -39,7 +48,7 @@ app.post('/api/optimize', validateRequest(optimizationRequestSchema), async (req
     const optimizationResult = await routeOptimizer.optimizeRoutes(req.body)
     res.json(optimizationResult)
   } catch (error) {
-    console.error('Route optimization error:', error)
+    logger.error('Route optimization error', { body: req.body }, error instanceof Error ? error : new Error(String(error)))
     res.status(500).json({
       error: 'Route optimization failed',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -55,7 +64,7 @@ app.get('/api/routes/:routeId', async (req, res) => {
     }
     res.json(route)
   } catch (error) {
-    console.error('Get route error:', error)
+    logger.error('Get route error', { routeId: req.params.routeId }, error instanceof Error ? error : new Error(String(error)))
     res.status(500).json({ error: 'Failed to retrieve route' })
   }
 })
@@ -65,7 +74,7 @@ app.get('/api/routes', async (req, res) => {
     const routes = await routeOptimizer.getAllRoutes()
     res.json(routes)
   } catch (error) {
-    console.error('Get routes error:', error)
+    logger.error('Get routes error', {}, error instanceof Error ? error : new Error(String(error)))
     res.status(500).json({ error: 'Failed to retrieve routes' })
   }
 })
@@ -75,19 +84,21 @@ app.use(errorHandler)
 
 // Start server
 app.listen(port, () => {
-  console.log(`🚛 REFUSE Protocol Route Optimizer running on port ${port}`)
-  console.log(`📊 Health check: http://localhost:${port}/health`)
-  console.log(`⚡ Optimization API: http://localhost:${port}/api/optimize`)
+  logger.info('REFUSE Protocol Route Optimizer started', {
+    port,
+    healthCheck: `http://localhost:${port}/health`,
+    optimizationAPI: `http://localhost:${port}/api/optimize`
+  })
 })
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully')
+  logger.info('SIGTERM received, shutting down gracefully')
   process.exit(0)
 })
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully')
+  logger.info('SIGINT received, shutting down gracefully')
   process.exit(0)
 })
 

@@ -238,7 +238,7 @@ export class CustomerModel implements Customer {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Customer> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData } = this.toJSON();
     return eventData;
   }
 

@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 /**
  * REFUSE Protocol Performance Testing Suite
  *
@@ -61,7 +62,7 @@ export class PerformanceTestSuite {
    * Run comprehensive performance test suite
    */
   async runFullPerformanceSuite(): Promise<BenchmarkSuite> {
-// CONSOLE:     console.log('🚀 Starting REFUSE Protocol Performance Testing Suite...');
+//   console.log('🚀 Starting REFUSE Protocol Performance Testing Suite...');
     const startTime = performance.now();
 
     const suite: BenchmarkSuite = {
@@ -86,7 +87,7 @@ export class PerformanceTestSuite {
 
     try {
       // Basic Performance Tests
-// CONSOLE:       console.log('📊 Testing Basic Performance...');
+//   console.log('📊 Testing Basic Performance...');
       suite.results.basicTests = await this.runBasicPerformanceTests();
 
       // Calculate summary statistics
@@ -95,14 +96,14 @@ export class PerformanceTestSuite {
       const duration = performance.now() - startTime;
       suite.summary.totalDuration = duration;
 
-// CONSOLE:       console.log(`✅ Performance testing completed in ${(duration / 1000).toFixed(2)}s`);
-// CONSOLE:       console.log(
-        `📈 Results: ${suite.summary.passedTests}/${suite.summary.totalTests} tests passed`
-      );
+  console.log(`✅ Performance testing completed in ${(duration / 1000).toFixed(2)}s`);
+  console.log(
+    `📈 Results: ${suite.summary.passedTests}/${suite.summary.totalTests} tests passed`
+  );
 
       return suite;
     } catch (error) {
-// CONSOLE:       console.error('❌ Performance testing failed:', error);
+//   console.error('❌ Performance testing failed:', error);
       throw error;
     }
   }

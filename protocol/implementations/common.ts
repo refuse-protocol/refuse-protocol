@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Common utilities for REFUSE Protocol entities
  * @description Shared validation, formatting, and utility functions

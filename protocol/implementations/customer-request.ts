@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview CustomerRequest entity implementation with validation
  * @description Complete CustomerRequest model with business logic and validation

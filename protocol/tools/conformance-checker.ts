@@ -1,3 +1,8 @@
+import { basename } from 'path';
+import { existsSync } from 'fs';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { resolve } from 'path';
 /**
  * @fileoverview Protocol conformance checker utility for REFUSE Protocol
  * @description Comprehensive validation of protocol implementations against specification standards
@@ -36,7 +41,7 @@ export class ConformanceChecker {
    * Run comprehensive conformance check on a project
    */
   async runFullConformanceCheck(options: ConformanceCheckOptions): Promise<ConformanceReport> {
-// CONSOLE:     console.log(chalk.blue('🔍 Running REFUSE Protocol Conformance Check...'));
+  console.log(chalk.blue('🔍 Running REFUSE Protocol Conformance Check...'));
 
     const startTime = Date.now();
     const report: ConformanceReport = {
@@ -58,7 +63,7 @@ export class ConformanceChecker {
       // Load schemas
       if (options.schemasDir) {
         await this.schemaValidator.loadAllSchemas(options.schemasDir);
-// CONSOLE:         console.log(chalk.green(`✅ Loaded ${this.schemaValidator.getAllMetrics().size} schemas`));
+  console.log(chalk.green(`✅ Loaded ${this.schemaValidator.getAllMetrics().size} schemas`));
       }
 
       // Run different types of checks
@@ -89,9 +94,9 @@ export class ConformanceChecker {
 
       const totalTime = Date.now() - startTime;
 
-// CONSOLE:       console.log(chalk.green(`✅ Conformance check complete in ${totalTime}ms`));
-// CONSOLE:       console.log(chalk.gray(`   Score: ${report.summary.score.toFixed(1)}/100`));
-// CONSOLE:       console.log(
+  console.log(chalk.green(`✅ Conformance check complete in ${totalTime}ms`));
+  console.log(chalk.gray(`   Score: ${report.summary.score.toFixed(1)}/100`));
+  console.log(
         chalk.gray(
           `   Passed: ${report.summary.passed}, Failed: ${report.summary.failed}, Warnings: ${report.summary.warnings}`
         )
@@ -99,7 +104,7 @@ export class ConformanceChecker {
 
       return report;
     } catch (error) {
-// CONSOLE:       console.error(
+      console.error(
         chalk.red(
           `❌ Conformance check failed: ${error instanceof Error ? error.message : String(error)}`
         )
@@ -758,7 +763,7 @@ export class ConformanceChecker {
         this.baselineMetrics.set(file.replace('.json', ''), metrics);
       }
     } catch (error) {
-// CONSOLE:       console.warn(
+  console.warn(
         chalk.yellow(
           `⚠️ Failed to load baseline metrics: ${error instanceof Error ? error.message : String(error)}`
         )
@@ -1038,25 +1043,25 @@ export class ConformanceCheckerCLI {
 
       // Exit with error code if score is low
       if (report.summary.score < 70) {
-// CONSOLE:         console.log(
+  console.log(
           chalk.red(`❌ Conformance score too low: ${report.summary.score.toFixed(1)}/100`)
         );
         process.exit(1);
       } else if (report.summary.score < 90) {
-// CONSOLE:         console.log(
+  console.log(
           chalk.yellow(
             `⚠️ Conformance score acceptable but could be improved: ${report.summary.score.toFixed(1)}/100`
           )
         );
         process.exit(0);
       } else {
-// CONSOLE:         console.log(
+  console.log(
           chalk.green(`✅ Conformance check passed: ${report.summary.score.toFixed(1)}/100`)
         );
         process.exit(0);
       }
     } catch (error) {
-// CONSOLE:       console.error(
+  console.error(
         chalk.red(
           `❌ Conformance check failed: ${error instanceof Error ? error.message : String(error)}`
         )
@@ -1068,13 +1073,13 @@ export class ConformanceCheckerCLI {
   private reportCommand(args: string[]): void {
     const reportPath = args[0];
     if (!reportPath) {
-// CONSOLE:       console.error('Usage: report <report-file>');
+//   console.error('Usage: report <report-file>');
       process.exit(1);
     }
 
     try {
       if (!existsSync(reportPath)) {
-// CONSOLE:         console.error(`Report file not found: ${reportPath}`);
+//   console.error(`Report file not found: ${reportPath}`);
         process.exit(1);
       }
 
@@ -1083,7 +1088,7 @@ export class ConformanceCheckerCLI {
 
       this.printReport(report);
     } catch (error) {
-// CONSOLE:       console.error(
+  console.error(
         chalk.red(
           `❌ Failed to load report: ${error instanceof Error ? error.message : String(error)}`
         )
@@ -1094,18 +1099,18 @@ export class ConformanceCheckerCLI {
 
   private async baselineCommand(args: string[]): Promise<void> {
     const baselinePath = args[0] || './baseline';
-// CONSOLE:     console.log(chalk.blue(`📊 Creating baseline metrics at ${baselinePath}`));
+  console.log(chalk.blue(`📊 Creating baseline metrics at ${baselinePath}`));
 
     try {
       // Create baseline directory
       if (!existsSync(baselinePath)) {
         // This would create the baseline - simplified for now
-// CONSOLE:         console.log(chalk.green('✅ Baseline creation would be implemented here'));
+  console.log(chalk.green('✅ Baseline creation would be implemented here'));
       } else {
-// CONSOLE:         console.log(chalk.yellow('⚠️ Baseline directory already exists'));
+  console.log(chalk.yellow('⚠️ Baseline directory already exists'));
       }
     } catch (error) {
-// CONSOLE:       console.error(
+  console.error(
         chalk.red(
           `❌ Baseline command failed: ${error instanceof Error ? error.message : String(error)}`
         )
@@ -1115,26 +1120,26 @@ export class ConformanceCheckerCLI {
   }
 
   private printReport(report: ConformanceReport): void {
-// CONSOLE:     console.log(chalk.blue('\n🏆 REFUSE Protocol Conformance Report'));
-// CONSOLE:     console.log(chalk.gray('='.repeat(50)));
-// CONSOLE:     console.log(chalk.gray(`Report ID: ${report.id}`));
-// CONSOLE:     console.log(chalk.gray(`Generated: ${report.timestamp}`));
-// CONSOLE:     console.log(chalk.gray(`Target: ${report.target}`));
+  console.log(chalk.blue('\n🏆 REFUSE Protocol Conformance Report'));
+  console.log(chalk.gray('='.repeat(50)));
+  console.log(chalk.gray(`Report ID: ${report.id}`));
+  console.log(chalk.gray(`Generated: ${report.timestamp}`));
+  console.log(chalk.gray(`Target: ${report.target}`));
 
-// CONSOLE:     console.log(chalk.blue('\n📋 Summary:'));
-// CONSOLE:     console.log(chalk.green(`  Score: ${report.summary.score.toFixed(1)}/100`));
-// CONSOLE:     console.log(chalk.green(`  Passed: ${report.summary.passed}`));
-// CONSOLE:     console.log(chalk.red(`  Failed: ${report.summary.failed}`));
-// CONSOLE:     console.log(chalk.yellow(`  Warnings: ${report.summary.warnings}`));
-// CONSOLE:     console.log(chalk.red(`  Errors: ${report.summary.errors}`));
+  console.log(chalk.blue('\n📋 Summary:'));
+  console.log(chalk.green(`  Score: ${report.summary.score.toFixed(1)}/100`));
+  console.log(chalk.green(`  Passed: ${report.summary.passed}`));
+  console.log(chalk.red(`  Failed: ${report.summary.failed}`));
+  console.log(chalk.yellow(`  Warnings: ${report.summary.warnings}`));
+  console.log(chalk.red(`  Errors: ${report.summary.errors}`));
 
-// CONSOLE:     console.log(chalk.blue('\n📊 Category Breakdown:'));
+  console.log(chalk.blue('\n📊 Category Breakdown:'));
     for (const check of report.checks) {
       const statusIcon = check.status === 'pass' ? '✅' : check.status === 'warn' ? '⚠️' : '❌';
       const statusColor =
         check.status === 'pass' ? chalk.green : check.status === 'warn' ? chalk.yellow : chalk.red;
 
-// CONSOLE:       console.log(statusColor(`  ${statusIcon} ${check.category}: ${check.score.toFixed(1)}/100`));
+  console.log(statusColor(`  ${statusIcon} ${check.category}: ${check.score.toFixed(1)}/100`));
 
       // Show details for failed checks
       if (check.status !== 'pass') {
@@ -1142,24 +1147,24 @@ export class ConformanceCheckerCLI {
           (d) => d.status === 'fail' || d.status === 'error'
         );
         if (failedDetails.length > 0) {
-// CONSOLE:           console.log(chalk.gray(`    Issues: ${failedDetails.length}`));
+  console.log(chalk.gray(`    Issues: ${failedDetails.length}`));
           failedDetails.slice(0, 3).forEach((detail) => {
-// CONSOLE:             console.log(chalk.gray(`      - ${detail.message}`));
+  console.log(chalk.gray(`      - ${detail.message}`));
           });
           if (failedDetails.length > 3) {
-// CONSOLE:             console.log(chalk.gray(`      ... and ${failedDetails.length - 3} more`));
+  console.log(chalk.gray(`      ... and ${failedDetails.length - 3} more`));
           }
         }
       }
     }
 
     if (report.checks.some((c) => c.recommendations.length > 0)) {
-// CONSOLE:       console.log(chalk.blue('\n💡 Recommendations:'));
+  console.log(chalk.blue('\n💡 Recommendations:'));
       for (const check of report.checks) {
         if (check.recommendations.length > 0) {
-// CONSOLE:           console.log(chalk.gray(`  ${check.category}:`));
+  console.log(chalk.gray(`  ${check.category}:`));
           check.recommendations.forEach((rec) => {
-// CONSOLE:             console.log(chalk.gray(`    - ${rec}`));
+  console.log(chalk.gray(`    - ${rec}`));
           });
         }
       }
@@ -1167,25 +1172,25 @@ export class ConformanceCheckerCLI {
   }
 
   private printUsage(): void {
-// CONSOLE:     console.log(chalk.blue('\nREFUSE Protocol Conformance Checker'));
-// CONSOLE:     console.log(chalk.gray('Usage: conformance-checker <command> [options]\n'));
+  console.log(chalk.blue('\nREFUSE Protocol Conformance Checker'));
+  console.log(chalk.gray('Usage: conformance-checker <command> [options]\n'));
 
-// CONSOLE:     console.log(chalk.green('Commands:'));
-// CONSOLE:     console.log('  check [options]       Run comprehensive conformance check');
-// CONSOLE:     console.log('  report <file>         Display saved conformance report');
-// CONSOLE:     console.log('  baseline <dir>        Create baseline metrics\n');
+  console.log(chalk.green('Commands:'));
+//   console.log('  check [options]       Run comprehensive conformance check');
+//   console.log('  report <file>         Display saved conformance report');
+//   console.log('  baseline <dir>        Create baseline metrics\n');
 
-// CONSOLE:     console.log(chalk.green('Options for check command:'));
-// CONSOLE:     console.log('  --target <path>       Target directory to check (default: current)');
-// CONSOLE:     console.log('  --schemas <path>      Directory containing JSON schemas');
-// CONSOLE:     console.log('  --performance         Include performance checks');
-// CONSOLE:     console.log('  --security            Include security checks\n');
+  console.log(chalk.green('Options for check command:'));
+  console.log('  --target <path>       Target directory to check (default: current)');
+//   console.log('  --schemas <path>      Directory containing JSON schemas');
+//   console.log('  --performance         Include performance checks');
+//   console.log('  --security            Include security checks\n');
 
-// CONSOLE:     console.log(chalk.green('Examples:'));
-// CONSOLE:     console.log('  conformance-checker check --target ./protocol --schemas ./contracts');
-// CONSOLE:     console.log('  conformance-checker check --performance --security');
-// CONSOLE:     console.log('  conformance-checker report ./reports/conformance-2024-01-01.json');
-// CONSOLE:     console.log('  conformance-checker baseline ./baseline\n');
+  console.log(chalk.green('Examples:'));
+//   console.log('  conformance-checker check --target ./protocol --schemas ./contracts');
+//   console.log('  conformance-checker check --performance --security');
+//   console.log('  conformance-checker report ./reports/conformance-2024-01-01.json');
+//   console.log('  conformance-checker baseline ./baseline\n');
   }
 }
 

@@ -359,7 +359,7 @@ export class SiteModel implements Site {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Site> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 

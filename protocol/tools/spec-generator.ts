@@ -1,3 +1,10 @@
+import { basename } from 'path';
+import { mkdirSync } from 'fs';
+import { existsSync } from 'fs';
+import { writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { resolve } from 'path';
 /**
  * @fileoverview Protocol specification documentation generator for REFUSE Protocol
  * @description Automatically generates comprehensive documentation from entity implementations, schemas, and protocol artifacts
@@ -33,7 +40,7 @@ export class SpecGenerator {
    * Generate complete protocol specification documentation
    */
   async generateFullSpecification(options: GenerationOptions = {}): Promise<GenerationResult> {
-// CONSOLE:     console.log(chalk.blue('📚 Generating REFUSE Protocol specification documentation...'));
+  console.log(chalk.blue('📚 Generating REFUSE Protocol specification documentation...'));
 
     const startTime = Date.now();
     const results: GenerationResult = {
@@ -54,7 +61,7 @@ export class SpecGenerator {
 
       const generationTime = Date.now() - startTime;
 
-// CONSOLE:       console.log(
+      console.log(
         chalk.green(
           `✅ Generated ${results.files.length} documentation files in ${generationTime}ms`
         )
@@ -63,7 +70,7 @@ export class SpecGenerator {
       return results;
     } catch (error) {
 // FIXED PARSING:       const errorMsg = error instanceof Error ? error.message : String(error);
-// CONSOLE:       console.error(chalk.red(`❌ Documentation generation failed: ${errorMsg}`));
+  console.error(chalk.red(`❌ Documentation generation failed: ${errorMsg}`));
       results.errors.push(errorMsg);
       return results;
     }
@@ -186,7 +193,7 @@ The protocol follows strict governance rules defined in the REFUSE Protocol Cons
     const entitiesPath = join(this.outputDir, 'entities.md');
 
     if (!existsSync(implementationsDir)) {
-// CONSOLE:       console.warn(chalk.yellow(`⚠️ Implementations directory not found: ${implementationsDir}`));
+  console.warn(chalk.yellow(`⚠️ Implementations directory not found: ${implementationsDir}`));
       return;
     }
 
@@ -259,7 +266,7 @@ ${method.parameters.map((p) => `- ${p.name}: ${p.type || 'any'} - ${p.descriptio
 
 `;
       } catch (error) {
-// CONSOLE:         console.warn(
+  console.warn(
           chalk.yellow(
             `⚠️ Failed to parse entity ${entityName}: ${error instanceof Error ? error.message : String(error)}`
           )
@@ -284,7 +291,7 @@ ${method.parameters.map((p) => `- ${p.name}: ${p.type || 'any'} - ${p.descriptio
     const schemasPath = join(this.outputDir, 'schemas.md');
 
     if (!existsSync(contractsDir)) {
-// CONSOLE:       console.warn(chalk.yellow(`⚠️ Contracts directory not found: ${contractsDir}`));
+  console.warn(chalk.yellow(`⚠️ Contracts directory not found: ${contractsDir}`));
       return;
     }
 
@@ -345,7 +352,7 @@ ${schema.required ? schema.required.map((req: string) => `- ${req}`).join('\n') 
 
 `;
       } catch (error) {
-// CONSOLE:         console.warn(
+  console.warn(
           chalk.yellow(
             `⚠️ Failed to parse schema ${schemaName}: ${error instanceof Error ? error.message : String(error)}`
           )
@@ -697,8 +704,8 @@ const customer = await client.customers.create({
     country: 'US'
   }
 });
-
-// CONSOLE: console.log('Created customer:', customer.id);
+// 
+  console.log('Created customer:', customer.id);
 \`\`\`
 
 ## Migration from Legacy Systems
@@ -790,7 +797,7 @@ const streamer = new EventStreamer({
 
 // Subscribe to customer events
 streamer.subscribe(['customer', 'service'], ['created', 'updated'], (event) => {
-// CONSOLE:   console.log('Received event:', event.entityType, event.eventType);
+//   console.log('Received event:', event.entityType, event.eventType);
 
   switch (event.entityType) {
     case 'customer':
@@ -859,10 +866,10 @@ try {
   const customer = await client.customers.create(customerData);
 } catch (error) {
   if (error.code === 'VALIDATION_ERROR') {
-// CONSOLE:     console.log('Validation failed:', error.details);
+//   console.log('Validation failed:', error.details);
     // Handle specific validation errors
     for (const detail of error.details) {
-// CONSOLE:       console.log(\`Field \${detail.field}: \${detail.message}\`);
+//   console.log(\`Field \${detail.field}: \${detail.message}\`);
     }
   }
 }
@@ -908,7 +915,7 @@ const results = await client.customers.createBatch(customers);
 // Handle results
 const successful = results.filter(r => r.success).length;
 const failed = results.filter(r => !r.success).length;
-// CONSOLE: console.log(\`Batch completed: \${successful} successful, \${failed} failed\`);
+//   console.log(\`Batch completed: \${successful} successful, \${failed} failed\`);
 \`\`\`
 
 ### Pagination
@@ -929,8 +936,8 @@ while (true) {
 
   offset += limit;
 }
-
-// CONSOLE: console.log(\`Retrieved \${allCustomers.length} customers\`);
+// 
+  console.log(\`Retrieved \${allCustomers.length} customers\`);
 \`\`\`
 
 ### Caching
@@ -1011,13 +1018,13 @@ Log all REFUSE Protocol interactions:
 \`\`\`typescript
 const logger = {
   info: (message: string, meta?: any) => {
-// CONSOLE:     console.log(\`[INFO] \${message}\`, meta);
+//   console.log(\`[INFO] \${message}\`, meta);
   },
   error: (message: string, error?: any) => {
-// CONSOLE:     console.error(\`[ERROR] \${message}\`, error);
+//   console.error(\`[ERROR] \${message}\`, error);
   },
   warn: (message: string, meta?: any) => {
-// CONSOLE:     console.warn(\`[WARN] \${message}\`, meta);
+//   console.warn(\`[WARN] \${message}\`, meta);
   }
 };
 
@@ -1147,7 +1154,6 @@ This document provides practical examples of using the REFUSE Protocol in real-w
 ### Creating a New Customer
 
 \`\`\`typescript
-import { REFUSEClient } from 'refuse-protocol-sdk';
 
 const client = new REFUSEClient({
   apiKey: 'your-api-key',
@@ -1202,8 +1208,8 @@ const customer = await client.customers.create({
     onboardingDate: '2024-01-15'
   }
 });
-
-// CONSOLE: console.log('Customer created:', customer.id);
+// 
+  console.log('Customer created:', customer.id);
 \`\`\`
 
 ### Managing Customer Sites
@@ -1336,8 +1342,8 @@ const optimizedRoute = await client.routes.optimize(mondayRoute.id, {
   timeWindows: true,
   trafficConsideration: true
 });
-
-// CONSOLE: console.log('Optimized route efficiency:', optimizedRoute.efficiency);
+// 
+  console.log('Optimized route efficiency:', optimizedRoute.efficiency);
 \`\`\`
 
 ### Route Performance Tracking
@@ -1360,9 +1366,9 @@ const performance = await client.routes.getPerformance(mondayRoute.id, {
   startDate: '2024-01-01',
   endDate: '2024-01-31'
 });
-
-// CONSOLE: console.log('Average efficiency:', performance.averageEfficiency);
-// CONSOLE: console.log('On-time performance:', performance.onTimePercentage);
+// 
+  console.log('Average efficiency:', performance.averageEfficiency);
+//   console.log('On-time performance:', performance.onTimePercentage);
 \`\`\`
 
 ## Facility Management Examples
@@ -1408,9 +1414,9 @@ const utilization = await client.facilities.getUtilization(mrf.id, {
   startDate: '2024-01-01',
   endDate: '2024-01-31'
 });
-
-// CONSOLE: console.log('Daily average utilization:', utilization.averageDailyUtilization);
-// CONSOLE: console.log('Peak utilization day:', utilization.peakUtilization.date);
+// 
+  console.log('Daily average utilization:', utilization.averageDailyUtilization);
+//   console.log('Peak utilization day:', utilization.peakUtilization.date);
 
 // Check if facility can accept more material
 const canAccept = await client.facilities.canAcceptMaterial(mrf.id, {
@@ -1420,10 +1426,10 @@ const canAccept = await client.facilities.canAcceptMaterial(mrf.id, {
 });
 
 if (canAccept.accepted) {
-// CONSOLE:   console.log('Facility can accept the material');
-// CONSOLE:   console.log('Available capacity:', canAccept.availableCapacity);
+//   console.log('Facility can accept the material');
+//   console.log('Available capacity:', canAccept.availableCapacity);
 } else {
-// CONSOLE:   console.log('Facility cannot accept material:', canAccept.reason);
+//   console.log('Facility cannot accept material:', canAccept.reason);
 }
 \`\`\`
 
@@ -1432,7 +1438,6 @@ if (canAccept.accepted) {
 ### Real-time Event Processing
 
 \`\`\`typescript
-import { EventStreamer } from 'refuse-protocol-sdk';
 
 const streamer = new EventStreamer({
   apiKey: 'your-api-key',
@@ -1444,7 +1449,7 @@ streamer.subscribe(
   ['customer', 'service', 'route', 'facility'],
   ['created', 'updated', 'completed', 'cancelled'],
   async (event) => {
-// CONSOLE:     console.log(\`Event: \${event.entityType}.\${event.eventType}\`);
+//   console.log(\`Event: \${event.entityType}.\${event.eventType}\`);
 
     // Handle different event types
     switch (event.entityType) {
@@ -1467,11 +1472,11 @@ streamer.subscribe(
 async function handleCustomerEvent(event: any) {
   switch (event.eventType) {
     case 'created':
-// CONSOLE:       console.log('New customer onboarded:', event.eventData.name);
+//   console.log('New customer onboarded:', event.eventData.name);
       // Trigger welcome email, setup billing, etc.
       break;
     case 'updated':
-// CONSOLE:       console.log('Customer updated:', event.eventData.name);
+//   console.log('Customer updated:', event.eventData.name);
       // Update CRM, recalculate pricing, etc.
       break;
   }
@@ -1480,11 +1485,11 @@ async function handleCustomerEvent(event: any) {
 async function handleServiceEvent(event: any) {
   switch (event.eventType) {
     case 'created':
-// CONSOLE:       console.log('New service created for customer');
+//   console.log('New service created for customer');
       // Schedule initial pickup, assign containers, etc.
       break;
     case 'completed':
-// CONSOLE:       console.log('Service completed:', event.eventData.serviceType);
+//   console.log('Service completed:', event.eventData.serviceType);
       // Process payment, update next service date, etc.
       break;
   }
@@ -1513,12 +1518,12 @@ const customerData = {
 const validationResult = validator.validate('./schemas/customer-schema.json', customerData);
 
 if (validationResult.isValid) {
-// CONSOLE:   console.log('✅ Customer data is valid');
+//   console.log('✅ Customer data is valid');
 } else {
-// CONSOLE:   console.log('❌ Validation failed:');
+//   console.log('❌ Validation failed:');
   validationResult.errors.forEach(error => {
-// CONSOLE:     console.log(\`  - \${error.path}: \${error.message}\`);
-// CONSOLE:     console.log(\`    Suggestion: \${error.suggestion}\`);
+//   console.log(\`  - \${error.path}: \${error.message}\`);
+//   console.log(\`    Suggestion: \${error.suggestion}\`);
   });
 }
 \`\`\`
@@ -1687,8 +1692,8 @@ const results = await client.customers.createBatch(customerDataArray);
 // Process results
 const successful = results.filter(r => r.success);
 const failed = results.filter(r => !r.success);
-
-// CONSOLE: console.log(\`Created \${successful.length} customers, \${failed.length} failed\`);
+// 
+  console.log(\`Created \${successful.length} customers, \${failed.length} failed\`);
 \`\`\`
 
 ### 4. Monitoring
@@ -1915,18 +1920,18 @@ export class SpecGeneratorCLI {
     try {
       const result = await this.generator.generateFullSpecification(options);
 
-// CONSOLE:       console.log(chalk.green(`✅ Generated ${result.files.length} documentation files`));
-// CONSOLE:       console.log(chalk.blue('Generated files:'));
+  console.log(chalk.green(`✅ Generated ${result.files.length} documentation files`));
+  console.log(chalk.blue('Generated files:'));
       result.files.forEach((file) => {
-// CONSOLE:         console.log(`  📄 ${file.path} (${file.size} bytes)`);
+  console.log(`  📄 ${file.path} (${file.size} bytes)`);
       });
 
       if (result.errors.length > 0) {
-// CONSOLE:         console.warn(chalk.yellow(`⚠️ ${result.errors.length} errors occurred:`));
-// CONSOLE:         result.errors.forEach((error) => console.warn(`  - ${error}`));
+  console.warn(chalk.yellow(`⚠️ ${result.errors.length} errors occurred:`));
+  result.errors.forEach((error) => console.warn(`  - ${error}`));
       }
     } catch (error) {
-// CONSOLE:       console.error(
+  console.error(
         chalk.red(`❌ Generation failed: ${error instanceof Error ? error.message : String(error)}`)
       );
       process.exit(1);
@@ -1939,25 +1944,25 @@ export class SpecGeneratorCLI {
   }
 
   private printUsage(): void {
-// CONSOLE:     console.log(chalk.blue('\nREFUSE Protocol Specification Generator'));
-// CONSOLE:     console.log(chalk.gray('Usage: spec-generator <command> [options]\n'));
+  console.log(chalk.blue('\nREFUSE Protocol Specification Generator'));
+  console.log(chalk.gray('Usage: spec-generator <command> [options]\n'));
 
-// CONSOLE:     console.log(chalk.green('Commands:'));
-// CONSOLE:     console.log('  generate [options]    Generate documentation with custom options');
-// CONSOLE:     console.log('  full [options]        Generate complete documentation (same as generate)\n');
+  console.log(chalk.green('Commands:'));
+//   console.log('  generate [options]    Generate documentation with custom options');
+  console.log('  full [options]        Generate complete documentation (same as generate)\n');
 
-// CONSOLE:     console.log(chalk.green('Options:'));
-// CONSOLE:     console.log('  --implementations <dir>  Path to entity implementation directory');
-// CONSOLE:     console.log('  --contracts <dir>        Path to JSON schema contracts directory');
-// CONSOLE:     console.log('  --output <dir>           Output directory for generated docs');
-// CONSOLE:     console.log('  --verbose                Enable verbose logging\n');
+  console.log(chalk.green('Options:'));
+//   console.log('  --implementations <dir>  Path to entity implementation directory');
+//   console.log('  --contracts <dir>        Path to JSON schema contracts directory');
+//   console.log('  --output <dir>           Output directory for generated docs');
+//   console.log('  --verbose                Enable verbose logging\n');
 
-// CONSOLE:     console.log(chalk.green('Examples:'));
-// CONSOLE:     console.log('  spec-generator generate --output ./docs --verbose');
-// CONSOLE:     console.log(
+  console.log(chalk.green('Examples:'));
+//   console.log('  spec-generator generate --output ./docs --verbose');
+//   console.log(
       '  spec-generator generate --implementations ./protocol/implementations --contracts ./contracts'
     );
-// CONSOLE:     console.log('  spec-generator full --output ./documentation --verbose\n');
+//   console.log('  spec-generator full --output ./documentation --verbose\n');
   }
 }
 

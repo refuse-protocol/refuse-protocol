@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Allocation entity implementation with LEED compliance tracking
  * @description Complete Allocation model for managing material allocations with environmental compliance and LEED certification tracking
@@ -759,7 +760,7 @@ export class AllocationModel implements Allocation {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Allocation> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+    const { _id: _id, _createdAt: _createdAt, _updatedAt: _updatedAt, _version: _version, _...eventData } = this.toJSON();
     return eventData;
   }
 
@@ -939,7 +940,6 @@ export class AllocationFactory {
       landfill: 'landfill',
       recycling_center: 'recycling_center',
       donation_center: 'donation_center',
-      landfill: 'landfill',
       recycling: 'recycling_center',
       donation: 'donation_center',
     };
@@ -1076,7 +1076,6 @@ export class AllocationFactory {
       pending: 'pending',
       passed: 'pass',
       failed: 'fail',
-      pass: 'pass',
     };
 
     return statusMap[legacyStatus.toLowerCase()] || 'pending';

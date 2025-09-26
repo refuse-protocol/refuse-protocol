@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Route entity implementation with optimization algorithms
  * @description Complete Route model with route optimization, scheduling, and performance tracking
@@ -417,7 +418,7 @@ export class RouteModel implements Route {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Route> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData } = this.toJSON();
     return eventData;
   }
 

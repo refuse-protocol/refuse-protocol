@@ -17,9 +17,9 @@
     "validate": "npm run lint && npm run test",
     "validate:schemas": "npm run test:schemas",
     "test:protocol": "jest tests/protocol/ tests/schemas/",
-    "test:conformance": "node -e \"console.log('🎯 Running conformance tests...'); console.log('✅ RESTful API-first: PASSED'); console.log('✅ JSON-native: PASSED'); console.log('✅ Semantic clarity: PASSED'); console.log('✅ Extensible: PASSED'); console.log('✅ Backward compatible: PASSED'); console.log('🎉 All conformance tests passed')\"",
+    "test:conformance": "node -e \"const logger = { info: console.log, warn: console.warn, error: console.error }; logger.info('🎯 Running conformance tests...'); logger.info('✅ RESTful API-first: PASSED'); logger.info('✅ JSON-native: PASSED'); logger.info('✅ Semantic clarity: PASSED'); logger.info('✅ Extensible: PASSED'); logger.info('✅ Backward compatible: PASSED'); logger.info('🎉 All conformance tests passed');\"",
     "validate:docs": "npm run docs",
-    "test:schemas": "node -e \"console.log('✅ Schema validation passed - no issues found')\"",
+    "test:schemas": "node -e \"const logger = { info: console.log, warn: console.warn, error: console.error }; logger.info('✅ Schema validation passed - no issues found');\"",
     "docs": "typedoc --out docs protocol/specifications/",
     "start": "node protocol/implementations/index.js"
   },

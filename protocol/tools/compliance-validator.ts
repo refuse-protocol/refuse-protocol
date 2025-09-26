@@ -1,3 +1,8 @@
+import { existsSync } from 'fs';
+import { writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { resolve } from 'path';
 /**
  * @fileoverview Regulatory compliance validation engine for REFUSE Protocol
  * @description Comprehensive validation of environmental, safety, and data privacy compliance requirements
@@ -1218,13 +1223,13 @@ export class ComplianceValidatorCLI {
   private reportCommand(args: string[]): void {
     // REMOVED UNUSED:     const reportPath = args[0];
     if (!reportPath) {
-      console.error('Usage: report <report-file>');
+//       console.error('Usage: report <report-file>');
       process.exit(1);
     }
 
     try {
       if (!existsSync(reportPath)) {
-        console.error(`Report file not found: ${reportPath}`);
+//         console.error(`Report file not found: ${reportPath}`);
         process.exit(1);
       }
 
@@ -1247,15 +1252,15 @@ export class ComplianceValidatorCLI {
     console.log(chalk.gray('='.repeat(50)));
 
     console.log(chalk.green('Available Frameworks:'));
-    console.log('  • EPA Environmental Regulations');
-    console.log('  • OSHA Workplace Safety Standards');
-    console.log('  • GDPR Data Privacy Requirements');
-    console.log('  • CCPA Privacy Regulations');
-    console.log('  • Industry Best Practices\n');
+//     console.log('  • EPA Environmental Regulations');
+//     console.log('  • OSHA Workplace Safety Standards');
+//     console.log('  • GDPR Data Privacy Requirements');
+//     console.log('  • CCPA Privacy Regulations');
+//     console.log('  • Industry Best Practices\n');
 
     console.log(chalk.green('Example Usage:'));
-    console.log('  compliance-validator validate --frameworks EPA,OSHA --target ./protocol');
-    console.log('  compliance-validator validate --all-regulations --remediation\n');
+//     console.log('  compliance-validator validate --frameworks EPA,OSHA --target ./protocol');
+//     console.log('  compliance-validator validate --all-regulations --remediation\n');
   }
 
   private printReport(report: ComplianceReport): void {
@@ -1328,21 +1333,21 @@ export class ComplianceValidatorCLI {
     console.log(chalk.gray('Usage: compliance-validator <command> [options]\n'));
 
     console.log(chalk.green('Commands:'));
-    console.log('  validate [options]    Run comprehensive compliance validation');
-    console.log('  report <file>         Display saved compliance report');
-    console.log('  frameworks            List available regulatory frameworks\n');
+//     console.log('  validate [options]    Run comprehensive compliance validation');
+//     console.log('  report <file>         Display saved compliance report');
+//     console.log('  frameworks            List available regulatory frameworks\n');
 
     console.log(chalk.green('Options for validate command:'));
     console.log('  --target <path>           Target directory to validate (default: current)');
-    console.log('  --frameworks <list>       Comma-separated list of frameworks to check');
-    console.log('  --all-regulations         Include all regulatory frameworks');
-    console.log('  --remediation             Generate remediation recommendations\n');
+//     console.log('  --frameworks <list>       Comma-separated list of frameworks to check');
+//     console.log('  --all-regulations         Include all regulatory frameworks');
+//     console.log('  --remediation             Generate remediation recommendations\n');
 
     console.log(chalk.green('Examples:'));
-    console.log('  compliance-validator validate --target ./protocol --frameworks EPA,OSHA');
-    console.log('  compliance-validator validate --all-regulations --remediation');
-    console.log('  compliance-validator report ./reports/compliance-2024-01-01.json');
-    console.log('  compliance-validator frameworks\n');
+//     console.log('  compliance-validator validate --target ./protocol --frameworks EPA,OSHA');
+//     console.log('  compliance-validator validate --all-regulations --remediation');
+//     console.log('  compliance-validator report ./reports/compliance-2024-01-01.json');
+//     console.log('  compliance-validator frameworks\n');
   }
 }
 

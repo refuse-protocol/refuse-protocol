@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Container entity implementation with RFID/GPS tracking support
  * @description Complete Container model for managing waste containers with asset tracking and lifecycle management
@@ -503,7 +504,7 @@ export class ContainerModel extends BaseEntityModel implements Container {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Container> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 

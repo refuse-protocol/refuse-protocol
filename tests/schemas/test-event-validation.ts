@@ -31,7 +31,7 @@ describe('Event Entity Schema Validation', () => {
     const result = validateEvent.validate(validEvent);
 
     if (!result.isValid) {
-      console.error('Event validation errors:', result.errors);
+//       console.error('Event validation errors:', result.errors);
     }
 
     expect(result.isValid).toBe(true);

@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Entity relationship mappings and foreign key validation
  * @description Defines relationships between all REFUSE Protocol entities with validation

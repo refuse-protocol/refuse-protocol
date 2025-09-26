@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Testing utilities for protocol conformance
  * @description Comprehensive testing utilities for validating REFUSE Protocol implementations
@@ -42,7 +43,7 @@ export class TestingUtilities {
    * Run comprehensive test suite
    */
   async runTestSuite(suiteName: string, options: TestOptions = {}): Promise<TestSuiteResult> {
-    console.log(`Running test suite: ${suiteName}`);
+//     console.log(`Running test suite: ${suiteName}`);
 
     // REMOVED UNUSED:     const suite = this.testSuites.get(suiteName) || this.createDefaultTestSuite(suiteName);
     const result: TestSuiteResult = {
@@ -84,7 +85,7 @@ export class TestingUtilities {
     result.duration = result.completedAt.getTime() - result.startedAt.getTime();
 
     this.testResults.set(suiteName, result);
-    console.log(`Test suite completed: ${result.passedTests}/${result.totalTests} tests passed`);
+//     console.log(`Test suite completed: ${result.passedTests}/${result.totalTests} tests passed`);
 
     return result;
   }
@@ -455,7 +456,7 @@ export class TestingUtilities {
     };
 
     // Simulate event streaming test
-    console.log('Testing event streaming...');
+//     console.log('Testing event streaming...');
 
     // Create test events
     const testEvents: Event[] = [

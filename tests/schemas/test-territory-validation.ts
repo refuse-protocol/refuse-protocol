@@ -77,7 +77,7 @@ describe('Territory Entity Schema Validation', () => {
     expect(result.isValid).toBe(true);
 
     if (!result.isValid) {
-      console.error('Validation errors:', result.errors);
+//       console.error('Validation errors:', result.errors);
     }
   });
 

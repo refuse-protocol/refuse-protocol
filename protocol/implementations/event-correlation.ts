@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Event correlation and tracking system
  * @description Advanced event correlation, pattern detection, and tracking for waste management operations

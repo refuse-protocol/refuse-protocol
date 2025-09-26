@@ -1,3 +1,7 @@
+import { mkdirSync } from 'fs';
+import { existsSync } from 'fs';
+import { writeFileSync } from 'fs';
+import { join } from 'path';
 /**
  * @fileoverview Interactive API documentation generator
  * @description Generates interactive API documentation with live testing capabilities
@@ -43,7 +47,7 @@ export class InteractiveAPIDocsGenerator {
    * Generate complete API documentation
    */
   async generateAPIDocs(options: DocsOptions = {}): Promise<GenerationResult> {
-    // CONSOLE:     console.log('Generating interactive API documentation...');
+//       console.log('Generating interactive API documentation...');
 
     const result: GenerationResult = {
       success: true,
@@ -91,13 +95,13 @@ export class InteractiveAPIDocsGenerator {
 
       // Generate navigation
       await this.generateNavigation(result.sections);
-
-      // CONSOLE:       console.log('✅ API documentation generated successfully');
+// 
+        console.log('✅ API documentation generated successfully');
       return result;
     } catch (error) {
       result.success = false;
       result.error = error instanceof Error ? error.message : String(error);
-      // CONSOLE:       console.error('❌ API documentation generation failed:', error);
+//         console.error('❌ API documentation generation failed:', error);
       return result;
     }
   }
@@ -368,7 +372,7 @@ export class InteractiveAPIDocsGenerator {
   private writeFile(filename: string, content: string): void {
     const filepath = path.join(this.outputDir, filename);
     fs.writeFileSync(filepath, content, 'utf8');
-    // CONSOLE:     console.log(`Generated: ${filepath}`);
+//       console.log(`Generated: ${filepath}`);
   }
 
   /**
@@ -1013,7 +1017,7 @@ const customer = await sdk.createClient('customer').create({
 const subscriptionId = sdk.subscribeToEvents(
   { entityType: 'customer' },
   (event) => {
-// CONSOLE:     console.log('Customer event:', event);
+//   console.log('Customer event:', event);
   }
 );
 
@@ -1058,7 +1062,7 @@ const validationResult = await sdk.validateCompliance({
 });
 
 if (!validationResult.compliant) {
-// CONSOLE:   console.log('Validation errors:', validationResult.violations);
+//   console.log('Validation errors:', validationResult.violations);
 }`;
   }
 
@@ -1069,9 +1073,9 @@ const conformanceResult = await sdk.checkConformance({
   type: 'api',
   standard: 'refuse-protocol-v1'
 });
-
-// CONSOLE: console.log('Conformance Score:', conformanceResult.score);
-// CONSOLE: console.log('Issues:', conformanceResult.issues);`;
+// 
+  console.log('Conformance Score:', conformanceResult.score);
+//   console.log('Issues:', conformanceResult.issues);`;
   }
 
   private getAllEndpoints(): string[] {

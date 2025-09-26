@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Material entity implementation with recycling classification
  * @description Complete Material model for managing waste materials with recycling and environmental classification
@@ -800,7 +801,7 @@ export class MaterialModel implements Material {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Material> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 

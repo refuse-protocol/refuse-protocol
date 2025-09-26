@@ -6,6 +6,7 @@
 
 import { Event } from '../specifications/entities';
 import { EventRouter as BaseEventRouter, EventRoute, RoutingResult } from './event-system';
+import { LoggerFactory } from './logger';
 
 /**
  * Advanced Event Filtering and Routing Engine
@@ -357,7 +358,13 @@ export class AdvancedEventRouter extends BaseEventRouter {
       name: 'Webhook Handler',
       handle: async (event: Event, options: any) => {
         // Simulate webhook delivery
-        console.log(`Sending webhook to ${options.url}:`, event);
+        const logger = LoggerFactory.getInstance().getLogger('webhook-handler');
+        logger.info('Sending webhook', {
+          url: options?.url,
+          eventId: event.id,
+          eventType: event.eventType,
+          entityType: event.entityType
+        });
         return { success: true, messageId: `webhook-${Date.now()}` };
       },
       getStats: () => 0,
@@ -368,7 +375,13 @@ export class AdvancedEventRouter extends BaseEventRouter {
       name: 'Database Handler',
       handle: async (event: Event, options: any) => {
         // Simulate database insert
-        console.log(`Storing event in database:`, event);
+        const logger = LoggerFactory.getInstance().getLogger('database-handler');
+        logger.info('Storing event in database', {
+          table: options?.table,
+          eventId: event.id,
+          eventType: event.eventType,
+          entityType: event.entityType
+        });
         return { success: true, messageId: `db-${Date.now()}` };
       },
       getStats: () => 0,
@@ -379,7 +392,13 @@ export class AdvancedEventRouter extends BaseEventRouter {
       name: 'Message Queue Handler',
       handle: async (event: Event, options: any) => {
         // Simulate queue message
-        console.log(`Queueing event to ${options.queueName}:`, event);
+        const logger = LoggerFactory.getInstance().getLogger('queue-handler');
+        logger.info('Queueing event', {
+          queueName: options?.queueName,
+          eventId: event.id,
+          eventType: event.eventType,
+          entityType: event.entityType
+        });
         return { success: true, messageId: `queue-${Date.now()}` };
       },
       getStats: () => 0,
@@ -390,7 +409,13 @@ export class AdvancedEventRouter extends BaseEventRouter {
       name: 'File Handler',
       handle: async (event: Event, options: any) => {
         // Simulate file write
-        console.log(`Writing event to file ${options.filePath}:`, event);
+        const logger = LoggerFactory.getInstance().getLogger('file-handler');
+        logger.info('Writing event to file', {
+          filePath: options?.filePath,
+          eventId: event.id,
+          eventType: event.eventType,
+          entityType: event.entityType
+        });
         return { success: true, messageId: `file-${Date.now()}` };
       },
       getStats: () => 0,
@@ -401,7 +426,13 @@ export class AdvancedEventRouter extends BaseEventRouter {
       name: 'External API Handler',
       handle: async (event: Event, options: any) => {
         // Simulate API call
-        console.log(`Calling API ${options.endpoint}:`, event);
+        const logger = LoggerFactory.getInstance().getLogger('api-handler');
+        logger.info('Calling external API', {
+          endpoint: options?.endpoint,
+          eventId: event.id,
+          eventType: event.eventType,
+          entityType: event.entityType
+        });
         return { success: true, messageId: `api-${Date.now()}` };
       },
       getStats: () => 0,

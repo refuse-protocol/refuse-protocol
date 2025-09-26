@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview MaterialTicket entity implementation with scale calculations
  * @description Complete MaterialTicket model with weight calculations, material breakdowns, and LEED allocations
@@ -63,8 +64,8 @@ export class MaterialTicketModel implements MaterialTicket {
       keyof BaseEntity | 'createdAt' | 'updatedAt' | 'version' | 'ticketNumber'
     > & { metadata?: Record<string, any> }
   ): MaterialTicketModel {
-    // REMOVED UNUSED:     const now = new Date();
-    // REMOVED UNUSED:     const ticketNumber = this.generateTicketNumber();
+    const now = new Date();
+    const ticketNumber = this.generateTicketNumber();
     const materialTicketData: Partial<MaterialTicket> = {
       id: uuidv4(),
       ticketNumber,
@@ -86,14 +87,14 @@ export class MaterialTicketModel implements MaterialTicket {
    * Generate unique ticket number
    */
   private static generateTicketNumber(): string {
-    // REMOVED UNUSED:     const date = new Date();
-    // REMOVED UNUSED:     const year = date.getFullYear();
-    // REMOVED UNUSED:     const month = String(date.getMonth() + 1).padStart(2, '0');
-    // REMOVED UNUSED:     const day = String(date.getDate()).padStart(2, '0');
-    // REMOVED UNUSED:     const hour = String(date.getHours()).padStart(2, '0');
-    // REMOVED UNUSED:     const minute = String(date.getMinutes()).padStart(2, '0');
-    // REMOVED UNUSED:     const second = String(date.getSeconds()).padStart(2, '0');
-    // REMOVED UNUSED:     const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    const second = String(date.getSeconds()).padStart(2, '0');
+    const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
 
     return `TICKET-${year}${month}${day}-${hour}${minute}${second}-${random}`;
   }
@@ -158,7 +159,7 @@ export class MaterialTicketModel implements MaterialTicket {
     }
 
     // Validate materials breakdown
-    // REMOVED UNUSED:     let totalPercentage = 0;
+    let totalPercentage = 0;
     data.materials.forEach((material, index) => {
       if (!material.materialId || typeof material.materialId !== 'string') {
         throw new Error(`Material ${index}: material ID is required`);
@@ -227,8 +228,8 @@ export class MaterialTicketModel implements MaterialTicket {
       throw new Error('Material weight must be non-negative');
     }
 
-    // REMOVED UNUSED:     const newMaterials = [...this.materials, { materialId, weight, percentage }];
-    // REMOVED UNUSED:     const totalPercentage = newMaterials.reduce((sum, mat) => sum + mat.percentage, 0);
+    const newMaterials = [...this.materials, { materialId, weight, percentage }];
+    const totalPercentage = newMaterials.reduce((sum, mat) => sum + mat.percentage, 0);
 
     if (Math.abs(totalPercentage - 100) > 0.01) {
       throw new Error('Material percentages must total 100% after adding new material');
@@ -241,13 +242,13 @@ export class MaterialTicketModel implements MaterialTicket {
    * Remove material breakdown entry
    */
   removeMaterial(materialId: string): MaterialTicketModel {
-    // REMOVED UNUSED:     const newMaterials = this.materials.filter((mat) => mat.materialId !== materialId);
+    const newMaterials = this.materials.filter((mat) => mat.materialId !== materialId);
 
     if (newMaterials.length === 0) {
       throw new Error('Cannot remove all materials from ticket');
     }
 
-    // REMOVED UNUSED:     const totalPercentage = newMaterials.reduce((sum, mat) => sum + mat.percentage, 0);
+    const totalPercentage = newMaterials.reduce((sum, mat) => sum + mat.percentage, 0);
 
     if (Math.abs(totalPercentage - 100) > 0.01) {
       throw new Error('Material percentages must total 100% after removing material');
@@ -260,17 +261,17 @@ export class MaterialTicketModel implements MaterialTicket {
    * Update material breakdown
    */
   updateMaterial(materialId: string, updates: Partial<MaterialBreakdown>): MaterialTicketModel {
-    // REMOVED UNUSED:     const materialIndex = this.materials.findIndex((mat) => mat.materialId === materialId);
+    const materialIndex = this.materials.findIndex((mat) => mat.materialId === materialId);
 
     if (materialIndex === -1) {
       throw new Error(`Material with ID ${materialId} not found`);
     }
 
-    // REMOVED UNUSED:     const newMaterials = [...this.materials];
+    const newMaterials = [...this.materials];
     newMaterials[materialIndex] = { ...newMaterials[materialIndex], ...updates };
 
     // Re-validate percentages
-    // REMOVED UNUSED:     const totalPercentage = newMaterials.reduce((sum, mat) => sum + mat.percentage, 0);
+    const totalPercentage = newMaterials.reduce((sum, mat) => sum + mat.percentage, 0);
 
     if (Math.abs(totalPercentage - 100) > 0.01) {
       throw new Error('Material percentages must total 100% after update');
@@ -314,7 +315,7 @@ export class MaterialTicketModel implements MaterialTicket {
    * Get total weight by material type
    */
   getWeightByMaterial(materialId: string): number {
-    // REMOVED UNUSED:     const material = this.materials.find((mat) => mat.materialId === materialId);
+    const material = this.materials.find((mat) => mat.materialId === materialId);
     return material ? material.weight : 0;
   }
 
@@ -342,7 +343,7 @@ export class MaterialTicketModel implements MaterialTicket {
       return 0;
     }
 
-    // REMOVED UNUSED:     const totalAllocation = this.leedAllocations.reduce((sum, alloc) => sum + alloc.percentage, 0);
+    const totalAllocation = this.leedAllocations.reduce((sum, alloc) => sum + alloc.percentage, 0);
     return Math.min(100, totalAllocation);
   }
 
@@ -425,7 +426,7 @@ export class MaterialTicketModel implements MaterialTicket {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<MaterialTicket> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 
@@ -433,7 +434,7 @@ export class MaterialTicketModel implements MaterialTicket {
    * Create domain event for ticket changes
    */
   createEvent(eventType: 'created' | 'updated' | 'completed' | 'cancelled'): Event {
-    // REMOVED UNUSED:     const now = new Date();
+    const now = new Date();
     return {
       id: uuidv4(),
       entityType: 'material_ticket',
@@ -460,7 +461,7 @@ export class MaterialTicketModel implements MaterialTicket {
     }
 
     // Business rule: LEED allocations should be present for recycling materials
-    // REMOVED UNUSED:     const recyclingPercentage = this.getRecyclingPercentage();
+    const recyclingPercentage = this.getRecyclingPercentage();
     if (recyclingPercentage > 50 && (!this.leedAllocations || this.leedAllocations.length === 0)) {
       errors.push('High recycling content should have LEED allocations for compliance');
     }
@@ -559,12 +560,12 @@ export class MaterialTicketFactory {
 
     // Handle comma-separated material types
     if (legacyData.material_types && legacyData.material_weights) {
-      // REMOVED UNUSED:       const materialTypes = legacyData.material_types.split(',').map((m: string) => m.trim());
+      const materialTypes = legacyData.material_types.split(',').map((m: string) => m.trim());
       const materialWeights = legacyData.material_weights
         .split(',')
         .map((w: string) => parseFloat(w.trim()));
 
-      // REMOVED UNUSED:       const totalWeight = materialWeights.reduce((sum: number, weight: number) => sum + weight, 0);
+      const totalWeight = materialWeights.reduce((sum: number, weight: number) => sum + weight, 0);
 
       return materialTypes.map((materialType: string, index: number) => ({
         materialId: materialType,
@@ -591,7 +592,7 @@ export class MaterialTicketFactory {
       return [];
     }
 
-    // REMOVED UNUSED:     const allocations = legacyData.leed_allocations || legacyData.leed_data || [];
+    const allocations = legacyData.leed_allocations || legacyData.leed_data || [];
 
     if (Array.isArray(allocations)) {
       return allocations;
@@ -641,7 +642,7 @@ export class ScaleCalculator {
     tareWeight: number,
     moisturePercentage: number
   ): number {
-    // REMOVED UNUSED:     const dryWeight = grossWeight * (1 - moisturePercentage / 100);
+    const dryWeight = grossWeight * (1 - moisturePercentage / 100);
     return dryWeight - tareWeight;
   }
 
@@ -677,9 +678,9 @@ export class ScaleCalculator {
     netWeight: number,
     tolerance: number = 0.1
   ): boolean {
-    // REMOVED UNUSED:     const calculatedNetWeight = grossWeight - tareWeight;
-    // REMOVED UNUSED:     const difference = Math.abs(calculatedNetWeight - netWeight);
-    // REMOVED UNUSED:     const toleranceAmount = Math.abs(netWeight) * tolerance;
+    const calculatedNetWeight = grossWeight - tareWeight;
+    const difference = Math.abs(calculatedNetWeight - netWeight);
+    const toleranceAmount = Math.abs(netWeight) * tolerance;
 
     return difference <= toleranceAmount;
   }

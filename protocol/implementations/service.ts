@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Service entity implementation with scheduling logic
  * @description Complete Service model with scheduling, pricing, and compliance
@@ -434,7 +435,7 @@ export class ServiceModel implements Service {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Service> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData } = this.toJSON();
     return eventData;
   }
 

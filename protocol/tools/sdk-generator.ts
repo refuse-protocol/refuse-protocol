@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview SDK for protocol integration
  * @description Software Development Kit for integrating with the REFUSE Protocol
@@ -12,7 +13,6 @@ import {
   Facility,
   MaterialTicket,
 } from '../specifications/entities';
-import {
   EventStreamingSystem,
   EventRouter,
   EventSourcingSystem,
@@ -55,8 +55,8 @@ export class RefuseProtocolSDK {
 
     // Initialize clients for different entity types
     this.initializeClients(config);
-
-    // CONSOLE:     console.log('REFUSE Protocol SDK initialized successfully');
+// 
+      console.log('REFUSE Protocol SDK initialized successfully');
   }
 
   /**
@@ -83,7 +83,7 @@ export class RefuseProtocolSDK {
       await this.eventSystem.publishEvent(event);
       return true;
     } catch (error) {
-      // CONSOLE:       console.error('Failed to publish event:', error);
+//         console.error('Failed to publish event:', error);
       return false;
     }
   }
@@ -507,7 +507,7 @@ export class HTTPClient {
     };
 
     // Simulate HTTP request
-    // CONSOLE:     console.log(`${method} ${url}`);
+//       console.log(`${method} ${url}`);
 
     // Simulate response
     return {

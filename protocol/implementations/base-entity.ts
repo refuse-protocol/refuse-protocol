@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Base entity implementation for all REFUSE Protocol entities
  * @description Common functionality and patterns shared across all entity models

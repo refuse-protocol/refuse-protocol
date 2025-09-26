@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Payment entity implementation with reconciliation logic
  * @description Complete Payment model for managing financial transactions with reconciliation and audit capabilities
@@ -780,7 +781,7 @@ export class PaymentModel implements Payment {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Payment> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 

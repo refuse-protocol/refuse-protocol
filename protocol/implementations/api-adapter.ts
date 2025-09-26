@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 /**
  * @fileoverview API adapter for existing waste management systems
  * @description RESTful API adapter for integrating with existing waste management systems
@@ -15,6 +16,7 @@ import {
 import express, { Request, Response, NextFunction } from 'express';
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
+import { LoggerFactory } from './logger';
 
 /**
  * API Adapter for Existing Waste Management Systems
@@ -48,7 +50,12 @@ export class WasteManagementAPIAdapter {
   start(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.server = this.app.listen(this.port, () => {
-        console.log(`API Adapter listening on port ${this.port}`);
+        const logger = LoggerFactory.getInstance().getLogger('api-adapter');
+        logger.info('API Adapter started', {
+          port: this.port,
+          endpoints: this.endpoints.size,
+          middleware: this.middleware.length
+        });
         resolve();
       });
 
@@ -302,7 +309,12 @@ export class WasteManagementAPIAdapter {
           }
         }
       } catch (error) {
-        console.error(`Error handling ${endpoint.method} ${path}:`, error);
+        const logger = LoggerFactory.getInstance().getLogger('api-adapter');
+        logger.error('Error handling endpoint', {
+          method: endpoint.method,
+          path,
+          error: error instanceof Error ? error.message : String(error)
+        }, error instanceof Error ? error : new Error(String(error)));
         if (!res.headersSent) {
           res.status(500).json({
             error: 'Internal Server Error',
@@ -333,7 +345,12 @@ export class WasteManagementAPIAdapter {
         this.app.delete(path, handler);
         break;
       default:
-        console.warn(`Unsupported HTTP method: ${endpoint.method} for path: ${path}`);
+        const logger = LoggerFactory.getInstance().getLogger('api-adapter');
+        logger.warn('Unsupported HTTP method', {
+          method: endpoint.method,
+          path,
+          supportedMethods: ['GET', 'POST', 'PUT', 'DELETE']
+        });
     }
   }
 
@@ -353,7 +370,13 @@ export class WasteManagementAPIAdapter {
     // Global error handler
     this.app.use(
       (error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-        console.error('Unhandled error:', error);
+        const logger = LoggerFactory.getInstance().getLogger('api-adapter');
+        logger.error('Unhandled error', {
+          url: req.url,
+          method: req.method,
+          ip: req.ip,
+          userAgent: req.get('User-Agent')
+        }, error);
         res.status(500).json({
           error: 'Internal Server Error',
           message: 'An unexpected error occurred',
@@ -374,7 +397,7 @@ export class WasteManagementAPIAdapter {
   }
 
   private async getCustomersHandler(req: express.Request, res: express.Response): Promise<void> {
-    const { page = 1, limit = 50, status, type } = req.query;
+    const { _page = 1, _limit = 50, _status, _type } = req.query;
 
     // Simulate customer data retrieval
     const customers = await this.fetchCustomersFromLegacy({
@@ -396,7 +419,7 @@ export class WasteManagementAPIAdapter {
   }
 
   private async getCustomerHandler(req: express.Request, res: express.Response): Promise<void> {
-    const { id } = req.params;
+    const { _id } = req.params;
 
     const customer = await this.fetchCustomerFromLegacy(id);
 
@@ -414,7 +437,7 @@ export class WasteManagementAPIAdapter {
   }
 
   private async getServiceHandler(req: express.Request, res: express.Response): Promise<void> {
-    const { id } = req.params;
+    const { _id } = req.params;
 
     const service = await this.fetchServiceFromLegacy(id);
 
@@ -432,7 +455,7 @@ export class WasteManagementAPIAdapter {
   }
 
   private async getRouteHandler(req: express.Request, res: express.Response): Promise<void> {
-    const { id } = req.params;
+    const { _id } = req.params;
 
     const route = await this.fetchRouteFromLegacy(id);
 
@@ -456,7 +479,7 @@ export class WasteManagementAPIAdapter {
     req: express.Request,
     res: express.Response
   ): Promise<void> {
-    const { id } = req.params;
+    const { _id } = req.params;
 
     const ticket = await this.fetchMaterialTicketFromLegacy(id);
 
@@ -504,7 +527,12 @@ export class WasteManagementAPIAdapter {
 
   // Webhook handlers
   private async customerWebhookHandler(req: express.Request, res: express.Response): Promise<void> {
-    console.log('Customer webhook received:', req.body);
+    const logger = LoggerFactory.getInstance().getLogger('webhook-handler');
+    logger.info('Customer webhook received', {
+      body: req.body,
+      headers: req.headers,
+      ip: req.ip
+    });
 
     // Process webhook data
     const event: Event = {
@@ -526,7 +554,12 @@ export class WasteManagementAPIAdapter {
   }
 
   private async routeWebhookHandler(req: express.Request, res: express.Response): Promise<void> {
-    console.log('Route webhook received:', req.body);
+    const logger = LoggerFactory.getInstance().getLogger('webhook-handler');
+    logger.info('Route webhook received', {
+      body: req.body,
+      headers: req.headers,
+      ip: req.ip
+    });
 
     const event: Event = {
       id: uuidv4(),
@@ -546,7 +579,12 @@ export class WasteManagementAPIAdapter {
   }
 
   private async facilityWebhookHandler(req: express.Request, res: express.Response): Promise<void> {
-    console.log('Facility webhook received:', req.body);
+    const logger = LoggerFactory.getInstance().getLogger('webhook-handler');
+    logger.info('Facility webhook received', {
+      body: req.body,
+      headers: req.headers,
+      ip: req.ip
+    });
 
     const event: Event = {
       id: uuidv4(),
@@ -568,7 +606,8 @@ export class WasteManagementAPIAdapter {
   // Legacy system data fetching (simulated)
   private async fetchCustomersFromLegacy(filters: any): Promise<Customer[]> {
     // Simulate fetching from legacy system
-    console.log('Fetching customers from legacy system with filters:', filters);
+    const logger = LoggerFactory.getInstance().getLogger('legacy-adapter');
+    logger.debug('Fetching customers from legacy system', { filters });
     return [
       {
         id: 'CUST001',
@@ -594,7 +633,8 @@ export class WasteManagementAPIAdapter {
   }
 
   private async fetchCustomerFromLegacy(id: string): Promise<Customer | null> {
-    console.log('Fetching customer from legacy system:', id);
+    const logger = LoggerFactory.getInstance().getLogger('legacy-adapter');
+    logger.debug('Fetching customer from legacy system', { id });
     return {
       id,
       name: 'Acme Corporation',
@@ -618,7 +658,8 @@ export class WasteManagementAPIAdapter {
   }
 
   private async fetchServicesFromLegacy(): Promise<Service[]> {
-    console.log('Fetching services from legacy system');
+    const logger = LoggerFactory.getInstance().getLogger('legacy-adapter');
+    logger.debug('Fetching services from legacy system');
     return [
       {
         id: 'SERV001',
@@ -643,7 +684,8 @@ export class WasteManagementAPIAdapter {
   }
 
   private async fetchServiceFromLegacy(id: string): Promise<Service | null> {
-    console.log('Fetching service from legacy system:', id);
+    const logger = LoggerFactory.getInstance().getLogger('legacy-adapter');
+    logger.debug('Fetching service from legacy system', { id });
     return {
       id,
       name: 'Weekly Waste Collection',
@@ -666,7 +708,8 @@ export class WasteManagementAPIAdapter {
   }
 
   private async fetchRoutesFromLegacy(): Promise<Route[]> {
-    console.log('Fetching routes from legacy system');
+    const logger = LoggerFactory.getInstance().getLogger('legacy-adapter');
+    logger.debug('Fetching routes from legacy system');
     return [
       {
         id: 'ROUTE001',
@@ -690,7 +733,8 @@ export class WasteManagementAPIAdapter {
   }
 
   private async fetchRouteFromLegacy(id: string): Promise<Route | null> {
-    console.log('Fetching route from legacy system:', id);
+    const logger = LoggerFactory.getInstance().getLogger('legacy-adapter');
+    logger.debug('Fetching route from legacy system', { id });
     return {
       id,
       name: 'Monday Downtown',
@@ -712,7 +756,8 @@ export class WasteManagementAPIAdapter {
   }
 
   private async fetchMaterialTicketsFromLegacy(): Promise<MaterialTicket[]> {
-    console.log('Fetching material tickets from legacy system');
+    const logger = LoggerFactory.getInstance().getLogger('legacy-adapter');
+    logger.debug('Fetching material tickets from legacy system');
     return [
       {
         id: 'TICKET001',
@@ -744,7 +789,8 @@ export class WasteManagementAPIAdapter {
   }
 
   private async fetchMaterialTicketFromLegacy(id: string): Promise<MaterialTicket | null> {
-    console.log('Fetching material ticket from legacy system:', id);
+    const logger = LoggerFactory.getInstance().getLogger('legacy-adapter');
+    logger.debug('Fetching material ticket from legacy system', { id });
     return {
       id,
       customerId: 'CUST001',
@@ -775,7 +821,8 @@ export class WasteManagementAPIAdapter {
 
   private emit(event: string, data: any): void {
     // EventEmitter mixin functionality would be implemented here
-    console.log(`Event emitted: ${event}`, data);
+    const logger = LoggerFactory.getInstance().getLogger('api-adapter');
+    logger.debug('Event emitted', { event, data });
   }
 }
 
@@ -931,12 +978,25 @@ export class RequestLogger {
   handler: express.RequestHandler = (req, res, next) => {
     const start = Date.now();
     const timestamp = new Date().toISOString();
+    const logger = LoggerFactory.getInstance().getLogger('request-logger');
 
-    console.log(`[${timestamp}] ${req.method} ${req.url} - ${req.ip}`);
+    logger.info('Request received', {
+      method: req.method,
+      url: req.url,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      timestamp
+    });
 
     res.on('finish', () => {
       const duration = Date.now() - start;
-      console.log(`[${timestamp}] ${req.method} ${req.url} - ${res.statusCode} - ${duration}ms`);
+      logger.info('Request completed', {
+        method: req.method,
+        url: req.url,
+        statusCode: res.statusCode,
+        duration,
+        timestamp: new Date().toISOString()
+      });
     });
 
     next();

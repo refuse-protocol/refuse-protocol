@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Yard entity implementation with facility management
  * @description Complete Yard model for managing waste management facilities and operations
@@ -591,7 +592,7 @@ export class YardModel implements Yard {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Yard> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 

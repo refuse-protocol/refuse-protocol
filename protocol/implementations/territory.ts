@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Territory entity implementation with geographic boundary validation
  * @description Complete Territory model with geographic boundaries, pricing rules, and spatial operations
@@ -471,7 +472,7 @@ export class TerritoryModel implements Territory {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Territory> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 

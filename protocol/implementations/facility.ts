@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Facility entity implementation with capacity management
  * @description Complete Facility model with capacity tracking, permits, and environmental controls
@@ -480,7 +481,7 @@ export class FacilityModel implements Facility {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Facility> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 

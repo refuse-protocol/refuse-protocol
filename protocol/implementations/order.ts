@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Order/Job entity implementation with work scheduling
  * @description Complete Order model for managing work orders, job scheduling, and operational workflows
@@ -726,7 +727,7 @@ export class OrderModel implements Order {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Order> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 

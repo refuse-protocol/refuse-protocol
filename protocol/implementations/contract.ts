@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Contract entity implementation with guaranteed pricing logic
  * @description Complete Contract model for managing customer agreements with pricing guarantees and terms
@@ -508,7 +509,7 @@ export class ContractModel implements Contract {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Contract> {
-    const { id, createdAt, updatedAt, version, ...eventData } = this.toJSON();
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData  } = this.toJSON();
     return eventData;
   }
 

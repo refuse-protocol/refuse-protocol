@@ -1,3 +1,8 @@
+import { existsSync } from 'fs';
+import { writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { resolve } from 'path';
 /**
  * @fileoverview Performance benchmarking utilities for REFUSE Protocol
  * @description Comprehensive performance testing and benchmarking tools for protocol implementations
@@ -1540,36 +1545,36 @@ export class BenchmarkerCLI {
     const suiteName = args[0];
 
     if (!suiteName) {
-      console.log('\n📊 Available Benchmark Suites:');
-      console.log('  • schema-validation     Schema validation performance');
-      console.log('  • entity-processing     Entity creation and processing');
-      console.log('  • event-streaming       Real-time event streaming');
-      console.log('  • data-transformation   Data transformation pipelines');
-      console.log('  • api-endpoints         REST API endpoint performance');
-      console.log('  • memory-usage          Memory allocation and GC');
-      console.log('  • concurrent-load       Concurrent processing capabilities');
-      console.log('  • comprehensive         All benchmark suites\n');
-
+//       console.log('\n📊 Available Benchmark Suites:');
+//       console.log('  • schema-validation     Schema validation performance');
+//       console.log('  • entity-processing     Entity creation and processing');
+//       console.log('  • event-streaming       Real-time event streaming');
+//       console.log('  • data-transformation   Data transformation pipelines');
+//       console.log('  • api-endpoints         REST API endpoint performance');
+//       console.log('  • memory-usage          Memory allocation and GC');
+//       console.log('  • concurrent-load       Concurrent processing capabilities');
+//       console.log('  • comprehensive         All benchmark suites\n');
+// 
       console.log('Usage: benchmarker run --suite <suite-name>');
       return;
     }
-
+// 
     console.log(`\n📋 Benchmark Suite: ${suiteName}`);
-    console.log('Run with: benchmarker run --suite ' + suiteName);
+//     console.log('Run with: benchmarker run --suite ' + suiteName);
   }
 
   private baselineCommand(args: string[]): void {
     const baselinePath = args[0] || './benchmarks/baseline';
-
+// 
     console.log(`📊 Creating baseline performance metrics at ${baselinePath}`);
 
     try {
       // Create baseline directory
       if (!existsSync(baselinePath)) {
         // This would create the baseline - simplified for now
-        console.log('✅ Baseline creation would be implemented here');
+//         console.log('✅ Baseline creation would be implemented here');
       } else {
-        console.log('⚠️ Baseline directory already exists');
+//         console.log('⚠️ Baseline directory already exists');
       }
     } catch (error) {
       console.error(
@@ -1580,20 +1585,20 @@ export class BenchmarkerCLI {
   }
 
   private printReport(report: BenchmarkReport): void {
-    console.log('\n🚀 REFUSE Protocol Performance Benchmark Report');
+//     console.log('\n🚀 REFUSE Protocol Performance Benchmark Report');
     console.log('='.repeat(60));
-    console.log(`Report ID: ${report.id}`);
-    console.log(`Generated: ${report.timestamp}`);
-    console.log(`Target: ${report.target}`);
-    console.log(`Suite: ${report.suite}`);
-
+//     console.log(`Report ID: ${report.id}`);
+//     console.log(`Generated: ${report.timestamp}`);
+//     console.log(`Target: ${report.target}`);
+//     console.log(`Suite: ${report.suite}`);
+// 
     console.log('\n📊 Summary:');
     console.log(`  Average Score: ${report.summary.averageScore.toFixed(1)}/100`);
-    console.log(`  Total Benchmarks: ${report.summary.totalBenchmarks}`);
-    console.log(`  Passed: ${report.summary.passed}`);
-    console.log(`  Failed: ${report.summary.failed}`);
-    console.log(`  Warnings: ${report.summary.warnings}`);
-    console.log(`  Errors: ${report.summary.errors}`);
+//     console.log(`  Total Benchmarks: ${report.summary.totalBenchmarks}`);
+//     console.log(`  Passed: ${report.summary.passed}`);
+//     console.log(`  Failed: ${report.summary.failed}`);
+//     console.log(`  Warnings: ${report.summary.warnings}`);
+//     console.log(`  Errors: ${report.summary.errors}`);
 
     if (report.summary.baselineComparison !== 'unknown') {
       const comparisonIcon =
@@ -1602,9 +1607,9 @@ export class BenchmarkerCLI {
           : report.summary.baselineComparison === 'worse'
             ? '📉'
             : '➡️';
-      console.log(`  Baseline Comparison: ${comparisonIcon} ${report.summary.baselineComparison}`);
+//       console.log(`  Baseline Comparison: ${comparisonIcon} ${report.summary.baselineComparison}`);
     }
-
+// 
     console.log('\n📈 Category Breakdown:');
     for (const result of report.results) {
       const statusIcon = result.status === 'pass' ? '✅' : result.status === 'warn' ? '⚠️' : '❌';
@@ -1619,60 +1624,60 @@ export class BenchmarkerCLI {
       console.log(`    Memory Efficiency: ${result.metrics.memory.efficiency.toFixed(1)}%`);
       console.log(`    Error Rate: ${result.metrics.errorRate.toFixed(1)}%`);
     }
-
+// 
     console.log('\n💡 Recommendations:');
     const lowPerforming = report.results.filter((r) => r.score < 80);
 
     if (lowPerforming.length === 0) {
-      console.log('  • All benchmarks performing well! 🎉');
+//       console.log('  • All benchmarks performing well! 🎉');
     } else {
       lowPerforming.forEach((result) => {
         if (result.metrics.errorRate > 5) {
-          console.log(`  • High error rate in ${result.category} - check for bugs`);
+//           console.log(`  • High error rate in ${result.category} - check for bugs`);
         }
         if (result.metrics.latency.average > 100) {
-          console.log(`  • High latency in ${result.category} - optimize performance`);
+//           console.log(`  • High latency in ${result.category} - optimize performance`);
         }
         if (result.metrics.memory.efficiency < 80) {
-          console.log(`  • Memory inefficiency in ${result.category} - check for leaks`);
+//           console.log(`  • Memory inefficiency in ${result.category} - check for leaks`);
         }
         if (result.metrics.throughput < 100) {
-          console.log(`  • Low throughput in ${result.category} - optimize algorithms`);
+//           console.log(`  • Low throughput in ${result.category} - optimize algorithms`);
         }
       });
     }
   }
 
   private printUsage(): void {
-    console.log('\nREFUSE Protocol Performance Benchmarker');
-    console.log('Usage: benchmarker <command> [options]\n');
-
+//     console.log('\nREFUSE Protocol Performance Benchmarker');
+//     console.log('Usage: benchmarker <command> [options]\n');
+// 
     console.log('Commands:');
-    console.log('  run [options]         Run performance benchmarks');
-    console.log('  suite <name>          Show benchmark suite details');
-    console.log('  baseline <path>       Create baseline metrics\n');
-
+//     console.log('  run [options]         Run performance benchmarks');
+//     console.log('  suite <name>          Show benchmark suite details');
+//     console.log('  baseline <path>       Create baseline metrics\n');
+// 
     console.log('Options for run command:');
     console.log('  --suite <name>        Benchmark suite to run (default: comprehensive)');
     console.log('  --target <path>       Target directory to benchmark (default: current)');
     console.log('  --iterations <n>      Number of iterations per test (default: 1000)');
     console.log('  --concurrency <n>     Concurrent worker count (default: 10)\n');
-
+// 
     console.log('Available Suites:');
-    console.log('  • comprehensive       All benchmark suites');
-    console.log('  • schema-validation   JSON schema validation performance');
-    console.log('  • entity-processing   Entity creation and validation');
-    console.log('  • event-streaming     Real-time event streaming');
-    console.log('  • data-transformation Data transformation pipelines');
-    console.log('  • api-endpoints       REST API endpoint performance');
-    console.log('  • memory-usage        Memory allocation and GC');
-    console.log('  • concurrent-load     Concurrent processing capabilities\n');
-
+//     console.log('  • comprehensive       All benchmark suites');
+//     console.log('  • schema-validation   JSON schema validation performance');
+//     console.log('  • entity-processing   Entity creation and validation');
+//     console.log('  • event-streaming     Real-time event streaming');
+//     console.log('  • data-transformation Data transformation pipelines');
+//     console.log('  • api-endpoints       REST API endpoint performance');
+//     console.log('  • memory-usage        Memory allocation and GC');
+//     console.log('  • concurrent-load     Concurrent processing capabilities\n');
+// 
     console.log('Examples:');
-    console.log('  benchmarker run --suite comprehensive --iterations 5000');
-    console.log('  benchmarker run --suite api-endpoints --target ./protocol');
-    console.log('  benchmarker suite schema-validation');
-    console.log('  benchmarker baseline ./benchmarks\n');
+//     console.log('  benchmarker run --suite comprehensive --iterations 5000');
+//     console.log('  benchmarker run --suite api-endpoints --target ./protocol');
+//     console.log('  benchmarker suite schema-validation');
+//     console.log('  benchmarker baseline ./benchmarks\n');
   }
 }
 

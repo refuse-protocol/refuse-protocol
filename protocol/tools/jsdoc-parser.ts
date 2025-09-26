@@ -1,3 +1,4 @@
+import { join } from 'path';
 /**
  * @fileoverview Simple JSDoc parser for extracting documentation from TypeScript files
  * @description Parses JSDoc comments and extracts structured documentation data

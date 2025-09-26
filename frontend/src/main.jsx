@@ -2,10 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './styles/main.css'
+import { logger } from './utils/logger.js'
 
 // Only log in development
 if (import.meta.env.DEV) {
-  console.log('main.jsx loaded successfully')
+  logger.info('main.jsx loaded successfully')
 }
 
 // Add error handling for React mounting
@@ -13,11 +14,11 @@ try {
   const rootElement = document.getElementById('root')
   if (rootElement) {
     if (import.meta.env.DEV) {
-      console.log('Root element found, creating React root...')
+      logger.info('Root element found, creating React root...')
     }
     const root = ReactDOM.createRoot(rootElement)
     if (import.meta.env.DEV) {
-      console.log('React root created, rendering App...')
+      logger.info('React root created, rendering App...')
     }
     root.render(
       <React.StrictMode>
@@ -25,10 +26,10 @@ try {
       </React.StrictMode>,
     )
     if (import.meta.env.DEV) {
-      console.log('React app rendered successfully')
+      logger.info('React app rendered successfully')
     }
   } else {
-    console.error('Root element not found!')
+    logger.error('Root element not found!')
     // Fallback: create the root element if it doesn't exist
     const body = document.body
     const rootDiv = document.createElement('div')
@@ -43,7 +44,7 @@ try {
     )
   }
 } catch (error) {
-  console.error('Error mounting React app:', error)
+  logger.error('Error mounting React app', { error: error.message }, error)
   // Ultimate fallback
   document.body.innerHTML = `
     <div style="padding: 20px; background: #fee; border: 2px solid #fcc; color: #c33; margin: 20px;">

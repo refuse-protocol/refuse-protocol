@@ -35,7 +35,7 @@ describe('Customer Entity Schema Validation', () => {
     expect(result.isValid).toBe(true);
 
     if (!result.isValid) {
-      console.error('Validation errors:', result.errors);
+//       console.error('Validation errors:', result.errors);
     }
   });
 
@@ -104,7 +104,7 @@ describe('Customer Entity Schema Validation', () => {
     const result = validateCustomer.validate(fullCustomer);
 
     if (!result.isValid) {
-      console.error('Customer validation errors:', result.errors);
+//       console.error('Customer validation errors:', result.errors);
     }
 
     // This test will fail initially since no implementation exists

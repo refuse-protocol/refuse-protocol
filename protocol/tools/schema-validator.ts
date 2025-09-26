@@ -1,3 +1,7 @@
+import { existsSync } from 'fs';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { resolve } from 'path';
 /**
  * @fileoverview JSON Schema validation engine for REFUSE Protocol
  * @description Comprehensive schema validation with detailed error reporting, performance metrics, and protocol conformance checking
@@ -110,15 +114,15 @@ export class SchemaValidator {
       'material-schema.json',
     ];
 
-// CONSOLE:     console.log(chalk.blue('🔍 Loading REFUSE Protocol schemas...'));
+  console.log(chalk.blue('🔍 Loading REFUSE Protocol schemas...'));
 
     for (const schemaFile of schemaFiles) {
       // REMOVED UNUSED:       const schemaPath = join(contractsPath, schemaFile);
       try {
         await this.loadSchema(schemaPath);
-// CONSOLE:         console.log(chalk.green(`✅ Loaded ${schemaFile}`));
+  console.log(chalk.green(`✅ Loaded ${schemaFile}`));
       } catch (error) {
-// CONSOLE:         console.warn(
+        console.warn(
           chalk.yellow(
             `⚠️ Failed to load ${schemaFile}: ${error instanceof Error ? error.message : String(error)}`
           )
@@ -126,7 +130,7 @@ export class SchemaValidator {
       }
     }
 
-// CONSOLE:     console.log(chalk.green(`✅ Loaded ${this.schemas.size} schemas successfully`));
+  console.log(chalk.green(`✅ Loaded ${this.schemas.size} schemas successfully`));
   }
 
   /**
@@ -548,7 +552,7 @@ export class SchemaValidatorCLI {
    */
   private async validateCommand(args: string[]): Promise<void> {
     if (args.length < 2) {
-// CONSOLE:       console.error('Usage: validate <schema> <data-file>');
+//   console.error('Usage: validate <schema> <data-file>');
       process.exit(1);
     }
 
@@ -571,7 +575,7 @@ export class SchemaValidatorCLI {
 
       this.printValidationResult(result);
     } catch (error) {
-// CONSOLE:       console.error(
+  console.error(
         chalk.red(`❌ Validation failed: ${error instanceof Error ? error.message : String(error)}`)
       );
       process.exit(1);
@@ -583,7 +587,7 @@ export class SchemaValidatorCLI {
    */
   private async batchCommand(args: string[]): Promise<void> {
     if (args.length < 2) {
-// CONSOLE:       console.error('Usage: batch <schema> <data-directory>');
+//   console.error('Usage: batch <schema> <data-directory>');
       process.exit(1);
     }
 
@@ -594,10 +598,10 @@ export class SchemaValidatorCLI {
 
       // This would scan the directory for JSON files
       // For now, just demonstrate the interface
-// CONSOLE:       console.log(chalk.blue(`🔍 Batch validation for ${dataDir} against ${schemaPath}`));
-// CONSOLE:       console.log(chalk.yellow('⚠️ Batch validation implementation pending'));
+  console.log(chalk.blue(`🔍 Batch validation for ${dataDir} against ${schemaPath}`));
+  console.log(chalk.yellow('⚠️ Batch validation implementation pending'));
     } catch (error) {
-// CONSOLE:       console.error(
+  console.error(
         chalk.red(
           `❌ Batch validation failed: ${error instanceof Error ? error.message : String(error)}`
         )
@@ -611,31 +615,31 @@ export class SchemaValidatorCLI {
    */
   private reportCommand(): void {
     // REMOVED UNUSED:     const report = this.validator.generateReport();
-// CONSOLE:     console.log(chalk.blue('\n📊 REFUSE Protocol Validation Report'));
-// CONSOLE:     console.log(chalk.gray(`Generated: ${report.timestamp}\n`));
+  console.log(chalk.blue('\n📊 REFUSE Protocol Validation Report'));
+  console.log(chalk.gray(`Generated: ${report.timestamp}\n`));
 
-// CONSOLE:     console.log(chalk.green(`✅ Schemas Loaded: ${report.totalSchemas}`));
-// CONSOLE:     console.log(chalk.green(`🔍 Total Validations: ${report.totalValidations}`));
-// CONSOLE:     console.log(chalk.green(`✅ Valid: ${report.totalValid}`));
-// CONSOLE:     console.log(chalk.red(`❌ Invalid: ${report.totalInvalid}`));
-// CONSOLE:     console.log(
+  console.log(chalk.green(`✅ Schemas Loaded: ${report.totalSchemas}`));
+  console.log(chalk.green(`🔍 Total Validations: ${report.totalValidations}`));
+  console.log(chalk.green(`✅ Valid: ${report.totalValid}`));
+  console.log(chalk.red(`❌ Invalid: ${report.totalInvalid}`));
+  console.log(
       chalk.yellow(
         `📈 Success Rate: ${((report.totalValid / report.totalValidations) * 100).toFixed(2)}%\n`
       )
     );
 
     if (report.totalValidations === 0) {
-// CONSOLE:       console.log(chalk.yellow('⚠️ No validation data available. Run some validations first.'));
+  console.log(chalk.yellow('⚠️ No validation data available. Run some validations first.'));
       return;
     }
 
-// CONSOLE:     console.log(chalk.blue('📋 Schema Performance:'));
+  console.log(chalk.blue('📋 Schema Performance:'));
     for (const [schemaPath, metrics] of Object.entries(report.schemaMetrics)) {
       // REMOVED UNUSED:       const schemaName = schemaPath.split('/').pop();
-// CONSOLE:       console.log(chalk.gray(`  ${schemaName}:`));
-// CONSOLE:       console.log(chalk.green(`    ✅ Success Rate: ${metrics.successRate.toFixed(2)}%`));
-// CONSOLE:       console.log(chalk.gray(`    🔍 Validations: ${metrics.totalValidations}`));
-// CONSOLE:       console.log(chalk.gray(`    ⏱️ Avg Time: ${metrics.averageValidationTime.toFixed(2)}ms`));
+  console.log(chalk.gray(`  ${schemaName}:`));
+  console.log(chalk.green(`    ✅ Success Rate: ${metrics.successRate.toFixed(2)}%`));
+  console.log(chalk.gray(`    🔍 Validations: ${metrics.totalValidations}`));
+  console.log(chalk.gray(`    ⏱️ Avg Time: ${metrics.averageValidationTime.toFixed(2)}ms`));
     }
   }
 
@@ -644,19 +648,19 @@ export class SchemaValidatorCLI {
    */
   private async conformanceCommand(args: string[]): Promise<void> {
     if (args.length < 1) {
-// CONSOLE:       console.error('Usage: conformance <data-directory>');
+//   console.error('Usage: conformance <data-directory>');
       process.exit(1);
     }
 
     const [dataDir] = args;
 
     try {
-// CONSOLE:       console.log(chalk.blue(`🔍 Running protocol conformance check on ${dataDir}`));
+  console.log(chalk.blue(`🔍 Running protocol conformance check on ${dataDir}`));
 
       // REMOVED UNUSED:       const result = await this.validator.validateProtocolConformance(dataDir);
-// CONSOLE:       console.log(chalk.yellow('⚠️ Protocol conformance implementation pending'));
+  console.log(chalk.yellow('⚠️ Protocol conformance implementation pending'));
     } catch (error) {
-// CONSOLE:       console.error(
+  console.error(
         chalk.red(
           `❌ Conformance check failed: ${error instanceof Error ? error.message : String(error)}`
         )
@@ -669,19 +673,19 @@ export class SchemaValidatorCLI {
    * Print validation result
    */
   private printValidationResult(result: ValidationResult): void {
-// CONSOLE:     console.log(chalk.blue('\n🔍 Validation Result'));
-// CONSOLE:     console.log(chalk.gray(`Schema: ${result.schemaPath}`));
-// CONSOLE:     console.log(chalk.gray(`Time: ${result.validationTime}ms`));
-// CONSOLE:     console.log(chalk.gray(`Data Size: ${result.metadata.dataSize} bytes\n`));
+  console.log(chalk.blue('\n🔍 Validation Result'));
+  console.log(chalk.gray(`Schema: ${result.schemaPath}`));
+  console.log(chalk.gray(`Time: ${result.validationTime}ms`));
+  console.log(chalk.gray(`Data Size: ${result.metadata.dataSize} bytes\n`));
 
     if (result.isValid) {
-// CONSOLE:       console.log(chalk.green('✅ VALIDATION PASSED'));
+  console.log(chalk.green('✅ VALIDATION PASSED'));
       return;
     }
 
-// CONSOLE:     console.log(chalk.red(`❌ VALIDATION FAILED (${result.errorCount} errors)\n`));
+  console.log(chalk.red(`❌ VALIDATION FAILED (${result.errorCount} errors)\n`));
 
-// CONSOLE:     console.log(chalk.yellow('🔧 Detailed Errors:'));
+  console.log(chalk.yellow('🔧 Detailed Errors:'));
     result.errors.forEach((error, index) => {
       const severityColor =
         error.severity === 'error'
@@ -690,10 +694,10 @@ export class SchemaValidatorCLI {
             ? chalk.yellow
             : chalk.blue;
 
-// CONSOLE:       console.log(severityColor(`  ${index + 1}. ${error.message}`));
-// CONSOLE:       console.log(chalk.gray(`     Path: ${error.path}`));
-// CONSOLE:       console.log(chalk.gray(`     Type: ${error.category} | Severity: ${error.severity}`));
-// CONSOLE:       console.log(chalk.gray(`     Suggestion: ${error.suggestion}\n`));
+  console.log(severityColor(`  ${index + 1}. ${error.message}`));
+  console.log(chalk.gray(`     Path: ${error.path}`));
+  console.log(chalk.gray(`     Type: ${error.category} | Severity: ${error.severity}`));
+  console.log(chalk.gray(`     Suggestion: ${error.suggestion}\n`));
     });
   }
 
@@ -701,22 +705,22 @@ export class SchemaValidatorCLI {
    * Print usage information
    */
   private printUsage(): void {
-// CONSOLE:     console.log(chalk.blue('\nREFUSE Protocol Schema Validator'));
-// CONSOLE:     console.log(chalk.gray('Usage: schema-validator <command> [options]\n'));
+  console.log(chalk.blue('\nREFUSE Protocol Schema Validator'));
+  console.log(chalk.gray('Usage: schema-validator <command> [options]\n'));
 
-// CONSOLE:     console.log(chalk.green('Commands:'));
-// CONSOLE:     console.log('  validate <schema> <data-file>    Validate single file against schema');
-// CONSOLE:     console.log('  batch <schema> <data-directory>  Batch validate all files in directory');
-// CONSOLE:     console.log('  report                           Generate validation performance report');
-// CONSOLE:     console.log('  conformance <data-directory>     Run protocol conformance check\n');
+  console.log(chalk.green('Commands:'));
+//   console.log('  validate <schema> <data-file>    Validate single file against schema');
+//   console.log('  batch <schema> <data-directory>  Batch validate all files in directory');
+//   console.log('  report                           Generate validation performance report');
+//   console.log('  conformance <data-directory>     Run protocol conformance check\n');
 
-// CONSOLE:     console.log(chalk.green('Examples:'));
-// CONSOLE:     console.log(
+  console.log(chalk.green('Examples:'));
+//   console.log(
       '  schema-validator validate ./contracts/customer-schema.json ./data/customer.json'
     );
-// CONSOLE:     console.log('  schema-validator batch ./contracts/route-schema.json ./data/routes/');
-// CONSOLE:     console.log('  schema-validator report');
-// CONSOLE:     console.log('  schema-validator conformance ./data/\n');
+//   console.log('  schema-validator batch ./contracts/route-schema.json ./data/routes/');
+//   console.log('  schema-validator report');
+//   console.log('  schema-validator conformance ./data/\n');
   }
 }
 

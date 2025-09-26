@@ -1,4 +1,6 @@
-#!/usr/bin/env node
+import { writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 /**
  * @fileoverview CLI tools for protocol validation and testing
@@ -13,6 +15,7 @@ import { ConformanceChecker } from './conformance-checker';
 import { Benchmarker } from './benchmarker';
 import { DataArchaeologist } from './data-archaeologist';
 import { EventStreamingSystem } from '../implementations/event-system';
+import { LoggerFactory } from '../implementations/logger';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -284,27 +287,30 @@ export class RefuseProtocolCLI {
    * Validate compliance
    */
   private async validateCompliance(file: string, options: any): Promise<void> {
+    const logger = LoggerFactory.getInstance().getLogger('cli-commands');
+
     try {
-      console.log(`Validating compliance for: ${file}`);
+      logger.info('Validating compliance', { file, options });
 
-      // REMOVED UNUSED:       const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-
-      // REMOVED UNUSED:       const result = await this.complianceValidator.validate(data, options.rules?.split(','));
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const result = await this.complianceValidator.validate(data, options.rules?.split(','));
 
       if (options.output === 'json') {
         console.log(JSON.stringify(result, null, 2));
       } else {
-        console.log(`Compliance Score: ${result.score}`);
-        console.log(`Violations: ${result.violations.length}`);
-        console.log(`Warnings: ${result.warnings.length}`);
+        logger.info('Compliance validation completed', {
+          score: result.score,
+          violations: result.violations.length,
+          warnings: result.warnings.length
+        });
 
         if (options.verbose) {
-          result.violations.forEach((v) => console.log(`❌ ${v}`));
-          result.warnings.forEach((w) => console.log(`⚠️  ${w}`));
+          result.violations.forEach((v) => logger.warn(`Violation: ${v}`));
+          result.warnings.forEach((w) => logger.warn(`Warning: ${w}`));
         }
       }
     } catch (error) {
-      console.error('Compliance validation failed:', error);
+      logger.error('Compliance validation failed', { file, options }, error instanceof Error ? error : new Error(String(error)));
       process.exit(1);
     }
   }
@@ -313,17 +319,17 @@ export class RefuseProtocolCLI {
    * Validate schema
    */
   private async validateSchema(file: string, options: any): Promise<void> {
+    const logger = LoggerFactory.getInstance().getLogger('cli-commands');
+
     try {
-      console.log(`Validating schema for: ${file}`);
+      logger.info('Validating schema', { file, schemaFile: options.schema });
 
-      // REMOVED UNUSED:       const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-
-      // Use JSON Schema validation
-      // REMOVED UNUSED:       const validationResult = await this.validateDataAgainstSchema(data, options.schema);
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const validationResult = await this.validateDataAgainstSchema(data, options.schema);
 
       console.log(JSON.stringify(validationResult, null, 2));
     } catch (error) {
-      console.error('Schema validation failed:', error);
+      logger.error('Schema validation failed', { file, options }, error instanceof Error ? error : new Error(String(error)));
       process.exit(1);
     }
   }
@@ -332,17 +338,17 @@ export class RefuseProtocolCLI {
    * Validate business rules
    */
   private async validateBusinessRules(file: string, options: any): Promise<void> {
+    const logger = LoggerFactory.getInstance().getLogger('cli-commands');
+
     try {
-      console.log(`Validating business rules for: ${file}`);
+      logger.info('Validating business rules', { file, rulesFile: options.rules });
 
-      // REMOVED UNUSED:       const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-
-      // Apply business rules validation
-      // REMOVED UNUSED:       const validationResult = await this.validateBusinessLogic(data, options.rules);
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const validationResult = await this.validateBusinessLogic(data, options.rules);
 
       console.log(JSON.stringify(validationResult, null, 2));
     } catch (error) {
-      console.error('Business rules validation failed:', error);
+      logger.error('Business rules validation failed', { file, options }, error instanceof Error ? error : new Error(String(error)));
       process.exit(1);
     }
   }
@@ -352,7 +358,7 @@ export class RefuseProtocolCLI {
    */
   private async checkConformance(directory: string, options: any): Promise<void> {
     try {
-      console.log(`Checking conformance for: ${directory}`);
+//       console.log(`Checking conformance for: ${directory}`);
 
       const result = await this.conformanceChecker.checkConformance({
         implementationPath: directory,
@@ -363,8 +369,8 @@ export class RefuseProtocolCLI {
       if (options.output === 'json') {
         console.log(JSON.stringify(result, null, 2));
       } else {
-        console.log(`Conformance Score: ${result.score}`);
-        console.log(`Issues: ${result.issues.length}`);
+//         console.log(`Conformance Score: ${result.score}`);
+//         console.log(`Issues: ${result.issues.length}`);
 
         if (options.verbose) {
           result.issues.forEach((issue) => console.log(`❌ ${issue}`));
@@ -372,7 +378,7 @@ export class RefuseProtocolCLI {
         }
       }
     } catch (error) {
-      console.error('Conformance check failed:', error);
+//       console.error('Conformance check failed:', error);
       process.exit(1);
     }
   }
@@ -382,7 +388,7 @@ export class RefuseProtocolCLI {
    */
   private async generateConformanceReport(directory: string, options: any): Promise<void> {
     try {
-      console.log(`Generating conformance report for: ${directory}`);
+//       console.log(`Generating conformance report for: ${directory}`);
 
       const report = await this.conformanceChecker.generateReport({
         implementationPath: directory,
@@ -391,12 +397,12 @@ export class RefuseProtocolCLI {
 
       if (options.output) {
         fs.writeFileSync(options.output, report);
-        console.log(`Report saved to: ${options.output}`);
+//         console.log(`Report saved to: ${options.output}`);
       } else {
-        console.log(report);
+//         console.log(report);
       }
     } catch (error) {
-      console.error('Report generation failed:', error);
+//       console.error('Report generation failed:', error);
       process.exit(1);
     }
   }
@@ -406,7 +412,7 @@ export class RefuseProtocolCLI {
    */
   private async runBenchmarks(options: any): Promise<void> {
     try {
-      console.log('Running benchmarks...');
+//       console.log('Running benchmarks...');
 
       const result = await this.benchmarker.runBenchmarks({
         duration: parseInt(options.duration),
@@ -418,13 +424,13 @@ export class RefuseProtocolCLI {
       if (options.format === 'json') {
         console.log(JSON.stringify(result, null, 2));
       } else {
-        console.log('Benchmark Results:');
-        console.log(result.summary);
-        console.log('\nRecommendations:');
+//         console.log('Benchmark Results:');
+//         console.log(result.summary);
+//         console.log('\nRecommendations:');
         result.recommendations.forEach((rec) => console.log(`• ${rec}`));
       }
     } catch (error) {
-      console.error('Benchmarking failed:', error);
+//       console.error('Benchmarking failed:', error);
       process.exit(1);
     }
   }
@@ -438,7 +444,7 @@ export class RefuseProtocolCLI {
     options: any
   ): Promise<void> {
     try {
-      console.log(`Comparing benchmarks: ${baselineFile} vs ${comparisonFile}`);
+//       console.log(`Comparing benchmarks: ${baselineFile} vs ${comparisonFile}`);
 
       // REMOVED UNUSED:       const baseline = JSON.parse(fs.readFileSync(baselineFile, 'utf8'));
       // REMOVED UNUSED:       const comparison = JSON.parse(fs.readFileSync(comparisonFile, 'utf8'));
@@ -447,7 +453,7 @@ export class RefuseProtocolCLI {
 
       console.log(JSON.stringify(comparisonResult, null, 2));
     } catch (error) {
-      console.error('Benchmark comparison failed:', error);
+//       console.error('Benchmark comparison failed:', error);
       process.exit(1);
     }
   }
@@ -457,7 +463,7 @@ export class RefuseProtocolCLI {
    */
   private async profileOperation(operation: string, options: any): Promise<void> {
     try {
-      console.log(`Profiling operation: ${operation}`);
+//       console.log(`Profiling operation: ${operation}`);
 
       const profile = await this.benchmarker.profileOperation(operation, {
         iterations: parseInt(options.iterations),
@@ -465,7 +471,7 @@ export class RefuseProtocolCLI {
 
       console.log(JSON.stringify(profile, null, 2));
     } catch (error) {
-      console.error('Operation profiling failed:', error);
+//       console.error('Operation profiling failed:', error);
       process.exit(1);
     }
   }
@@ -475,7 +481,7 @@ export class RefuseProtocolCLI {
    */
   private async analyzeLegacySystem(sourcePath: string, options: any): Promise<void> {
     try {
-      console.log(`Analyzing legacy system: ${sourcePath}`);
+//       console.log(`Analyzing legacy system: ${sourcePath}`);
 
       const analysis = await this.dataArchaeologist.analyzeLegacySystem({
         sourcePath,
@@ -488,14 +494,14 @@ export class RefuseProtocolCLI {
       if (options.output === 'json') {
         console.log(JSON.stringify(analysis, null, 2));
       } else {
-        console.log('Analysis Summary:');
-        console.log(`System: ${analysis.systemInfo.name} v${analysis.systemInfo.version}`);
-        console.log(`Entities: ${analysis.entities.length}`);
-        console.log(`Files: ${analysis.fileStructure.totalFiles}`);
-        console.log(`Complexity: ${analysis.complexityScore}/100`);
+//         console.log('Analysis Summary:');
+//         console.log(`System: ${analysis.systemInfo.name} v${analysis.systemInfo.version}`);
+//         console.log(`Entities: ${analysis.entities.length}`);
+//         console.log(`Files: ${analysis.fileStructure.totalFiles}`);
+//         console.log(`Complexity: ${analysis.complexityScore}/100`);
       }
     } catch (error) {
-      console.error('Legacy system analysis failed:', error);
+//       console.error('Legacy system analysis failed:', error);
       process.exit(1);
     }
   }
@@ -505,7 +511,7 @@ export class RefuseProtocolCLI {
    */
   private async extractPatterns(analysisFile: string, options: any): Promise<void> {
     try {
-      console.log(`Extracting patterns from: ${analysisFile}`);
+//       console.log(`Extracting patterns from: ${analysisFile}`);
 
       // REMOVED UNUSED:       const analysis = JSON.parse(fs.readFileSync(analysisFile, 'utf8'));
 
@@ -513,7 +519,7 @@ export class RefuseProtocolCLI {
 
       console.log(JSON.stringify(patterns, null, 2));
     } catch (error) {
-      console.error('Pattern extraction failed:', error);
+//       console.error('Pattern extraction failed:', error);
       process.exit(1);
     }
   }
@@ -523,7 +529,7 @@ export class RefuseProtocolCLI {
    */
   private async generateMigrationStrategy(analysisFile: string, options: any): Promise<void> {
     try {
-      console.log(`Generating migration strategy for: ${analysisFile}`);
+//       console.log(`Generating migration strategy for: ${analysisFile}`);
 
       // REMOVED UNUSED:       const analysis = JSON.parse(fs.readFileSync(analysisFile, 'utf8'));
 
@@ -531,7 +537,7 @@ export class RefuseProtocolCLI {
 
       console.log(JSON.stringify(strategy, null, 2));
     } catch (error) {
-      console.error('Migration strategy generation failed:', error);
+//       console.error('Migration strategy generation failed:', error);
       process.exit(1);
     }
   }
@@ -541,7 +547,7 @@ export class RefuseProtocolCLI {
    */
   private async publishEvent(file: string, options: any): Promise<void> {
     try {
-      console.log(`Publishing event from: ${file}`);
+//       console.log(`Publishing event from: ${file}`);
 
       // REMOVED UNUSED:       const eventData = JSON.parse(fs.readFileSync(file, 'utf8'));
 
@@ -558,13 +564,13 @@ export class RefuseProtocolCLI {
       // REMOVED UNUSED:       const success = await this.eventSystem.publishEvent(event);
 
       if (success) {
-        console.log('✅ Event published successfully');
+//         console.log('✅ Event published successfully');
       } else {
-        console.error('❌ Failed to publish event');
+//         console.error('❌ Failed to publish event');
         process.exit(1);
       }
     } catch (error) {
-      console.error('Event publishing failed:', error);
+//       console.error('Event publishing failed:', error);
       process.exit(1);
     }
   }
@@ -574,16 +580,16 @@ export class RefuseProtocolCLI {
    */
   private async subscribeToEvents(options: any): Promise<void> {
     try {
-      console.log('Subscribing to events...');
+//       console.log('Subscribing to events...');
 
       const subscriptionId = this.eventSystem.subscribe((event: Event) => {
         if (options.output === 'json') {
           console.log(JSON.stringify(event, null, 2));
         } else {
-          console.log(`[${event.timestamp}] ${event.entityType}:${event.eventType} - ${event.id}`);
+//           console.log(`[${event.timestamp}] ${event.entityType}:${event.eventType} - ${event.id}`);
         }
       });
-
+// 
       console.log(`Subscribed with ID: ${subscriptionId}`);
 
       if (options.follow) {
@@ -594,12 +600,12 @@ export class RefuseProtocolCLI {
 
         process.on('SIGINT', () => {
           this.eventSystem.unsubscribe(subscriptionId);
-          console.log('\nUnsubscribed from event stream');
+//           console.log('\nUnsubscribed from event stream');
           process.exit(0);
         });
       }
     } catch (error) {
-      console.error('Event subscription failed:', error);
+//       console.error('Event subscription failed:', error);
       process.exit(1);
     }
   }
@@ -614,16 +620,16 @@ export class RefuseProtocolCLI {
       if (options.output === 'json') {
         console.log(JSON.stringify(stats, null, 2));
       } else {
-        console.log('Event System Statistics:');
-        console.log(`Total Events: ${stats.totalEvents}`);
-        console.log(`Routed Events: ${stats.routedEvents}`);
-        console.log(`Filtered Events: ${stats.filteredEvents}`);
-        console.log(`Failed Routes: ${stats.failedRoutes}`);
-        console.log(`Average Routing Time: ${stats.averageRoutingTime}ms`);
-        console.log(`Throughput: ${stats.throughput} events/sec`);
+//         console.log('Event System Statistics:');
+//         console.log(`Total Events: ${stats.totalEvents}`);
+//         console.log(`Routed Events: ${stats.routedEvents}`);
+//         console.log(`Filtered Events: ${stats.filteredEvents}`);
+//         console.log(`Failed Routes: ${stats.failedRoutes}`);
+//         console.log(`Average Routing Time: ${stats.averageRoutingTime}ms`);
+//         console.log(`Throughput: ${stats.throughput} events/sec`);
       }
     } catch (error) {
-      console.error('Failed to get event stats:', error);
+//       console.error('Failed to get event stats:', error);
       process.exit(1);
     }
   }
@@ -633,7 +639,7 @@ export class RefuseProtocolCLI {
    */
   private async generateSampleData(type: string, options: any): Promise<void> {
     try {
-      console.log(`Generating ${options.count} ${type} samples...`);
+//       console.log(`Generating ${options.count} ${type} samples...`);
 
       // REMOVED UNUSED:       const samples = this.generateSamples(type, parseInt(options.count));
 
@@ -655,12 +661,12 @@ export class RefuseProtocolCLI {
 
       if (options.output) {
         fs.writeFileSync(options.output, output);
-        console.log(`Sample data saved to: ${options.output}`);
+//         console.log(`Sample data saved to: ${options.output}`);
       } else {
-        console.log(output);
+//         console.log(output);
       }
     } catch (error) {
-      console.error('Sample data generation failed:', error);
+//       console.error('Sample data generation failed:', error);
       process.exit(1);
     }
   }
@@ -674,7 +680,7 @@ export class RefuseProtocolCLI {
     options: any
   ): Promise<void> {
     try {
-      console.log(`Converting ${inputFile} from ${options.from} to ${options.to}`);
+//       console.log(`Converting ${inputFile} from ${options.from} to ${options.to}`);
 
       // REMOVED UNUSED:       const inputData = fs.readFileSync(inputFile, 'utf8');
       let parsedData: any;
@@ -710,9 +716,9 @@ export class RefuseProtocolCLI {
       }
 
       fs.writeFileSync(outputFile, outputData);
-      console.log(`Converted data saved to: ${outputFile}`);
+//       console.log(`Converted data saved to: ${outputFile}`);
     } catch (error) {
-      console.error('Data conversion failed:', error);
+//       console.error('Data conversion failed:', error);
       process.exit(1);
     }
   }
@@ -722,7 +728,7 @@ export class RefuseProtocolCLI {
    */
   private async checkSystemHealth(options: any): Promise<void> {
     try {
-      console.log('Checking system health...');
+//       console.log('Checking system health...');
 
       const health = {
         timestamp: new Date().toISOString(),
@@ -741,19 +747,19 @@ export class RefuseProtocolCLI {
       if (options.output === 'json') {
         console.log(JSON.stringify(health, null, 2));
       } else {
-        console.log('System Health: ✅ Healthy');
+//         console.log('System Health: ✅ Healthy');
         console.log(`Memory Usage: ${Math.round(health.memory.heapUsed / 1024 / 1024)}MB`);
         console.log(`Uptime: ${Math.round(health.uptime / 60)} minutes`);
 
         if (options.detailed) {
-          console.log('\nComponent Status:');
+//           console.log('\nComponent Status:');
           Object.entries(health.components).forEach(([component, status]) => {
-            console.log(`  ${component}: ✅ ${status}`);
+//             console.log(`  ${component}: ✅ ${status}`);
           });
         }
       }
     } catch (error) {
-      console.error('Health check failed:', error);
+//       console.error('Health check failed:', error);
       process.exit(1);
     }
   }
@@ -879,7 +885,7 @@ export class RefuseProtocolCLI {
 
   private parseXML(xml: string): any[] {
     // Simple XML parsing - in production would use proper XML parser
-    console.log('XML parsing not fully implemented in CLI');
+//     console.log('XML parsing not fully implemented in CLI');
     return [];
   }
 
