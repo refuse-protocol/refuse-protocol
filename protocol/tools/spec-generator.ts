@@ -1958,8 +1958,8 @@ export class SpecGeneratorCLI {
 //   console.log('  --verbose                Enable verbose logging\n');
 
   console.log(chalk.green('Examples:'));
-//   console.log('  spec-generator generate --output ./docs --verbose');
-//   console.log(
+  console.log('  spec-generator generate --output ./docs --verbose');
+  console.log(
       '  spec-generator generate --implementations ./protocol/implementations --contracts ./contracts'
     );
 //   console.log('  spec-generator full --output ./documentation --verbose\n');

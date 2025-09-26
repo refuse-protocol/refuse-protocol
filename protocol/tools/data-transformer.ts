@@ -1146,27 +1146,27 @@ export class DataTransformerCLI {
 
     console.log(chalk.green('Commands:'));
 //     console.log(
-      '  transform <entity-type> <input-file> [output-file]    Transform single entity type'
-    );
+//       '  transform <entity-type> <input-file> [output-file]    Transform single entity type'
+//     );
 //     console.log(
-      '  batch <config-file> <input-directory>                 Batch transform multiple entities'
-    );
+//       '  batch <config-file> <input-directory>                 Batch transform multiple entities'
+//     );
 //     console.log(
-      '  report                                                Show transformation metrics'
-    );
+//       '  report                                                Show transformation metrics'
+//     );
 //     console.log(
-      '  validate <mapping-file> <sample-data>                 Validate transformation setup\n'
-    );
+//       '  validate <mapping-file> <sample-data>                 Validate transformation setup\n'
+//     );
 
     console.log(chalk.green('Examples:'));
 //     console.log(
-      '  data-transformer transform customer ./data/customers.csv customers-transformed.json'
-    );
+//       '  data-transformer transform customer ./data/customers.csv customers-transformed.json'
+//     );
 //     console.log('  data-transformer batch ./batch-config.json ./legacy-data/');
 //     console.log('  data-transformer report');
 //     console.log(
-      '  data-transformer validate ./mappings/customer-mappings.json ./sample-customer.json\n'
-    );
+//       '  data-transformer validate ./mappings/customer-mappings.json ./sample-customer.json\n'
+//     );
 
     console.log(chalk.green('Configuration Files:'));
 //     console.log('  Field mappings: JSON file with source->target field mappings');

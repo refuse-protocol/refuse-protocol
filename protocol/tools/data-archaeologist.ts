@@ -1404,8 +1404,8 @@ export class DataArchaeologistCLI {
 
   console.log(chalk.green('Usage:'));
 //   console.log(
-      '  data-archaeologist analyze --source ./legacy-data --patterns customer,service\n'
-    );
+//     '  data-archaeologist analyze --source ./legacy-data --patterns customer,service\n'
+//   );
   }
 
   private reportCommand(args: string[]): void {

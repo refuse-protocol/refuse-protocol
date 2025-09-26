@@ -45,7 +45,7 @@
   },
   "homepage": "https://refuse-protocol.org",
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=20",
     "npm": ">=9.0.0"
   },
   "devDependencies": {

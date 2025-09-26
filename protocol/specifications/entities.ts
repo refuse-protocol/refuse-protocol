@@ -141,6 +141,11 @@ export interface Route extends BaseEntity {
     onTimePercentage?: number;
   };
   metadata?: Record<string, any>;
+
+  // Method signatures
+  getDurationMinutes(): number;
+  getDurationFormatted(): string;
+  getStopsPerHour(): number;
 }
 
 // Facility entity
@@ -214,6 +219,9 @@ export interface CustomerRequest extends BaseEntity {
   }>;
   relatedServices?: string[];
   metadata?: Record<string, any>;
+
+  // Method signatures
+  getDaysSinceSubmission(): number;
 }
 
 // Territory entity

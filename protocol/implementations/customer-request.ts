@@ -250,4 +250,14 @@ export class CustomerRequestModel implements CustomerRequest {
       this.version
     );
   }
+
+  /**
+   * Get days since submission
+   */
+  getDaysSinceSubmission(): number {
+    const now = new Date();
+    const submissionDate = new Date(this.createdAt);
+    const diffTime = Math.abs(now.getTime() - submissionDate.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
 }

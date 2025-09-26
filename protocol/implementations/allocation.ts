@@ -760,7 +760,7 @@ export class AllocationModel implements Allocation {
    * Convert to event data for event streaming
    */
   toEventData(): Partial<Allocation> {
-    const { _id: _id, _createdAt: _createdAt, _updatedAt: _updatedAt, _version: _version, _...eventData } = this.toJSON();
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, version: _version, ...eventData } = this.toJSON();
     return eventData;
   }
 
@@ -1151,7 +1151,7 @@ export class AllocationFactory {
    */
   private static mapLegacyRegulatoryStatus(
     legacyStatus: string
-  ): Allocation['regulatoryCompliance'][0]['status'] {
+  ): string {
     const statusMap: Record<string, Allocation['regulatoryCompliance'][0]['status']> = {
       compliant: 'compliant',
       non_compliant: 'non_compliant',

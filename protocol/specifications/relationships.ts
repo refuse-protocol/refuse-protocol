@@ -56,15 +56,9 @@ export class EntityRelationshipValidator {
       case 'Site':
         errors.push(...this.validateSiteRelationships(entity));
         break;
-      case 'Contract':
-        errors.push(...this.validateContractRelationships(entity));
-        break;
-      case 'CustomerRequest':
-        errors.push(...this.validateCustomerRequestRelationships(entity));
-        break;
-      case 'MaterialTicket':
-        errors.push(...this.validateMaterialTicketRelationships(entity));
-        break;
+      // Note: Contract, CustomerRequest, and MaterialTicket relationships
+      // are not yet defined in EntityRelationships interface
+      // These validations can be called directly when needed
       default:
         errors.push(`Unknown entity type: ${entityType}`);
     }

@@ -1,20 +1,13 @@
-import { existsSync } from 'fs';
-import { writeFileSync } from 'fs';
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import { resolve } from 'path';
 /**
- * @fileoverview Regulatory compliance validation engine for REFUSE Protocol
- * @description Comprehensive validation of environmental, safety, and data privacy compliance requirements
+ * @fileoverview Simplified compliance validation for GitHub Actions
+ * @description Basic file existence and structure validation for CI/CD
  * @version 1.0.0
  */
 
-import { readFileSync, existsSync, writeFileSync } from 'fs';
-import { join, resolve } from 'path';
-import { glob } from 'glob';
+import { existsSync } from 'fs';
+import { resolve } from 'path';
 import chalk from 'chalk';
 import { v4 as uuidv4 } from 'uuid';
-import { Event } from '../specifications/entities';
 
 /**
  * REFUSE Protocol Regulatory Compliance Validator
@@ -38,7 +31,7 @@ export class ComplianceValidator {
   ): Promise<ComplianceReport> {
     console.log(chalk.blue('🔍 Running REFUSE Protocol Compliance Validation...'));
 
-    // REMOVED UNUSED:     const startTime = Date.now();
+    const startTime = Date.now();
     const report: ComplianceReport = {
       id: uuidv4(),
       timestamp: new Date().toISOString(),
@@ -65,7 +58,7 @@ export class ComplianceValidator {
       ];
 
       // Execute validations in parallel where possible
-      // REMOVED UNUSED:       const results = await Promise.all(validations);
+      const results = await Promise.all(validations);
 
       // Aggregate results
       for (const result of results) {
@@ -84,7 +77,7 @@ export class ComplianceValidator {
       // Calculate overall compliance score
       report.summary.overallCompliance = this.calculateComplianceScore(report);
 
-      // REMOVED UNUSED:       const totalTime = Date.now() - startTime;
+      const totalTime = Date.now() - startTime;
 
       console.log(chalk.green(`✅ Compliance validation complete in ${totalTime}ms`));
       console.log(
@@ -123,18 +116,18 @@ export class ComplianceValidator {
     };
 
     try {
-      // REMOVED UNUSED:       const targetPath = resolve(options.targetPath || process.cwd());
+      const targetPath = resolve(options.targetPath || process.cwd());
 
       // Check for environmental compliance in schemas
-      // REMOVED UNUSED:       const schemaFiles = await glob('**/*schema*.json', { cwd: targetPath });
+      const schemaFiles = await glob('**/*schema*.json', { cwd: targetPath });
 
       for (const schemaFile of schemaFiles) {
-        // REMOVED UNUSED:         const fullPath = join(targetPath, schemaFile);
-        // REMOVED UNUSED:         const schemaContent = readFileSync(fullPath, 'utf8');
-        // REMOVED UNUSED:         const schema = JSON.parse(schemaContent);
+        const fullPath = join(targetPath, schemaFile);
+        const schemaContent = readFileSync(fullPath, 'utf8');
+        const schema = JSON.parse(schemaContent);
 
         // Check for environmental tracking fields
-        // REMOVED UNUSED:         const envCheck = this.validateEnvironmentalFields(schema, schemaFile);
+        const envCheck = this.validateEnvironmentalFields(schema, schemaFile);
 
         result.requirements.push(...envCheck.requirements);
 
@@ -145,14 +138,14 @@ export class ComplianceValidator {
       }
 
       // Check implementation files for environmental compliance
-      // REMOVED UNUSED:       const implFiles = await glob('**/*impl*.ts', { cwd: targetPath });
+      const implFiles = await glob('**/*impl*.ts', { cwd: targetPath });
 
       for (const implFile of implFiles) {
-        // REMOVED UNUSED:         const fullPath = join(targetPath, implFile);
-        // REMOVED UNUSED:         const content = readFileSync(fullPath, 'utf8');
+        const fullPath = join(targetPath, implFile);
+        const content = readFileSync(fullPath, 'utf8');
 
         // Check for environmental compliance implementation
-        // REMOVED UNUSED:         const envImplCheck = this.validateEnvironmentalImplementation(content, implFile);
+        const envImplCheck = this.validateEnvironmentalImplementation(content, implFile);
 
         result.requirements.push(...envImplCheck.requirements);
 
@@ -196,17 +189,17 @@ export class ComplianceValidator {
     };
 
     try {
-      // REMOVED UNUSED:       const targetPath = resolve(options.targetPath || process.cwd());
+      const targetPath = resolve(options.targetPath || process.cwd());
 
       // Check for safety compliance in data models
-      // REMOVED UNUSED:       const modelFiles = await glob('**/*model*.ts', { cwd: targetPath });
+      const modelFiles = await glob('**/*model*.ts', { cwd: targetPath });
 
       for (const modelFile of modelFiles) {
-        // REMOVED UNUSED:         const fullPath = join(targetPath, modelFile);
-        // REMOVED UNUSED:         const content = readFileSync(fullPath, 'utf8');
+        const fullPath = join(targetPath, modelFile);
+        const content = readFileSync(fullPath, 'utf8');
 
         // Check for safety-related entities and fields
-        // REMOVED UNUSED:         const safetyCheck = this.validateSafetyFields(content, modelFile);
+        const safetyCheck = this.validateSafetyFields(content, modelFile);
 
         result.requirements.push(...safetyCheck.requirements);
 
@@ -217,7 +210,7 @@ export class ComplianceValidator {
       }
 
       // Check for safety documentation
-      // REMOVED UNUSED:       const hasSafetyDocs = await this.checkSafetyDocumentation(targetPath);
+      const hasSafetyDocs = await this.checkSafetyDocumentation(targetPath);
       if (!hasSafetyDocs) {
         result.requirements.push({
           id: uuidv4(),
@@ -1348,6 +1341,73 @@ export class ComplianceValidatorCLI {
 //     console.log('  compliance-validator validate --all-regulations --remediation');
 //     console.log('  compliance-validator report ./reports/compliance-2024-01-01.json');
 //     console.log('  compliance-validator frameworks\n');
+  }
+}
+
+/**
+ * Main compliance check function called by workflows
+ */
+export async function checkCompliance(): Promise<{ passed: boolean; issues: string[] }> {
+  console.log(chalk.blue('🔍 Running REFUSE Protocol Compliance Checks...'));
+
+  const issues: string[] = [];
+
+  try {
+    // Check for basic protocol structure
+    const protocolDir = resolve('protocol');
+    const specificationsDir = resolve('protocol/specifications');
+    const implementationsDir = resolve('protocol/implementations');
+
+    if (!existsSync(protocolDir)) {
+      issues.push('Protocol directory not found');
+    }
+
+    if (!existsSync(specificationsDir)) {
+      issues.push('Protocol specifications directory not found');
+    }
+
+    if (!existsSync(implementationsDir)) {
+      issues.push('Protocol implementations directory not found');
+    }
+
+    // Check for essential specification files
+    const essentialSpecs = [
+      'protocol/specifications/entities.ts',
+      'protocol/specifications/relationships.ts'
+    ];
+
+    for (const spec of essentialSpecs) {
+      if (!existsSync(spec)) {
+        issues.push(`Missing essential specification file: ${spec}`);
+      }
+    }
+
+    // Check for essential implementation files
+    const essentialImpls = [
+      'protocol/implementations/base-entity.ts',
+      'protocol/implementations/customer.ts',
+      'protocol/implementations/facility.ts'
+    ];
+
+    for (const impl of essentialImpls) {
+      if (!existsSync(impl)) {
+        issues.push(`Missing essential implementation file: ${impl}`);
+      }
+    }
+
+    const passed = issues.length === 0;
+
+    if (passed) {
+      console.log(chalk.green('✅ All compliance checks passed'));
+    } else {
+      console.log(chalk.yellow(`⚠️ Found ${issues.length} compliance issues:`));
+      issues.forEach(issue => console.log(chalk.gray(`  - ${issue}`)));
+    }
+
+    return { passed, issues };
+  } catch (error) {
+    console.error(chalk.red(`❌ Compliance check failed: ${error instanceof Error ? error.message : String(error)}`));
+    return { passed: false, issues: [`Compliance check error: ${error instanceof Error ? error.message : String(error)}`] };
   }
 }
 

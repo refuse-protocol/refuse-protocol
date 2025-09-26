@@ -647,5 +647,3 @@ export class RouteOptimizer {
     });
 
     return rebalancedRoutes;
-  }
-}
